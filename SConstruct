@@ -395,7 +395,5 @@ Import('env')
 env.Program('build/'+program_name+'_1', env.src_files,LIBS = 'precice',
  LIBPATH = ['/usr/lib'])
 
-
-
 env.Program('build/'+program_name+'_2', env.src_files,LIBS = 'precice',
  LIBPATH = ['/usr/lib'])

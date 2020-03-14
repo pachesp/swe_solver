@@ -3,6 +3,7 @@ build/SWE_*
 output/
 documentation/doxy/
 .tags
+cuda-repo-ubuntu*
 
 *.pyc
 .sconsign.dblite

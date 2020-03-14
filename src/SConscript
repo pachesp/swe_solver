@@ -92,7 +92,7 @@ if env['xmlRuntime'] == True:
 # if env['parallelization'] in ['none', 'cuda']:
 #   if env['solver'] != 'rusanov':
 #     if env['openGL'] == False:
-#      sourceFiles.append( ['examples/swe_simple_1.cpp'] )
+#      sourceFiles.append( ['examples/swe_simple.cpp'] )
 #     else:
 #       sourceFiles.append( ['examples/swe_opengl.cpp'] )
 #   else:
