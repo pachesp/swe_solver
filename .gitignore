@@ -1,7 +1,8 @@
 build/build_SWE_*
 build/SWE_*
-
+output/
 documentation/doxy/
+.tags
 
 *.pyc
 .sconsign.dblite
