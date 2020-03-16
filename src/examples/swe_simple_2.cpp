@@ -72,17 +72,19 @@ int main( int argc, char** argv ) {
 	  return 0;
   }
 
-  //preCICE
+  //***************preCICE**************************
   std::string configFileName("precice-config.xml");
   std::string solverName = "Solver2";
   SolverInterface interface(solverName, configFileName, 0, 1);
   int dimensions = interface.getDimensions();
-
   int meshID               = interface.getMeshID("Solver2_Nodes");
   int heightId             = interface.getDataID("Height", meshID);
-
-
-
+  //***************preCICE**************************
+  // // tell preCICE about your coupling interface mesh
+  // interface.setMeshVertices(meshID, N + 1, grid, vertexIDs);
+  //
+  // cout << "Initialize preCICE..." << endl;
+  // interface.initialize();
 
   //! number of grid cells in x- and y-direction.
   int l_nX, l_nY;
@@ -94,6 +96,19 @@ int main( int argc, char** argv ) {
   l_nX = args.getArgument<int>("grid-size-x");
   l_nY = args.getArgument<int>("grid-size-y");
   l_baseName = args.getArgument<std::string>("output-basepath");
+
+  //***************preCICE**************************
+  int* vertexIDs;
+  vertexIDs = new int[(l_nX + 2)];
+  double* grid;
+  grid = new double[dimensions * (l_nX + 1)];
+  for(int i=0;i<dimensions*(l_nX+1);i++){
+    grid[i]=0;
+  }
+  interface.setMeshVertices(meshID, l_nX + 1, grid, vertexIDs);
+  cout << "Initialize preCICE..." << endl;
+  interface.initialize();
+  //***************preCICE**************************
 
 
   // create a simple artificial scenario
@@ -171,11 +186,20 @@ int main( int argc, char** argv ) {
 
   unsigned int l_iterations = 0;
 
+  //***************preCICE**************************
+  int c=1;
+  while(interface.isCouplingOngoing()){
+  //***************preCICE**************************
+
   // loop over checkpoints
-  for(int c=1; c<=l_numberOfCheckPoints; c++) {
+  // for(int c=1; c<=l_numberOfCheckPoints; c++) {
+
+  //***************preCICE**************************
+  if(l_t < l_checkPoints[c]){
+  //***************preCICE**************************
 
     // do time steps until next checkpoint is reached
-    while( l_t < l_checkPoints[c] ) {
+    // while( l_t < l_checkPoints[c] ) {
       // set values in ghost cells:
       l_wavePropgationBlock.setGhostLayer();
 
@@ -195,6 +219,11 @@ int main( int argc, char** argv ) {
 
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
+
+      //***************preCICE**************************
+      interface.advance(l_maxTimeStepWidth);
+      //***************preCICE**************************
+
 
       // update the cpu time in the logger
       tools::Logger::logger.updateTime("Cpu");
@@ -220,6 +249,9 @@ int main( int argc, char** argv ) {
                             l_wavePropgationBlock.getDischarge_hv(),
                             l_t);
   }
+
+  interface.finalize();
+
 
   /**
    * Finalize.

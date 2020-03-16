@@ -89,6 +89,14 @@ int main( int argc, char** argv ) {
   //! number of grid cells in x- and y-direction.
   int l_nX, l_nY;
 
+  //! l_baseName of the plots.
+  std::string l_baseName;
+
+  // read command line parameters
+  l_nX = args.getArgument<int>("grid-size-x");
+  l_nY = args.getArgument<int>("grid-size-y");
+  l_baseName = args.getArgument<std::string>("output-basepath");
+
   //***************preCICE**************************
   int* vertexIDs;
   vertexIDs = new int[(l_nX + 2)];
@@ -101,14 +109,6 @@ int main( int argc, char** argv ) {
   cout << "Initialize preCICE..." << endl;
   interface.initialize();
   //***************preCICE**************************
-
-  //! l_baseName of the plots.
-  std::string l_baseName;
-
-  // read command line parameters
-  l_nX = args.getArgument<int>("grid-size-x");
-  l_nY = args.getArgument<int>("grid-size-y");
-  l_baseName = args.getArgument<std::string>("output-basepath");
 
 
   // create a simple artificial scenario
@@ -249,6 +249,9 @@ int main( int argc, char** argv ) {
                             l_wavePropgationBlock.getDischarge_hv(),
                             l_t);
   }
+
+  interface.finalize();
+
 
   /**
    * Finalize.
