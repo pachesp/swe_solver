@@ -45,11 +45,11 @@ class SWE_RadialDamBreakScenario : public SWE_Scenario {
        return 0.f;
     };
 
-    float getWaterHeight(float x, float y) { 
+    float getWaterHeight(float x, float y) {
        return ( sqrt( (x-500.f)*(x-500.f) + (y-500.f)*(y-500.f) ) < 100.f ) ? 15.f: 10.0f;
     };
 
-	virtual float endSimulation() { return (float) 15; };
+	virtual float endSimulation() { return (float) 20; };
 
     virtual BoundaryType getBoundaryType(BoundaryEdge edge) { return OUTFLOW; };
 
@@ -78,10 +78,10 @@ class SWE_BathymetryDamBreakScenario : public SWE_Scenario {
 
   public:
 
-    float getBathymetry(float x, float y) { 
+    float getBathymetry(float x, float y) {
        return ( std::sqrt( (x-500.f)*(x-500.f) + (y-500.f)*(y-500.f) ) < 50.f ) ? -255.f: -260.f;
     };
-    
+
 	virtual float endSimulation() { return (float) 15; };
 
     virtual BoundaryType getBoundaryType(BoundaryEdge edge) { return OUTFLOW; };
@@ -117,18 +117,18 @@ class SWE_BathymetryDamBreakScenario : public SWE_Scenario {
 
 /**
  * Scenario "Sea at Rest":
- * flat water surface ("sea at rest"), 
+ * flat water surface ("sea at rest"),
  * but non-uniform bathymetry (id. to "Bathymetry Dam Break")
- * test scenario for "sea at rest"-solution 
+ * test scenario for "sea at rest"-solution
  */
 class SWE_SeaAtRestScenario : public SWE_Scenario {
 
   public:
 
-    float getWaterHeight(float x, float y) { 
+    float getWaterHeight(float x, float y) {
        return ( sqrt( (x-0.5)*(x-0.5) + (y-0.5)*(y-0.5) ) < 0.1f ) ? 9.9f: 10.0f;
     };
-    float getBathymetry(float x, float y) { 
+    float getBathymetry(float x, float y) {
        return ( sqrt( (x-0.5)*(x-0.5) + (y-0.5)*(y-0.5) ) < 0.1f ) ? 0.1f: 0.0f;
     };
 
@@ -180,7 +180,7 @@ class SWE_SplashingConeScenario : public SWE_Scenario {
 
   public:
 
-    float getWaterHeight(float x, float y) { 
+    float getWaterHeight(float x, float y) {
        float r = sqrt( (x-0.5f)*(x-0.5f) + (y-0.5f)*(y-0.5f) );
        float h = 4.0f-4.5f*(r/0.5f);
 
@@ -189,11 +189,11 @@ class SWE_SplashingConeScenario : public SWE_Scenario {
        return (h>0.0f) ? h : 0.0f;
     };
 
-    float getBathymetry(float x, float y) { 
+    float getBathymetry(float x, float y) {
        float r = sqrt( (x-0.5f)*(x-0.5f) + (y-0.5f)*(y-0.5f) );
        return 1.0f+9.0f*( (r < 0.5f) ? r : 0.5f);
     };
-    
+
     float waterHeightAtRest() { return 4.0f; };
     float endSimulation() { return 0.5f; };
 

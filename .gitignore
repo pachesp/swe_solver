@@ -3,8 +3,8 @@ build/SWE_*
 output/
 documentation/doxy/
 .tags
-cuda-repo-ubuntu*
 *log
+build/precice-Solver*
 
 *.pyc
 .sconsign.dblite

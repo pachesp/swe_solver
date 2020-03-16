@@ -17,3 +17,4 @@ elif [ $1 == "b" ]; then
 else
   echo "not valid option"
 fi
+ cd ..
