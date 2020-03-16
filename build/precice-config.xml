@@ -3,7 +3,7 @@
 <precice-configuration>
 
   <log>
-     <sink filter= "%Severity% >= debug" format="---[precice] %ColorizedSeverity% %Message%" enabled="true" />
+     <sink filter= "%Severity% > debug" format="---[precice] %ColorizedSeverity% %Message%" enabled="true" />
    </log>
 
   <solver-interface dimensions="2">
@@ -36,7 +36,7 @@
 
     <coupling-scheme:serial-explicit>
         <participants first="Solver1" second="Solver2"/>
-        <time-window-size value="0.2"/>
+        <time-window-size value="0.01"/>
         <max-time value="15.0"/>
         <exchange data="Height" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
       </coupling-scheme:serial-explicit>

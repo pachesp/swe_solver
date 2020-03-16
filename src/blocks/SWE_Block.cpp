@@ -34,7 +34,7 @@
 #include <cassert>
 #include <limits>
 
-#define DBG
+// #define DBG
 
 // gravitational acceleration
 const float SWE_Block::g = 9.81f;

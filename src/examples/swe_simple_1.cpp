@@ -104,7 +104,7 @@ std::cout << "im solver 1" << '\n';
   }
   interface.setMeshVertices(meshID, l_nX + 1, grid, vertexIDs);
   cout << "Initialize preCICE..." << endl;
-  interface.initialize();
+  float precice_dt = interface.initialize();
   //***************preCICE**************************
 
 
@@ -217,8 +217,9 @@ std::cout << "im solver 1" << '\n';
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
 
+      l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
       //***************preCICE**************************
-      interface.advance(l_maxTimeStepWidth);
+      precice_dt = interface.advance(l_maxTimeStepWidth);
       //***************preCICE**************************
 
 
@@ -234,6 +235,7 @@ std::cout << "im solver 1" << '\n';
       tools::Logger::logger.printSimulationTime(l_t);
       progressBar.update(l_t);
     }
+  else{
 
     // print current simulation time of the output
     progressBar.clear();
@@ -245,6 +247,8 @@ std::cout << "im solver 1" << '\n';
                             l_wavePropgationBlock.getDischarge_hu(),
                             l_wavePropgationBlock.getDischarge_hv(),
                             l_t);
+    c++;
+  }
   }
 
   interface.finalize();
