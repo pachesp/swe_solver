@@ -36,7 +36,7 @@
 
     <coupling-scheme:serial-explicit>
         <participants first="Solver1" second="Solver2"/>
-        <time-window-size value="0.08"/>
+        <time-window-size value="2"/>
         <max-time value="20.0"/>
         <exchange data="Height" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
       </coupling-scheme:serial-explicit>
