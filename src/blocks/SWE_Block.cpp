@@ -34,18 +34,20 @@
 #include <cassert>
 #include <limits>
 
+#define DBG
+
 // gravitational acceleration
 const float SWE_Block::g = 9.81f;
 
 /**
  * Constructor: allocate variables for simulation
  *
- * unknowns h (water height), hu,hv (discharge in x- and y-direction), 
+ * unknowns h (water height), hu,hv (discharge in x- and y-direction),
  * and b (bathymetry) are defined on grid indices [0,..,nx+1]*[0,..,ny+1]
  * -> computational domain is [1,..,nx]*[1,..,ny]
  * -> plus ghost cell layer
  *
- * The constructor is protected: no instances of SWE_Block can be 
+ * The constructor is protected: no instances of SWE_Block can be
  * generated.
  *
  */
@@ -72,7 +74,7 @@ SWE_Block::~SWE_Block() {
 
 //==================================================================
 // methods for external read/write to main variables h, hu, hv, and b
-// Note: temporary and non-local variables depending on the main 
+// Note: temporary and non-local variables depending on the main
 // variables are synchronised before/after their update or read
 //==================================================================
 
@@ -83,7 +85,7 @@ SWE_Block::~SWE_Block() {
  * should be set. This is because an isolated SWE_Block doesn't have any in information about the grid.
  * Therefore the calling routine, which has the information about multiple blocks, has to take care about setting
  * the right boundary conditions.
- * 
+ *
  * @param i_scenario scenario, which is used during the setup.
  * @param i_multipleBlocks are the multiple SWE_blocks?
  */
@@ -100,7 +102,7 @@ void SWE_Block::initScenario( float _offsetX, float _offsetY,
       float y = offsetY + (j-0.5f)*dy;
       h[i][j] =  i_scenario.getWaterHeight(x,y);
       hu[i][j] = i_scenario.getVeloc_u(x,y) * h[i][j];
-      hv[i][j] = i_scenario.getVeloc_v(x,y) * h[i][j]; 
+      hv[i][j] = i_scenario.getVeloc_v(x,y) * h[i][j];
     };
 
   // initialize bathymetry
@@ -120,13 +122,13 @@ void SWE_Block::initScenario( float _offsetX, float _offsetY,
     setBoundaryType(BND_TOP, i_scenario.getBoundaryType(BND_TOP));
   }
 
-  // perform update after external write to variables 
+  // perform update after external write to variables
   synchAfterWrite();
 
 }
 
 /**
- * set water height h in all interior grid cells (i.e. except ghost layer) 
+ * set water height h in all interior grid cells (i.e. except ghost layer)
  * to values specified by parameter function _h
  */
 void SWE_Block::setWaterHeight(float (*_h)(float, float)) {
@@ -140,9 +142,9 @@ void SWE_Block::setWaterHeight(float (*_h)(float, float)) {
 }
 
 /**
- * set discharge in all interior grid cells (i.e. except ghost layer) 
+ * set discharge in all interior grid cells (i.e. except ghost layer)
  * to values specified by parameter functions
- * Note: unknowns hu and hv represent momentum, while parameters u and v are velocities! 
+ * Note: unknowns hu and hv represent momentum, while parameters u and v are velocities!
  */
 void SWE_Block::setDischarge(float (*_u)(float, float), float (*_v)(float, float)) {
 
@@ -151,7 +153,7 @@ void SWE_Block::setDischarge(float (*_u)(float, float), float (*_v)(float, float
       float x = offsetX + (i-0.5f)*dx;
       float y = offsetY + (j-0.5f)*dy;
       hu[i][j] = _u(x,y) * h[i][j];
-      hv[i][j] = _v(x,y) * h[i][j]; 
+      hv[i][j] = _v(x,y) * h[i][j];
     };
 
   synchDischargeAfterWrite();
@@ -185,19 +187,19 @@ void SWE_Block::setBathymetry(float (*_b)(float, float)) {
   synchBathymetryAfterWrite();
 }
 
-// /** 
+// /**
 // 	Restores values for h, v, and u from file data
 // 	@param _b		array holding b-values in sequence
 // */
 // void SWE_Block::setBathymetry(float* _b) {
 // 	// Set all inner cells to the value available
-// 	int i, j;	
+// 	int i, j;
 // 	for(int k=0; k<nx*ny; k++) {
 // 		i = (k % ny) + 1;
 // 		j = (k / ny) + 1;
 // 		b[i][j] = _b[k];
 // 	};
-// 
+//
 // 	// Set ghost cells values such that normals = 0
 // 	// Boundaries
 // 	for(int i=1; i<=nx; i++) {
@@ -211,30 +213,30 @@ void SWE_Block::setBathymetry(float (*_b)(float, float)) {
 // 	b[0][ny+1] = b[1][ny];
 // 	b[nx+1][0] = b[nx][1];
 // 	b[nx+1][ny+1] = b[nx][ny];
-// 
+//
 // 	synchBathymetryAfterWrite();
 // }
 
 /**
  * return reference to water height unknown h
  */
-const Float2D& SWE_Block::getWaterHeight() { 
+const Float2D& SWE_Block::getWaterHeight() {
   synchWaterHeightBeforeRead();
-  return h; 
+  return h;
 };
 
 /**
  * return reference to discharge unknown hu
  */
-const Float2D& SWE_Block::getDischarge_hu() { 
+const Float2D& SWE_Block::getDischarge_hu() {
   synchDischargeBeforeRead();
-  return hu; 
+  return hu;
 };
 
 /**
  * return reference to discharge unknown hv
  */
-const Float2D& SWE_Block::getDischarge_hv() { 
+const Float2D& SWE_Block::getDischarge_hv() {
   synchDischargeBeforeRead();
   return hv;
 };
@@ -242,9 +244,9 @@ const Float2D& SWE_Block::getDischarge_hv() {
 /**
  * return reference to bathymetry unknown b
  */
-const Float2D& SWE_Block::getBathymetry() { 
+const Float2D& SWE_Block::getBathymetry() {
   synchBathymetryBeforeRead();
-  return b; 
+  return b;
 };
 
 //==================================================================
@@ -268,11 +270,11 @@ SWE_Block::simulateTimestep (float dt)
 /**
  * simulate implements the main simulation loop between two checkpoints;
  * Note: this implementation can only be used, if you only use a single SWE_Block
- *       and only apply simple boundary conditions! 
- *       In particular, SWE_Block::simulate can not trigger calls to exchange values 
+ *       and only apply simple boundary conditions!
+ *       In particular, SWE_Block::simulate can not trigger calls to exchange values
  *       of copy and ghost layers between blocks!
  * @param	tStart	time where the simulation is started
- * @param	tEnd	time of the next checkpoint 
+ * @param	tEnd	time of the next checkpoint
  * @return	actual	end time reached
  */
 float
@@ -372,12 +374,12 @@ SWE_Block1D* SWE_Block::registerCopyLayer(BoundaryEdge edge){
 }
 
 /**
- * "grab" the ghost layer at the specific boundary in order to set boundary values 
- * in this ghost layer externally. 
- * The boundary conditions at the respective ghost layer is set to PASSIVE, 
- * such that the grabbing program component is responsible to provide correct 
- * values in the ghost layer, for example by receiving data from a remote 
- * copy layer via MPI communication. 
+ * "grab" the ghost layer at the specific boundary in order to set boundary values
+ * in this ghost layer externally.
+ * The boundary conditions at the respective ghost layer is set to PASSIVE,
+ * such that the grabbing program component is responsible to provide correct
+ * values in the ghost layer, for example by receiving data from a remote
+ * copy layer via MPI communication.
  * @param	specified edge
  * @return	a SWE_Block1D object that contains row variables h, hu, and hv
  */
@@ -399,9 +401,9 @@ SWE_Block1D* SWE_Block::grabGhostLayer(BoundaryEdge edge){
 
 
 /**
- * set the values of all ghost cells depending on the specifed 
+ * set the values of all ghost cells depending on the specifed
  * boundary conditions;
- * if the ghost layer replicates the variables of a remote SWE_Block, 
+ * if the ghost layer replicates the variables of a remote SWE_Block,
  * the values are copied
  */
 void SWE_Block::setGhostLayer() {
@@ -409,14 +411,14 @@ void SWE_Block::setGhostLayer() {
 #ifdef DBG
   cout << "Set simple boundary conditions " << endl << flush;
 #endif
-  // call to virtual function to set ghost layer values 
+  // call to virtual function to set ghost layer values
   setBoundaryConditions();
 
   // for a CONNECT boundary, data will be copied from a neighbouring
   // SWE_Block (via a SWE_Block1D proxy object)
   // -> these copy operations cannot be executed in GPU/accelerator memory, e.g.
   //    setBoundaryConditions then has to take care that values are copied.
-  
+
 #ifdef DBG
   cout << "Set CONNECT boundary conditions in main memory " << endl << flush;
 #endif
@@ -428,7 +430,7 @@ void SWE_Block::setGhostLayer() {
        hv[0][j] = neighbour[BND_LEFT]->hv[j];
       };
   };
-  
+
   // right boundary
   if(boundary[BND_RIGHT] == CONNECT) {
      for(int j=0; j<=ny+1; j++) {
@@ -466,8 +468,8 @@ void SWE_Block::setGhostLayer() {
 
 /**
  * Compute the largest allowed time step for the current grid block
- * (reference implementation) depending on the current values of 
- * variables h, hu, and hv, and store this time step size in member 
+ * (reference implementation) depending on the current values of
+ * variables h, hu, and hv, and store this time step size in member
  * variable maxTimestep.
  *
  * @param i_dryTol dry tolerance (dry cells do not affect the time step).
@@ -475,7 +477,7 @@ void SWE_Block::setGhostLayer() {
  */
 void SWE_Block::computeMaxTimestep( const float i_dryTol,
                                     const float i_cflNumber ) {
-  
+
   // initialize the maximum wave speed
   float l_maximumWaveSpeed = (float) 0;
 
@@ -487,15 +489,15 @@ void SWE_Block::computeMaxTimestep( const float i_dryTol,
                                      std::abs( hv[i][j] ) );
 
         float l_particleVelocity = l_momentum / h[i][j];
-        
+
         // approximate the wave speed
         float l_waveSpeed = l_particleVelocity + std::sqrt( g * h[i][j] );
-        
+
         l_maximumWaveSpeed = std::max( l_maximumWaveSpeed, l_waveSpeed );
       }
     }
   }
-  
+
   float l_minimumCellLength = std::min( dx, dy );
 
   // set the maximum time step variable
@@ -512,7 +514,7 @@ void SWE_Block::computeMaxTimestep( const float i_dryTol,
 //==================================================================
 
 /**
- * set the values of all ghost cells depending on the specifed 
+ * set the values of all ghost cells depending on the specifed
  * boundary conditions
  * - set boundary conditions for typs WALL and OUTFLOW
  * - derived classes need to transfer ghost layers
@@ -640,22 +642,22 @@ void SWE_Block::setBoundaryConditions() {
    *   (steady state) with the neighboring cells. For the lower left corner (0,0) using
    *   the values of (1,1) generates a steady state (zero) Riemann problem for (0,0) - (0,1) and
    *   (0,0) - (1,0) for both outflow and reflecting boundary conditions.
-   * 
+   *
    *   Remark: Unsplit methods don't need corner values.
    *
    * Sketch (reflecting boundary conditions, lower left corner):
    * <pre>
    *                  **************************
-   *                  *  _    _    *  _    _   *   
-   *  Ghost           * |  h   |   * |  h   |  *   
+   *                  *  _    _    *  _    _   *
+   *  Ghost           * |  h   |   * |  h   |  *
    *  cell    ------> * | -hu  |   * |  hu  |  * <------ Cell (1,1) inside the domain
-   *  (0,1)           * |_ hv _|   * |_ hv _|  *  
+   *  (0,1)           * |_ hv _|   * |_ hv _|  *
    *                  *            *           *
    *                  **************************
    *                  *  _    _    *  _    _   *
-   *   Corner Ghost   * |  h   |   * |  h   |  *  
+   *   Corner Ghost   * |  h   |   * |  h   |  *
    *   cell   ------> * |  hu  |   * |  hu  |  * <----- Ghost cell (1,0)
-   *   (0,0)          * |_ hv _|   * |_-hv _|  * 
+   *   (0,0)          * |_ hv _|   * |_-hv _|  *
    *                  *            *           *
    *                  **************************
    * </pre>
@@ -667,7 +669,7 @@ void SWE_Block::setBoundaryConditions() {
   h [0][ny+1] = h [1][ny];
   hu[0][ny+1] = hu[1][ny];
   hv[0][ny+1] = hv[1][ny];
-  
+
   h [nx+1][0] = h [nx][1];
   hu[nx+1][0] = hu[nx][1];
   hv[nx+1][0] = hv[nx][1];
@@ -679,11 +681,11 @@ void SWE_Block::setBoundaryConditions() {
 
 
 //==================================================================
-// protected member functions for memory model: 
-// in case of temporary variables (especial in non-local memory, for 
-// example on accelerators), the main variables h, hu, hv, and b 
+// protected member functions for memory model:
+// in case of temporary variables (especial in non-local memory, for
+// example on accelerators), the main variables h, hu, hv, and b
 // are not necessarily updated after each time step.
-// The following methods are called to synchronise before or after 
+// The following methods are called to synchronise before or after
 // external read or write to the variables.
 //==================================================================
 
@@ -717,7 +719,7 @@ void SWE_Block::synchBathymetryAfterWrite() {}
 
 /**
  * Update the ghost layers (only for CONNECT and PASSIVE boundary conditions)
- * after an external update of the main variables h, hu, hv, and b in the 
+ * after an external update of the main variables h, hu, hv, and b in the
  * ghost layer.
  */
 void SWE_Block::synchGhostLayerAfterWrite() {}
@@ -755,4 +757,3 @@ void SWE_Block::synchBathymetryBeforeRead() {}
  * before an external access to the unknowns
  */
 void SWE_Block::synchCopyLayerBeforeRead() {}
-
