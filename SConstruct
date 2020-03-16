@@ -385,15 +385,15 @@ if env['vectorize'] == True:
 build_dir = env['buildDir']+'/build_'+program_name
 
 # get the src-code files
-env.src_files = []
+env.src_files_1 = []
 env.src_files_2 = []
 Export('env')
 SConscript('src/SConscript', variant_dir=build_dir, duplicate=0)
 Import('env')
 
 # build the program
-env.Program('build/'+program_name+'_1', env.src_files,LIBS = 'precice',
+env.Program('build/'+program_name+'_1', env.src_files_1, LIBS = 'precice',
  LIBPATH = ['/usr/lib'])
 
-env.Program('build/'+program_name+'_2', env.src_files,LIBS = 'precice',
+env.Program('build/'+program_name+'_2', env.src_files_2, LIBS = 'precice',
  LIBPATH = ['/usr/lib'])

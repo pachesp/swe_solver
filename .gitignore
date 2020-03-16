@@ -4,6 +4,7 @@ output/
 documentation/doxy/
 .tags
 cuda-repo-ubuntu*
+*log
 
 *.pyc
 .sconsign.dblite

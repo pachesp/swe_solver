@@ -59,7 +59,8 @@ else:
 
 # compile the files defined so far, important step because of possible different compilers
 for i in sourceFiles:
-  env.src_files.append(env.Object(i))
+  env.src_files_1.append(env.Object(i))
+  env.src_files_2.append(env.Object(i))
 
 # SWE_Block and Logger is used in every implementation
 sourceFiles = ['blocks/SWE_Block.cpp', 'tools/Logger.cpp']
@@ -105,11 +106,11 @@ if env['xmlRuntime'] == True:
 #   Exit(1)
 
 # CPU compilation for sure
-env.src_files.append(env.Object(['examples/swe_simple_1.cpp']))
+env.src_files_1.append(env.Object(['examples/swe_simple_1.cpp']))
 env.src_files_2.append(env.Object(['examples/swe_simple_2.cpp']))
 
 for i in sourceFiles:
-  env.src_files.append(env.Object(i))
+  env.src_files_1.append(env.Object(i))
   env.src_files_2.append(env.Object(i))
 
 Export('env')

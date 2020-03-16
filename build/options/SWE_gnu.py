@@ -28,5 +28,5 @@
 
 # Build options
 solver='fwave'
-compileMode = 'debug'
+# compileMode = 'debug'
 #solver='augrie'
