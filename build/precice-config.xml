@@ -2,12 +2,14 @@
 
 <precice-configuration>
 
+  <log>
+     <sink filter= "%Severity% >= debug" format="---[precice] %ColorizedSeverity% %Message%" enabled="true" />
+   </log>
+
   <solver-interface dimensions="2">
 
-    <!-- Data fields that are exchanged between the solvers -->
     <data:scalar name="Height"/>
 
-    <!-- A common mesh that uses these data fields -->
     <mesh name="Solver1_Nodes">
       <use-data name="Height"/>
     </mesh>
@@ -16,45 +18,28 @@
       <use-data name="Height"/>
     </mesh>
 
-    <!-- Represents each solver using preCICE. In a coupled simulation, two participants have to be
-         defined. The name of the participant has to match the name given on construction of the
-         precice::SolverInterface object used by the participant. -->
-
     <participant name="Solver1">
       <!-- Makes the named mesh available to the participant. Mesh is provided by the solver directly. -->
       <use-mesh name="Solver1_Nodes" provide="yes"/>
-      <use-mesh name="Solver2_Nodes" from="Solver2"/>
       <!-- Define input/output of the solver.  -->
       <write-data name="Height" mesh="Solver1_Nodes"/>
-      <mapping:nearest-neighbor direction="write" from="Solver1_Nodes" to="Solver2_Nodes" constraint="consistent" timing="initial"/>
-      <mapping:nearest-neighbor direction="read"  from="Solver2_Nodes" to="Solver1_Nodes" constraint="consistent" timing="initial"/>
     </participant>
 
     <participant name="Solver2">
       <use-mesh name="Solver2_Nodes" provide="yes"/>
-      <read-data  name="Height"      mesh="Solver2_Nodes"/>
+      <use-mesh name="Solver1_Nodes" from="Solver1"/>
+      <mapping:nearest-neighbor direction="read"  from="Solver1_Nodes" to="Solver2_Nodes" constraint="consistent"/>
+      <read-data  name="Height" mesh="Solver2_Nodes"/>
     </participant>
 
-    <!-- Communication method, use TCP/IP sockets, change network to "ib0" on SuperMUC -->
-    <m2n:sockets from="Solver1" to="Solver2" network="lo"/>
+    <m2n:sockets from="Solver1" to="Solver2"/>
 
-    <coupling-scheme:serial-implicit>
-      <participants first="Solver1" second="Solver2"/>
-      <max-time value="1.0"/>
-      <time-window-size value="0.01"/>
-      <max-iterations value="40"/>
-      <exchange data="Height"      mesh="Solver2_Nodes" from="Solver1" to="Solver2" />
-      <relative-convergence-measure data="Height"        mesh="Solver2_Nodes" limit="1e-5"/>
-      <extrapolation-order value="2"/>
-      <!-- <acceleration:IQN-ILS>
-	< PostProc always done on the second participant >
-        <data name="CrossSectionLength" mesh="Solver2_Nodes"/>
-        <initial-relaxation value="0.01"/>
-        <max-used-iterations value="50"/>
-        <timesteps-reused value="8"/>
-        <filter type="QR2" limit="1e-3"/>
-      </acceleration:IQN-ILS> -->
-    </coupling-scheme:serial-implicit>
+    <coupling-scheme:serial-explicit>
+        <participants first="Solver1" second="Solver2"/>
+        <time-window-size value="0.01"/>
+        <max-time value="15.0"/>
+        <exchange data="Height" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
+      </coupling-scheme:serial-explicit>
 
   </solver-interface>
 </precice-configuration>

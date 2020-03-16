@@ -97,20 +97,6 @@ int main( int argc, char** argv ) {
   l_nY = args.getArgument<int>("grid-size-y");
   l_baseName = args.getArgument<std::string>("output-basepath");
 
-  //***************preCICE**************************
-  int* vertexIDs;
-  vertexIDs = new int[(l_nX + 2)];
-  double* grid;
-  grid = new double[dimensions * (l_nX + 1)];
-  for(int i=0;i<dimensions*(l_nX+1);i++){
-    grid[i]=0;
-  }
-  interface.setMeshVertices(meshID, l_nX + 1, grid, vertexIDs);
-  cout << "Initialize preCICE..." << endl;
-  interface.initialize();
-  //***************preCICE**************************
-
-
   // create a simple artificial scenario
   SWE_RadialDamBreakScenario l_scenario;
 
@@ -133,6 +119,23 @@ int main( int argc, char** argv ) {
   // get the origin from the scenario
   l_originX = l_scenario.getBoundaryPos(BND_LEFT);
   l_originY = l_scenario.getBoundaryPos(BND_BOTTOM);
+
+
+  //***************preCICE**************************
+  int* vertexIDs;
+  vertexIDs = new int[(l_nX + 2)];
+  double* grid;
+  grid = new double[dimensions * (l_nX + 1)];
+  int count = 0;
+  for (int i = 0; i <= l_nX + 1; i++) {
+     grid[count] = l_originX + (i - 0.5) * l_dX;
+     grid[++count] = 0.0;
+     count++;
+     }
+  interface.setMeshVertices(meshID, l_nX + 2, grid, vertexIDs);
+  cout << "Initialize preCICE..." << endl;
+  interface.initialize();
+  //***************preCICE**************************
 
   // initialize the wave propagation block
   l_wavePropgationBlock.initScenario(l_originX, l_originY, l_scenario);
