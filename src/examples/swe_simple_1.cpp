@@ -216,8 +216,10 @@ std::cout << "im solver 1" << '\n';
 
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
-
+      // std::cout << "**********l_maxTimeStepWidth = " << l_maxTimeStepWidth   << '\n';
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
+      // std::cout << "**********l_maxTimeStepWidth after min = " << l_maxTimeStepWidth   << '\n';
+
       //***************preCICE**************************
       precice_dt = interface.advance(l_maxTimeStepWidth);
       //***************preCICE**************************
