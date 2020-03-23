@@ -55,7 +55,7 @@ SWE_Block::SWE_Block(int l_nx, int l_ny,
 		float l_dx, float l_dy)
 	: nx(l_nx), ny(l_ny),
 	  dx(l_dx), dy(l_dy),
-	  h(nx+2,ny+2), hu(nx+2,ny+2), hv(nx+2,ny+2), b(nx+2,ny+2),
+	  h(nx+2,ny+2), hu(nx+2,ny+2), hv(nx+2,ny+2), b(nx+2,ny+2), dummy(nx+2, ny+2),
 	  // This three are only set here, so eclipse does not complain
 	  maxTimestep(0), offsetX(0), offsetY(0)
 {

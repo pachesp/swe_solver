@@ -78,7 +78,7 @@ int main( int argc, char** argv ) {
   SolverInterface interface(solverName, configFileName, 0, 1);
   int dimensions = interface.getDimensions();
   int meshID               = interface.getMeshID("Solver1_Nodes");
-  int heightId             = interface.getDataID("Height", meshID);
+  int dummyValueId             = interface.getDataID("DummyValue", meshID);
   //***************preCICE**************************
 
 std::cout << "im solver 1" << '\n';
