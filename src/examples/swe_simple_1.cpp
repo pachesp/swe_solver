@@ -112,7 +112,7 @@ std::cout << "im solver 1" << '\n';
   SWE_RadialDamBreakScenario l_scenario;
 
   //! number of checkpoints for visualization (at each checkpoint in time, an output file is written).
-  int l_numberOfCheckPoints = 20;
+  int l_numberOfCheckPoints = 5;
 
   //! size of a single cell in x- and y-direction
   float l_dX, l_dY;
