@@ -100,6 +100,8 @@ private:
     //computes the net-updates for the block
     void computeNumericalFluxes();
 
+    void computeDummy();
+
     //update the cells
     void updateUnknowns(float dt);
     void updateUnknownsRow(float dt, int i);

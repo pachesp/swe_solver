@@ -1,3 +1,2 @@
 #!/bin/bash
-
-paraview /build/output
+paraview build/output/testrun1_00...vts

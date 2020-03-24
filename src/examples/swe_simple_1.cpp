@@ -211,6 +211,8 @@ std::cout << "im solver 1" << '\n';
 
       // compute numerical flux on each edge
       l_wavePropgationBlock.computeNumericalFluxes();
+      l_wavePropgationBlock.computeDummy();
+
 
       //! maximum allowed time step width.
       float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();

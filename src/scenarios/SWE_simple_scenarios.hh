@@ -68,6 +68,10 @@ class SWE_RadialDamBreakScenario : public SWE_Scenario {
        else
          return (float)1000;
     };
+
+    // float getDummy(float x, float y){
+    //   return x + y;
+    // }
 };
 
 /**

@@ -93,7 +93,7 @@ SWE_WavePropagationBlock::SWE_WavePropagationBlock (int l_nx, int l_ny, float l_
 
 /**
  * Compute net updates for the block.
- * The member variable #maxTimestep will be updated with the 
+ * The member variable #maxTimestep will be updated with the
  * maximum allowed time step size
  */
 void
@@ -162,6 +162,15 @@ SWE_WavePropagationBlock::computeNumericalFluxes ()
 		maxTimestep = std::numeric_limits<float>::max ();
 	}
 }
+
+void SWE_WavePropagationBlock::computeDummy(){
+	for (int i=1; i < nx + 1; i++) {
+		for (int j=1; j < ny + 1; j++) {
+	 	dummy[i][j] += 10;
+		}
+	}
+}
+
 
 /**
  * Updates the unknowns with the already computed net-updates.
