@@ -137,7 +137,7 @@ class SWE_Block {
     /// provides read access to the bathymetry data
     const Float2D& getBathymetry();
 
-    const Float2D& getDummy();
+    Float2D& getDummy();
 
     // defining boundary conditions
     /// set type of boundary condition for the specified boundary

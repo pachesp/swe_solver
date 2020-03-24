@@ -72,17 +72,6 @@ int main( int argc, char** argv ) {
 	  return 0;
   }
 
-  //***************preCICE**************************
-  std::string configFileName("precice-config.xml");
-  std::string solverName = "Solver2";
-  SolverInterface interface(solverName, configFileName, 0, 1);
-  int dimensions = interface.getDimensions();
-  int meshID               = interface.getMeshID("Solver2_Nodes");
-  int dummyValueId             = interface.getDataID("DummyValue", meshID);
-  //***************preCICE**************************
-
-std::cout << "im solver 1" << '\n';
-
   //! number of grid cells in x- and y-direction.
   int l_nX, l_nY;
 
@@ -93,20 +82,6 @@ std::cout << "im solver 1" << '\n';
   l_nX = args.getArgument<int>("grid-size-x");
   l_nY = args.getArgument<int>("grid-size-y");
   l_baseName = args.getArgument<std::string>("output-basepath");
-
-  //***************preCICE**************************
-  int* vertexIDs;
-  vertexIDs = new int[(l_nX + 2)];
-  double* grid;
-  grid = new double[dimensions * (l_nX + 1)];
-  for(int i=0;i<dimensions*(l_nX+1);i++){
-    grid[i]=0;
-  }
-  interface.setMeshVertices(meshID, l_nX + 1, grid, vertexIDs);
-  cout << "Initialize preCICE..." << endl;
-  float precice_dt = interface.initialize();
-  //***************preCICE**************************
-
 
   // create a simple artificial scenario
   SWE_RadialDamBreakScenario l_scenario;
@@ -130,6 +105,31 @@ std::cout << "im solver 1" << '\n';
   // get the origin from the scenario
   l_originX = l_scenario.getBoundaryPos(BND_LEFT);
   l_originY = l_scenario.getBoundaryPos(BND_BOTTOM);
+
+  //***************preCICE**************************
+  std::string configFileName("precice-config.xml");
+  std::string solverName = "Solver2";
+  SolverInterface interface(solverName, configFileName, 0, 1);
+  int dimensions = interface.getDimensions();
+  int meshID = interface.getMeshID("Solver2_Nodes");
+  int dummyValueId = interface.getDataID("DummyValue", meshID);
+  int* vertexIDs;
+  vertexIDs = new int[(l_nX  * l_nY)];
+  double* grid;
+  grid = new double[dimensions * (l_nX  * l_nY)];
+  int count=0;
+  for(int i = 1; i <= l_nX; i++){
+    for(int j = 1; j <= l_nY; j++) {
+      grid[count] = l_originX + (i-0.5f) * l_dX;
+      grid[++count] = l_originY + (j-0.5f) * l_dY;
+      count++;
+    }
+  }
+
+  interface.setMeshVertices(meshID, l_nX * l_nY , grid, vertexIDs);
+  cout << "Initialize preCICE..." << endl;
+  float precice_dt = interface.initialize();
+  //***************preCICE**************************
 
   // initialize the wave propagation block
   l_wavePropgationBlock.initScenario(l_originX, l_originY, l_scenario);

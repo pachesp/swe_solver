@@ -126,6 +126,9 @@ int main( int argc, char** argv ) {
     }
   }
   interface.setMeshVertices(meshID, l_nX * l_nY , grid, vertexIDs);
+
+  Float2D dummyValue_n(l_nX, l_nY);
+
   cout << "Initialize preCICE..." << endl;
   float precice_dt = interface.initialize();
   //***************preCICE**************************
@@ -161,6 +164,8 @@ int main( int argc, char** argv ) {
 		  l_boundarySize,
 		  l_nX, l_nY,
 		  l_dX, l_dY );
+
+  double *test = l_wavePropgationBlock.getDummy().Float2D2doublePointer();
 
   // Write zero time step
   l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
@@ -224,6 +229,8 @@ int main( int argc, char** argv ) {
 
       //***************preCICE**************************
       precice_dt = interface.advance(l_maxTimeStepWidth);
+      // interface.readBlockScalarData(dummyValueId, l_nX * l_nY, vertexIDs, crossSectionLength);
+
       //***************preCICE**************************
 
 
@@ -274,6 +281,13 @@ int main( int argc, char** argv ) {
 
   // printer iteration counter
   tools::Logger::logger.printIterationsDone(l_iterations);
+
+  for(int i = 1; i <= l_nX ; i++){
+    for(int j = 1; j <= l_nY; j++){
+      std::cout << test[i*(l_nX +2)+j] << "  ";
+  }
+  std::cout <<"\n";
+}
 
   return 0;
 }

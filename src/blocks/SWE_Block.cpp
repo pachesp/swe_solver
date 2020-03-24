@@ -250,7 +250,7 @@ const Float2D& SWE_Block::getBathymetry() {
   return b;
 };
 
-const Float2D& SWE_Block::getDummy(){
+Float2D& SWE_Block::getDummy(){
 	// syncDummyBeforeRead();
 	return dummy;
 }
