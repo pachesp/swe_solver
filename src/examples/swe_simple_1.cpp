@@ -167,6 +167,7 @@ std::cout << "im solver 1" << '\n';
   l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
                           l_wavePropgationBlock.getDischarge_hu(),
                           l_wavePropgationBlock.getDischarge_hv(),
+                          l_wavePropgationBlock.getDummy(),
                           (float) 0.);
 
   /**
@@ -248,6 +249,7 @@ std::cout << "im solver 1" << '\n';
     l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
                             l_wavePropgationBlock.getDischarge_hu(),
                             l_wavePropgationBlock.getDischarge_hv(),
+                            l_wavePropgationBlock.getDummy(),
                             l_t);
     c++;
   }

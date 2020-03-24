@@ -137,6 +137,8 @@ class SWE_Block {
     /// provides read access to the bathymetry data
     const Float2D& getBathymetry();
 
+    const Float2D& getDummy();
+
     // defining boundary conditions
     /// set type of boundary condition for the specified boundary
     void setBoundaryType(BoundaryEdge edge, BoundaryType boundtype,
@@ -236,7 +238,7 @@ class SWE_Block {
     Float2D hv; ///< array that holds the y-component of the momentum for each element (water height h multiplied by velocity in y-direction)
     Float2D b;  ///< array that holds the bathymetry data (sea floor elevation) for each element
     Float2D dummy;
-    
+
     /// type of boundary conditions at LEFT, RIGHT, TOP, and BOTTOM boundary
     BoundaryType boundary[4];
     /// for CONNECT boundaries: pointer to connected neighbour block

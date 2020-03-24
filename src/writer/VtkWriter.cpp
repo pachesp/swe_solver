@@ -58,6 +58,7 @@ void io::VtkWriter::writeTimeStep(
 		const Float2D &i_h,
         const Float2D &i_hu,
         const Float2D &i_hv,
+				const Float2D &i_dummy,
         float i_time)
 {
 	std::ofstream vtkFile(generateFileName().c_str());
@@ -109,6 +110,13 @@ void io::VtkWriter::writeTimeStep(
 	for (int j=1; j<nY+1; j++)
 		for (int i=1; i<nX+1; i++)
 			vtkFile << b[i][j] << std::endl;
+	vtkFile << "</DataArray>" << std::endl;
+
+	// Dummy
+	vtkFile << "<DataArray Name=\"dummy\" type=\"Float32\" format=\"ascii\">" << std::endl;
+	for (int j=1; j < nY+1; j++)
+		for (int i=1; i < nX+1; i++)
+			vtkFile << i_dummy[i][j] << std::endl;
 	vtkFile << "</DataArray>" << std::endl;
 
 	vtkFile << "</CellData>" << std::endl

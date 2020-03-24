@@ -103,6 +103,7 @@ void SWE_Block::initScenario( float _offsetX, float _offsetY,
       h[i][j] =  i_scenario.getWaterHeight(x,y);
       hu[i][j] = i_scenario.getVeloc_u(x,y) * h[i][j];
       hv[i][j] = i_scenario.getVeloc_v(x,y) * h[i][j];
+			dummy[i][j] = i_scenario.getDummy(x,y);
     };
 
   // initialize bathymetry
@@ -249,6 +250,10 @@ const Float2D& SWE_Block::getBathymetry() {
   return b;
 };
 
+const Float2D& SWE_Block::getDummy(){
+	// syncDummyBeforeRead();
+	return dummy;
+}
 //==================================================================
 // methods for simulation
 //==================================================================

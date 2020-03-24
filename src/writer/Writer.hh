@@ -106,6 +106,7 @@ public:
 			const Float2D &i_h,
             const Float2D &i_hu,
             const Float2D &i_hv,
+						const Float2D &i_dummy,
             float i_time) = 0;
 };
 
