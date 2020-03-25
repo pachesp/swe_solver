@@ -114,19 +114,18 @@ int main( int argc, char** argv ) {
   int meshID = interface.getMeshID("Solver1_Nodes");
   int dummyValueId = interface.getDataID("DummyValue", meshID);
   int* vertexIDs;
-  vertexIDs = new int[(l_nX  * l_nY)];
+  vertexIDs = new int[l_nX  * l_nY];
   double* grid;
-  grid = new double[dimensions * (l_nX  * l_nY)];
+  grid = new double[dimensions * l_nX  * l_nY];
   int count=0;
-  for(int i = 1; i <= l_nX; i++){
-    for(int j = 1; j <= l_nY; j++) {
-      grid[count] = l_originX + (i-0.5f) * l_dX;
-      grid[++count] = l_originY + (j-0.5f) * l_dY;
-      count++;
+  for (int j=0; j < l_nY; j++){
+    for (int i=0; i < l_nX; i++){
+      grid[count++] = (l_originX + i) * l_dX;
+      grid[count++] = (l_originX + j) * l_dY;
     }
   }
   interface.setMeshVertices(meshID, l_nX * l_nY , grid, vertexIDs);
-  double *dummyDouble_n = new double[(l_nX) * (l_nY)];
+  double *dummyDouble_n = new double[l_nX * l_nY];
   Float2D dummyFloat2D_n(l_nX, l_nY);
   cout << "Initialize preCICE..." << endl;
   float precice_dt = interface.initialize();
@@ -212,6 +211,14 @@ int main( int argc, char** argv ) {
 
       // compute numerical flux on each edge
       l_wavePropgationBlock.computeNumericalFluxes();
+      l_wavePropgationBlock.computeDummy();
+      dummyDouble_n = l_wavePropgationBlock.getDummy().float2D2doublePointer();
+      for(int j = 1; j <= l_nY ; j++){
+         for(int i = 1; i <= l_nX; i++){
+           std::cout << dummyDouble_n[i*(l_nX +2)+j] << "  ";
+       }
+       std::cout <<"\n";
+     }
 
       //! maximum allowed time step width.
       float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
@@ -224,7 +231,7 @@ int main( int argc, char** argv ) {
 
       //***************preCICE**************************
       precice_dt = interface.advance(l_maxTimeStepWidth);
-      interface.readBlockScalarData(dummyValueId, (l_nX+2) * (l_nY+2), vertexIDs, dummyDouble_n);
+      // interface.readBlockScalarData(dummyValueId, l_nX * l_nY, vertexIDs, dummyDouble_n);
       //***************preCICE**************************
 
 
@@ -248,6 +255,13 @@ int main( int argc, char** argv ) {
     progressBar.update(l_t);
 
     dummyFloat2D_n = Float2D::double2Float2D(dummyDouble_n, l_nX+2, l_nY+2);
+    std::cout << "meeee lllleva" << '\n';
+    for(int i = 0; i < l_nX+ 2 ; i++){
+       for(int j = 0; j < l_nY + 2; j++){
+         std::cout << dummyDouble_n[i*(l_nX +2)+j] << "\t";
+     }
+     std::cout <<"\n";
+   }
 
     // write output
     l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
@@ -295,6 +309,14 @@ int main( int argc, char** argv ) {
 //                         l_wavePropgationBlock.getDischarge_hv(),
 //                         testFloat2D,
 //                         l_t);
+count = 0;
+for(int i = 1; i <= l_nX; i++){
+  for(int j = 1; j <= l_nY; j++) {
+    std::cout << grid[count++] << "\t";
+    std::cout << grid[count++] << "\n";
+  }
+}
+
 
   return 0;
 }

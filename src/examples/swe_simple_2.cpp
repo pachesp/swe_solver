@@ -114,15 +114,14 @@ int main( int argc, char** argv ) {
   int meshID = interface.getMeshID("Solver2_Nodes");
   int dummyValueId = interface.getDataID("DummyValue", meshID);
   int* vertexIDs;
-  vertexIDs = new int[(l_nX  * l_nY)];
+  vertexIDs = new int[l_nX  * l_nY];
   double* grid;
-  grid = new double[dimensions * (l_nX  * l_nY)];
+  grid = new double[dimensions * l_nX  * l_nY];
   int count=0;
-  for(int i = 1; i <= l_nX; i++){
-    for(int j = 1; j <= l_nY; j++) {
-      grid[count] = l_originX + (i-0.5f) * l_dX;
-      grid[++count] = l_originY + (j-0.5f) * l_dY;
-      count++;
+  for (int j=0; j < l_nY; j++){
+    for (int i=0; i < l_nX; i++){
+      grid[count++] = (l_originX + i) * l_dX;
+      grid[count++] = (l_originX + j) * l_dY;
     }
   }
   interface.setMeshVertices(meshID, l_nX * l_nY , grid, vertexIDs);
@@ -220,7 +219,7 @@ int main( int argc, char** argv ) {
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
       //***************preCICE**************************
       precice_dt = interface.advance(l_maxTimeStepWidth);
-      interface.writeBlockScalarData(dummyValueId, (l_nX) * (l_nY), vertexIDs, dummyDouble);
+      interface.writeBlockScalarData(dummyValueId, l_nX * l_nY, vertexIDs, dummyDouble);
       //***************preCICE**************************
 
 

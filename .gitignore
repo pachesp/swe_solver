@@ -6,6 +6,7 @@ documentation/doxy/
 *log
 build/precice-Solver*
 *.pdf
+*.dot
 
 *.pyc
 .sconsign.dblite
