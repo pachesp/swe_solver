@@ -126,9 +126,7 @@ int main( int argc, char** argv ) {
     }
   }
   interface.setMeshVertices(meshID, l_nX * l_nY , grid, vertexIDs);
-
-  Float2D dummyValue_n(l_nX, l_nY);
-
+  double *dummyDouble_n = new double[(l_nX + 2) * (l_nY + 2)];
   cout << "Initialize preCICE..." << endl;
   float precice_dt = interface.initialize();
   //***************preCICE**************************
@@ -164,8 +162,6 @@ int main( int argc, char** argv ) {
 		  l_boundarySize,
 		  l_nX, l_nY,
 		  l_dX, l_dY );
-
-  double *test = l_wavePropgationBlock.getDummy().Float2D2doublePointer();
 
   // Write zero time step
   l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
@@ -215,8 +211,6 @@ int main( int argc, char** argv ) {
 
       // compute numerical flux on each edge
       l_wavePropgationBlock.computeNumericalFluxes();
-      l_wavePropgationBlock.computeDummy();
-
 
       //! maximum allowed time step width.
       float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
@@ -229,8 +223,7 @@ int main( int argc, char** argv ) {
 
       //***************preCICE**************************
       precice_dt = interface.advance(l_maxTimeStepWidth);
-      // interface.readBlockScalarData(dummyValueId, l_nX * l_nY, vertexIDs, crossSectionLength);
-
+      // interface.readBlockScalarData(dummyValueId, N + 1, vertexIDs, dummyDouble_n);
       //***************preCICE**************************
 
 
@@ -282,12 +275,23 @@ int main( int argc, char** argv ) {
   // printer iteration counter
   tools::Logger::logger.printIterationsDone(l_iterations);
 
+
+double *test = l_wavePropgationBlock.getDummy().float2D2doublePointer();
+
   for(int i = 1; i <= l_nX ; i++){
     for(int j = 1; j <= l_nY; j++){
       std::cout << test[i*(l_nX +2)+j] << "  ";
   }
   std::cout <<"\n";
 }
+
+Float2D testFloat2D = Float2D::double2Float2D(test, l_nX+2, l_nY+2);
+
+l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
+                        l_wavePropgationBlock.getDischarge_hu(),
+                        l_wavePropgationBlock.getDischarge_hv(),
+                        testFloat2D,
+                        l_t);
 
   return 0;
 }

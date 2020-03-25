@@ -167,18 +167,6 @@ class Float2D {
 		return elem;
 	}
 
-  double* Float2D2doublePointer(){
-    if(allocateMemory){
-    doublePointer = new double[rows * cols];
-     // ary[i][j] is then rewritten as
-     for (int i=0; i<rows*cols; i++) {
-       doublePointer[i] = (double)elem[i];
-     }
-   }
-   allocateDoubleMemory = true;
-   return doublePointer;
-  }
-
   inline int getRows() const { return rows; };
   inline int getCols() const { return cols; };
 
@@ -193,6 +181,26 @@ class Float2D {
                 // starting at elem[0][j] with cols elements and stride rows
 		return Float1D(elem + j, cols, rows);
 	};
+
+  double* float2D2doublePointer(){
+    if(allocateMemory){
+      doublePointer = new double[rows * cols];
+       for (int i=0; i<rows*cols; i++) {
+         doublePointer[i] = (double)elem[i];
+       }
+       allocateDoubleMemory = true;
+     }
+       return doublePointer;
+    }
+
+  static Float2D double2Float2D(double* doublePointer, int sizeX, int sizeY){
+      float *floatPointer = new float[sizeX * sizeY];
+       for (int i=0; i<sizeX*sizeY; i++) {
+         floatPointer[i] = (float)doublePointer[i];
+       }
+       Float2D float2D(sizeX, sizeY, floatPointer);
+      return float2D;
+    }
 
   private:
     int rows;
@@ -283,6 +291,5 @@ inline std::string generateContainerFileName(std::string baseName, int timeStep)
 	FileName << baseName<<"_"<<timeStep<<".pvts";
 	return FileName.str();
 };
-
 
 #endif
