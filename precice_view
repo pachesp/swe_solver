@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cat build/precice-config.xml | precice-config-visualizer  | dot -Tpdf > build/precice-config.pdf
+xdg-open build/precice-config.pdf
