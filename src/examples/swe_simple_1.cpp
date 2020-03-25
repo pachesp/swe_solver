@@ -126,7 +126,8 @@ int main( int argc, char** argv ) {
     }
   }
   interface.setMeshVertices(meshID, l_nX * l_nY , grid, vertexIDs);
-  double *dummyDouble_n = new double[(l_nX + 2) * (l_nY + 2)];
+  double *dummyDouble_n = new double[(l_nX) * (l_nY)];
+  Float2D dummyFloat2D_n(l_nX, l_nY);
   cout << "Initialize preCICE..." << endl;
   float precice_dt = interface.initialize();
   //***************preCICE**************************
@@ -223,7 +224,7 @@ int main( int argc, char** argv ) {
 
       //***************preCICE**************************
       precice_dt = interface.advance(l_maxTimeStepWidth);
-      // interface.readBlockScalarData(dummyValueId, N + 1, vertexIDs, dummyDouble_n);
+      interface.readBlockScalarData(dummyValueId, (l_nX+2) * (l_nY+2), vertexIDs, dummyDouble_n);
       //***************preCICE**************************
 
 
@@ -246,11 +247,13 @@ int main( int argc, char** argv ) {
     tools::Logger::logger.printOutputTime(l_t);
     progressBar.update(l_t);
 
+    dummyFloat2D_n = Float2D::double2Float2D(dummyDouble_n, l_nX+2, l_nY+2);
+
     // write output
     l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
                             l_wavePropgationBlock.getDischarge_hu(),
                             l_wavePropgationBlock.getDischarge_hv(),
-                            l_wavePropgationBlock.getDummy(),
+                            dummyFloat2D_n,
                             l_t);
     c++;
   }
@@ -276,22 +279,22 @@ int main( int argc, char** argv ) {
   tools::Logger::logger.printIterationsDone(l_iterations);
 
 
-double *test = l_wavePropgationBlock.getDummy().float2D2doublePointer();
-
-  for(int i = 1; i <= l_nX ; i++){
-    for(int j = 1; j <= l_nY; j++){
-      std::cout << test[i*(l_nX +2)+j] << "  ";
-  }
-  std::cout <<"\n";
-}
-
-Float2D testFloat2D = Float2D::double2Float2D(test, l_nX+2, l_nY+2);
-
-l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
-                        l_wavePropgationBlock.getDischarge_hu(),
-                        l_wavePropgationBlock.getDischarge_hv(),
-                        testFloat2D,
-                        l_t);
+// double *test = l_wavePropgationBlock.getDummy().float2D2doublePointer();
+//
+//   for(int i = 1; i <= l_nX ; i++){
+//     for(int j = 1; j <= l_nY; j++){
+//       std::cout << test[i*(l_nX +2)+j] << "  ";
+//   }
+//   std::cout <<"\n";
+// }
+//
+// Float2D testFloat2D = Float2D::double2Float2D(test, l_nX+2, l_nY+2);
+//
+// l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
+//                         l_wavePropgationBlock.getDischarge_hu(),
+//                         l_wavePropgationBlock.getDischarge_hv(),
+//                         testFloat2D,
+//                         l_t);
 
   return 0;
 }

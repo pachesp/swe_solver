@@ -3,7 +3,7 @@
 <precice-configuration>
 
   <log>
-     <sink filter= "%Severity% > debug" format="---[precice] %ColorizedSeverity% %Message%" enabled="true" />
+     <sink filter= "%Severity% >= debug" format="---[precice] %ColorizedSeverity% %Message%" enabled="true" />
    </log>
 
   <solver-interface dimensions="2">
@@ -21,15 +21,16 @@
     <participant name="Solver1">
       <!-- Makes the named mesh available to the participant. Mesh is provided by the solver directly. -->
       <use-mesh name="Solver1_Nodes" provide="yes"/>
+      <use-mesh name="Solver2_Nodes" from="Solver2"/>
       <!-- Define input/output of the solver.  -->
-      <write-data name="DummyValue" mesh="Solver1_Nodes"/>
+      <read-data name="DummyValue" mesh="Solver1_Nodes"/>
+      <!--<mapping:nearest-neighbor direction="write" from="Fluid_Nodes" to="Structure_Nodes" constraint="consistent" timing="initial"/>-->
+      <mapping:nearest-neighbor direction="read" from="Solver2_Nodes" to="Solver1_Nodes" constraint="consistent"/>
     </participant>
 
     <participant name="Solver2">
       <use-mesh name="Solver2_Nodes" provide="yes"/>
-      <use-mesh name="Solver1_Nodes" from="Solver1"/>
-      <mapping:nearest-neighbor direction="read"  from="Solver1_Nodes" to="Solver2_Nodes" constraint="consistent"/>
-      <read-data  name="DummyValue" mesh="Solver2_Nodes"/>
+      <write-data  name="DummyValue" mesh="Solver2_Nodes"/>
     </participant>
 
     <m2n:sockets from="Solver1" to="Solver2"/>
@@ -38,7 +39,7 @@
         <participants first="Solver1" second="Solver2"/>
         <time-window-size value="1"/>
         <max-time value="20.0"/>
-        <exchange data="DummyValue" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
+        <exchange data="DummyValue" mesh="Solver2_Nodes" from="Solver2" to="Solver1"/>
       </coupling-scheme:serial-explicit>
 
   </solver-interface>

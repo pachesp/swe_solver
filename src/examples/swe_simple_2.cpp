@@ -125,7 +125,6 @@ int main( int argc, char** argv ) {
       count++;
     }
   }
-
   interface.setMeshVertices(meshID, l_nX * l_nY , grid, vertexIDs);
   cout << "Initialize preCICE..." << endl;
   float precice_dt = interface.initialize();
@@ -209,8 +208,8 @@ int main( int argc, char** argv ) {
 
       // compute numerical flux on each edge
       l_wavePropgationBlock.computeNumericalFluxes();
-      // l_wavePropgationBlock.computeDummy();
-      // dummyDouble = l_wavePropgationBlock.getDummy().float2D2doublePointer();
+      l_wavePropgationBlock.computeDummy();
+      dummyDouble = l_wavePropgationBlock.getDummy().float2D2doublePointer();
 
       //! maximum allowed time step width.
       float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
@@ -221,7 +220,7 @@ int main( int argc, char** argv ) {
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
       //***************preCICE**************************
       precice_dt = interface.advance(l_maxTimeStepWidth);
-      // interface.writeBlockScalarData(dummyValueId, l_nX * l_nY, vertexIDs, dummyDouble);
+      interface.writeBlockScalarData(dummyValueId, (l_nX) * (l_nY), vertexIDs, dummyDouble);
       //***************preCICE**************************
 
 
