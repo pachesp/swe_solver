@@ -114,8 +114,8 @@ void io::VtkWriter::writeTimeStep(
 
 	// Dummy
 	vtkFile << "<DataArray Name=\"dummy\" type=\"Float32\" format=\"ascii\">" << std::endl;
-	for (int j=1; j < nY+1; j++)
-		for (int i=1; i < nX+1; i++)
+	for (int j=1; j < nY + 1; j++)
+		for (int i=1; i < nX + 1; i++)
 			vtkFile << i_dummy[i][j] << std::endl;
 	vtkFile << "</DataArray>" << std::endl;
 

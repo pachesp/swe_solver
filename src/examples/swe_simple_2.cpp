@@ -107,6 +107,8 @@ int main( int argc, char** argv ) {
   l_originY = l_scenario.getBoundaryPos(BND_BOTTOM);
 
   //***************preCICE**************************
+  // *
+  // *
   std::string configFileName("precice-config.xml");
   std::string solverName = "Solver2";
   SolverInterface interface(solverName, configFileName, 0, 1);
@@ -114,19 +116,21 @@ int main( int argc, char** argv ) {
   int meshID = interface.getMeshID("Solver2_Nodes");
   int dummyValueId = interface.getDataID("DummyValue", meshID);
   int* vertexIDs;
-  vertexIDs = new int[l_nX  * l_nY];
+  vertexIDs = new int[(l_nX + 2)  * (l_nY+2)];
   double* grid;
-  grid = new double[dimensions * l_nX  * l_nY];
+  grid = new double[dimensions * (l_nX + 2)  * (l_nY+2)];
   int count=0;
-  for (int j=0; j < l_nY; j++){
-    for (int i=0; i < l_nX; i++){
+  for (int i=0; i < l_nX + 2 ; i++){
+    for (int j=0; j < l_nY + 2; j++){
       grid[count++] = (l_originX + i) * l_dX;
-      grid[count++] = (l_originX + j) * l_dY;
+      grid[count++] = (l_originY + j) * l_dY;
     }
   }
-  interface.setMeshVertices(meshID, l_nX * l_nY , grid, vertexIDs);
+  interface.setMeshVertices(meshID, (l_nX + 2)  * (l_nY+2) , grid, vertexIDs);
   cout << "Initialize preCICE..." << endl;
   float precice_dt = interface.initialize();
+  // *
+  // *
   //***************preCICE**************************
 
   // initialize the wave propagation block
@@ -156,15 +160,6 @@ int main( int argc, char** argv ) {
   std::string l_fileName = generateBaseFileName(l_baseName,0,0);
   //boundary size of the ghost layers
   io::BoundarySize l_boundarySize = {{1, 1, 1, 1}};
-
-  // consturct a VtkWriter
-  io::VtkWriter l_writer( l_fileName,
-		  l_wavePropgationBlock.getBathymetry(),
-		  l_boundarySize,
-		  l_nX, l_nY,
-		  l_dX, l_dY );
-
-
 
   /**
    * Simulation.
@@ -210,7 +205,7 @@ int main( int argc, char** argv ) {
       l_wavePropgationBlock.computeDummy();
       dummyDouble = l_wavePropgationBlock.getDummy().float2D2doublePointer();
 
-      //! maximum allowed time step width.
+        //! maximum allowed time step width.
       float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
 
       // update the cell values
@@ -218,10 +213,9 @@ int main( int argc, char** argv ) {
 
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
       //***************preCICE**************************
+      interface.writeBlockScalarData(dummyValueId, (l_nX + 2)  * (l_nY+2), vertexIDs, dummyDouble);
       precice_dt = interface.advance(l_maxTimeStepWidth);
-      interface.writeBlockScalarData(dummyValueId, l_nX * l_nY, vertexIDs, dummyDouble);
       //***************preCICE**************************
-
 
       // update the cpu time in the logger
       tools::Logger::logger.updateTime("Cpu");
@@ -242,11 +236,6 @@ int main( int argc, char** argv ) {
     tools::Logger::logger.printOutputTime(l_t);
     progressBar.update(l_t);
 
-    // write output
-    // l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
-    //                         l_wavePropgationBlock.getDischarge_hu(),
-    //                         l_wavePropgationBlock.getDischarge_hv(),
-    //                         l_t);
     c++;
   }
   }
