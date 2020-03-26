@@ -87,7 +87,7 @@ int main( int argc, char** argv ) {
   SWE_RadialDamBreakScenario l_scenario;
 
   //! number of checkpoints for visualization (at each checkpoint in time, an output file is written).
-  int l_numberOfCheckPoints = 5;
+  int l_numberOfCheckPoints = 20;
 
   //! size of a single cell in x- and y-direction
   float l_dX, l_dY;
@@ -139,7 +139,8 @@ int main( int argc, char** argv ) {
   l_wavePropgationBlock.initScenario(l_originX, l_originY, l_scenario);
 
   //! time when the simulation ends.
-  float l_endSimulation = l_scenario.endSimulation();
+  // float l_endSimulation = l_scenario.endSimulation();
+  float l_endSimulation = 200.0;
 
   //! checkpoints when output files are written.
   float* l_checkPoints = new float[l_numberOfCheckPoints+1];
@@ -226,7 +227,7 @@ int main( int argc, char** argv ) {
       // std::cout << "**********l_maxTimeStepWidth after min = " << l_maxTimeStepWidth   << '\n';
 
       //***************preCICE**************************
-      interface.readBlockScalarData(dummyValueId, (l_nX + 2)  * (l_nY+2), vertexIDs, dummyDouble_n);
+      // interface.readBlockScalarData(dummyValueId, (l_nX + 2)  * (l_nY+2), vertexIDs, dummyDouble_n);
       precice_dt = interface.advance(l_maxTimeStepWidth);
       //***************preCICE**************************
 

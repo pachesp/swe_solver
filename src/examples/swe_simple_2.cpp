@@ -96,6 +96,8 @@ int main( int argc, char** argv ) {
   l_dX = (l_scenario.getBoundaryPos(BND_RIGHT) - l_scenario.getBoundaryPos(BND_LEFT) )/l_nX;
   l_dY = (l_scenario.getBoundaryPos(BND_TOP) - l_scenario.getBoundaryPos(BND_BOTTOM) )/l_nY;
 
+
+
   // create a single wave propagation block
   SWE_WavePropagationBlock l_wavePropgationBlock(l_nX,l_nY,l_dX,l_dY);
 
@@ -103,8 +105,11 @@ int main( int argc, char** argv ) {
   float l_originX, l_originY;
 
   // get the origin from the scenario
-  l_originX = l_scenario.getBoundaryPos(BND_LEFT);
-  l_originY = l_scenario.getBoundaryPos(BND_BOTTOM);
+  // l_originX = l_scenario.getBoundaryPos(BND_LEFT);
+  // l_originY = l_scenario.getBoundaryPos(BND_BOTTOM);
+
+  l_originX = 1000.0;
+  l_originY = 0.0;
 
   //***************preCICE**************************
   // *
@@ -140,7 +145,8 @@ int main( int argc, char** argv ) {
   double *dummyDouble;
 
   //! time when the simulation ends.
-  float l_endSimulation = l_scenario.endSimulation();
+  // float l_endSimulation = l_scenario.endSimulation();
+  float l_endSimulation = 200.0;
 
   //! checkpoints when output files are written.
   float* l_checkPoints = new float[l_numberOfCheckPoints+1];
@@ -160,6 +166,22 @@ int main( int argc, char** argv ) {
   std::string l_fileName = generateBaseFileName(l_baseName,0,0);
   //boundary size of the ghost layers
   io::BoundarySize l_boundarySize = {{1, 1, 1, 1}};
+
+  // consturct a VtkWriter
+  io::VtkWriter l_writer( l_fileName,
+		  l_wavePropgationBlock.getBathymetry(),
+		  l_boundarySize,
+		  l_nX, l_nY,
+		  l_dX, l_dY,
+      l_originX, l_originY );
+
+  // Write zero time step
+  l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
+                          l_wavePropgationBlock.getDischarge_hu(),
+                          l_wavePropgationBlock.getDischarge_hv(),
+                          l_wavePropgationBlock.getDummy(),
+                          (float) 0.);
+
 
   /**
    * Simulation.
@@ -213,7 +235,7 @@ int main( int argc, char** argv ) {
 
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
       //***************preCICE**************************
-      interface.writeBlockScalarData(dummyValueId, (l_nX + 2)  * (l_nY+2), vertexIDs, dummyDouble);
+      // interface.writeBlockScalarData(dummyValueId, (l_nX + 2)  * (l_nY+2), vertexIDs, dummyDouble);
       precice_dt = interface.advance(l_maxTimeStepWidth);
       //***************preCICE**************************
 
@@ -235,6 +257,13 @@ int main( int argc, char** argv ) {
     progressBar.clear();
     tools::Logger::logger.printOutputTime(l_t);
     progressBar.update(l_t);
+
+    // write output
+    l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
+                            l_wavePropgationBlock.getDischarge_hu(),
+                            l_wavePropgationBlock.getDischarge_hv(),
+                            l_wavePropgationBlock.getDummy(),
+                            l_t);
 
     c++;
   }
