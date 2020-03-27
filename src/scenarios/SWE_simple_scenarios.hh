@@ -45,9 +45,9 @@ class SWE_RadialDamBreakScenario : public SWE_Scenario {
        return 0.f;
     };
 
-    float getWaterHeight(float x, float y) {
-      float offsetX = 1000.f;
-      float offsetY = 0.f;
+    float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
+      // float offsetX = 1000.f;
+      // float offsetY = 0.f;
        return ( sqrt( (x-(500.f+offsetX))*(x-(500.f+offsetX)) + (y-(500.f+offsetY))*(y-(500.f+offsetY)) ) < 100.f ) ? 15.f: 10.0f;
     };
 
@@ -60,16 +60,14 @@ class SWE_RadialDamBreakScenario : public SWE_Scenario {
      * @param i_edge which edge
      * @return value in the corresponding dimension
      */
-    float getBoundaryPos(BoundaryEdge i_edge) {
-       if ( i_edge == BND_LEFT )
-         return (float)0;
-       else if ( i_edge == BND_RIGHT)
-         return (float)1000;
-       else if ( i_edge == BND_BOTTOM )
-         return (float)0;
-       else
-         return (float)1000;
-    };
+     virtual float getBoundaryPos(BoundaryEdge edge) {
+        if (edge==BND_LEFT || edge==BND_BOTTOM)
+           return 0.0f;
+        else if (edge == BND_LEFT_2 || edge == BND_TOP || edge == BND_RIGHT)
+           return 1000.0f;
+       else if (edge == BND_RIGHT_2)
+         return 2000.0f;
+     };
 };
 
 /**
@@ -112,7 +110,7 @@ class SWE_BathymetryDamBreakScenario : public SWE_Scenario {
      * @return water height (before the initial displacement)
      */
     float getWaterHeight( float i_positionX,
-                          float i_positionY ) {
+                          float i_positionY, float offsetX =0, float offsetY = 0 ) {
       return (float) 260;
     }
 };
@@ -127,7 +125,7 @@ class SWE_SeaAtRestScenario : public SWE_Scenario {
 
   public:
 
-    float getWaterHeight(float x, float y) {
+    float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
        return ( sqrt( (x-0.5)*(x-0.5) + (y-0.5)*(y-0.5) ) < 0.1f ) ? 9.9f: 10.0f;
     };
     float getBathymetry(float x, float y) {
@@ -148,7 +146,7 @@ class SWE_SplashingPoolScenario : public SWE_Scenario {
        return -250.f;
     };
 
-    float getWaterHeight(float x, float y) {
+    float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
     	return 250.0f+(5.0f-(x+y)/200);
     };
 
@@ -182,7 +180,7 @@ class SWE_SplashingConeScenario : public SWE_Scenario {
 
   public:
 
-    float getWaterHeight(float x, float y) {
+    float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
        float r = sqrt( (x-0.5f)*(x-0.5f) + (y-0.5f)*(y-0.5f) );
        float h = 4.0f-4.5f*(r/0.5f);
 

@@ -139,8 +139,8 @@ int main( int argc, char** argv ) {
   l_wavePropgationBlock.initScenario(l_originX, l_originY, l_scenario);
 
   //! time when the simulation ends.
-  // float l_endSimulation = l_scenario.endSimulation();
-  float l_endSimulation = 200.0;
+  float l_endSimulation = l_scenario.endSimulation();
+  // float l_endSimulation = 200.0;
 
   //! checkpoints when output files are written.
   float* l_checkPoints = new float[l_numberOfCheckPoints+1];

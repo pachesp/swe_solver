@@ -100,7 +100,7 @@ void SWE_Block::initScenario( float _offsetX, float _offsetY,
     for(int j=1; j<=ny; j++) {
       float x = offsetX + (i-0.5f)*dx;
       float y = offsetY + (j-0.5f)*dy;
-      h[i][j] =  i_scenario.getWaterHeight(x,y);
+      h[i][j] =  i_scenario.getWaterHeight(x,y, offsetX, offsetY);
       hu[i][j] = i_scenario.getVeloc_u(x,y) * h[i][j];
       hv[i][j] = i_scenario.getVeloc_v(x,y) * h[i][j];
 			dummy[i][j] = i_scenario.getDummy(x,y);

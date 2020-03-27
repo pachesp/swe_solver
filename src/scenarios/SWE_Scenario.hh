@@ -39,7 +39,8 @@ typedef enum BoundaryType {
  * enum type: numbering of the boundary edges
  */
 typedef enum BoundaryEdge {
-   BND_LEFT, BND_RIGHT, BND_BOTTOM, BND_TOP
+   BND_LEFT, BND_RIGHT, BND_BOTTOM, BND_TOP,
+   BND_LEFT_2, BND_RIGHT_2
 } BoundaryEdge;
 
 /**
@@ -55,7 +56,7 @@ class SWE_Scenario {
 
  public:
 
-    virtual float getWaterHeight(float x, float y) { return 10.0f; };
+    virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) { return 10.0f; };
     virtual float getVeloc_u(float x, float y) { return 0.0f; };
     virtual float getVeloc_v(float x, float y) { return 0.0f; };
     virtual float getBathymetry(float x, float y) { return 0.0f; };
@@ -69,8 +70,10 @@ class SWE_Scenario {
     virtual float getBoundaryPos(BoundaryEdge edge) {
        if (edge==BND_LEFT || edge==BND_BOTTOM)
           return 0.0f;
-       else
+       else if (edge == BND_LEFT_2 || edge == BND_TOP || edge == BND_RIGHT)
           return 1.0f;
+      else if (edge == BND_RIGHT_2)
+        return 2.0f;
     };
 
     virtual ~SWE_Scenario() {};

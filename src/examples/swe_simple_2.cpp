@@ -93,10 +93,9 @@ int main( int argc, char** argv ) {
   float l_dX, l_dY;
 
   // compute the size of a single cell
-  l_dX = (l_scenario.getBoundaryPos(BND_RIGHT) - l_scenario.getBoundaryPos(BND_LEFT) )/l_nX;
+  // l_dX = (l_scenario.getBoundaryPos(BND_RIGHT) - l_scenario.getBoundaryPos(BND_LEFT) )/l_nX;
+  l_dX = (l_scenario.getBoundaryPos(BND_RIGHT_2) - l_scenario.getBoundaryPos(BND_LEFT_2) )/l_nX;
   l_dY = (l_scenario.getBoundaryPos(BND_TOP) - l_scenario.getBoundaryPos(BND_BOTTOM) )/l_nY;
-
-
 
   // create a single wave propagation block
   SWE_WavePropagationBlock l_wavePropgationBlock(l_nX,l_nY,l_dX,l_dY);
@@ -105,11 +104,10 @@ int main( int argc, char** argv ) {
   float l_originX, l_originY;
 
   // get the origin from the scenario
-  // l_originX = l_scenario.getBoundaryPos(BND_LEFT);
-  // l_originY = l_scenario.getBoundaryPos(BND_BOTTOM);
+  l_originX = l_scenario.getBoundaryPos(BND_LEFT);
+  l_originX = l_scenario.getBoundaryPos(BND_LEFT_2);
+  l_originY = l_scenario.getBoundaryPos(BND_BOTTOM);
 
-  l_originX = 1000.0;
-  l_originY = 0.0;
 
   //***************preCICE**************************
   // *
@@ -145,8 +143,8 @@ int main( int argc, char** argv ) {
   double *dummyDouble;
 
   //! time when the simulation ends.
-  // float l_endSimulation = l_scenario.endSimulation();
-  float l_endSimulation = 200.0;
+  float l_endSimulation = l_scenario.endSimulation();
+  // float l_endSimulation = 200.0;
 
   //! checkpoints when output files are written.
   float* l_checkPoints = new float[l_numberOfCheckPoints+1];
@@ -181,7 +179,6 @@ int main( int argc, char** argv ) {
                           l_wavePropgationBlock.getDischarge_hv(),
                           l_wavePropgationBlock.getDummy(),
                           (float) 0.);
-
 
   /**
    * Simulation.
