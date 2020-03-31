@@ -84,10 +84,10 @@ int main( int argc, char** argv ) {
   l_baseName = args.getArgument<std::string>("output-basepath");
 
   // create a simple artificial scenario
-  SWE_RadialDamBreakScenario l_scenario;
+  SWE_NothingScenario l_scenario;
 
   //! number of checkpoints for visualization (at each checkpoint in time, an output file is written).
-  int l_numberOfCheckPoints = 20;
+  int l_numberOfCheckPoints = 10;
 
   //! size of a single cell in x- and y-direction
   float l_dX, l_dY;
@@ -104,7 +104,7 @@ int main( int argc, char** argv ) {
   float l_originX, l_originY;
 
   // get the origin from the scenario
-  l_originX = l_scenario.getBoundaryPos(BND_LEFT);
+  // l_originX = l_scenario.getBoundaryPos(BND_LEFT);
   l_originX = l_scenario.getBoundaryPos(BND_LEFT_2);
   l_originY = l_scenario.getBoundaryPos(BND_BOTTOM);
 
@@ -117,7 +117,9 @@ int main( int argc, char** argv ) {
   SolverInterface interface(solverName, configFileName, 0, 1);
   int dimensions = interface.getDimensions();
   int meshID = interface.getMeshID("Solver2_Nodes");
-  int dummyValueId = interface.getDataID("DummyValue", meshID);
+  int heightId = interface.getDataID("height", meshID);
+  int huId = interface.getDataID("hu", meshID);
+  int hvId = interface.getDataID("hv", meshID);
   int* vertexIDs;
   vertexIDs = new int[(l_nX + 2)  * (l_nY+2)];
   double* grid;
@@ -139,8 +141,9 @@ int main( int argc, char** argv ) {
   // initialize the wave propagation block
   l_wavePropgationBlock.initScenario(l_originX, l_originY, l_scenario);
 
-  //get initialized dummy value
-  double *dummyDouble;
+  double *height_db = new double[(l_nX + 2)  * (l_nY+2)];
+  double *hu_db = new double[(l_nX + 2)  * (l_nY+2)];
+  double *hv_db = new double[(l_nX + 2)  * (l_nY+2)];
 
   //! time when the simulation ends.
   float l_endSimulation = l_scenario.endSimulation();
@@ -177,7 +180,7 @@ int main( int argc, char** argv ) {
   l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
                           l_wavePropgationBlock.getDischarge_hu(),
                           l_wavePropgationBlock.getDischarge_hv(),
-                          l_wavePropgationBlock.getDummy(),
+                          // l_wavePropgationBlock.getDummy(),
                           (float) 0.);
 
   /**
@@ -204,7 +207,13 @@ int main( int argc, char** argv ) {
 
   //***************preCICE**************************
   if(l_t < l_checkPoints[c]){
+      interface.readBlockScalarData(heightId, (l_nX + 2)  * (l_nY+2), vertexIDs, height_db);
+      interface.readBlockScalarData(huId, (l_nX + 2)  * (l_nY+2), vertexIDs, hu_db);
+      interface.readBlockScalarData(hvId, (l_nX + 2)  * (l_nY+2), vertexIDs, hv_db);
   //***************preCICE**************************
+
+    // Float1D height1D = convert
+    // l_wavePropgationBlock.setBoundaryType(BND_LEFT, i_scenario.getBoundaryType(BND_LEFT), height1D);
 
     // do time steps until next checkpoint is reached
     // while( l_t < l_checkPoints[c] ) {
@@ -219,10 +228,14 @@ int main( int argc, char** argv ) {
       // Remark: The code is executed on the CPU, therefore a "valid result" depends on the CPU-GPU-synchronization.
 //      l_wavePropgationBlock.computeMaxTimestep();
 
+
+      // l_wavePropgationBlock.getWaterHeight() = Float2D::double2Float2D(height, l_nX+2, l_nY+2);
+
+
       // compute numerical flux on each edge
       l_wavePropgationBlock.computeNumericalFluxes();
-      l_wavePropgationBlock.computeDummy();
-      dummyDouble = l_wavePropgationBlock.getDummy().float2D2doublePointer();
+      // l_wavePropgationBlock.computeDummy();
+      // dummyDouble = l_wavePropgationBlock.getDummy().float2D2doublePointer();
 
         //! maximum allowed time step width.
       float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
@@ -232,7 +245,6 @@ int main( int argc, char** argv ) {
 
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
       //***************preCICE**************************
-      // interface.writeBlockScalarData(dummyValueId, (l_nX + 2)  * (l_nY+2), vertexIDs, dummyDouble);
       precice_dt = interface.advance(l_maxTimeStepWidth);
       //***************preCICE**************************
 
@@ -259,7 +271,7 @@ int main( int argc, char** argv ) {
     l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
                             l_wavePropgationBlock.getDischarge_hu(),
                             l_wavePropgationBlock.getDischarge_hv(),
-                            l_wavePropgationBlock.getDummy(),
+                            // l_wavePropgationBlock.getDummy(),
                             l_t);
 
     c++;

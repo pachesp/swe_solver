@@ -8,29 +8,39 @@
 
   <solver-interface dimensions="2">
 
-    <data:scalar name="DummyValue"/>
+    <data:scalar name="height"/>
+    <data:scalar name="hu"/>
+    <data:scalar name="hv"/>
 
     <mesh name="Solver1_Nodes">
-      <use-data name="DummyValue"/>
+      <use-data name="height"/>
+      <use-data name="hu"/>
+      <use-data name="hv"/>
     </mesh>
 
     <mesh name="Solver2_Nodes">
-      <use-data name="DummyValue"/>
+      <use-data name="height"/>
+      <use-data name="hu"/>
+      <use-data name="hv"/>
     </mesh>
 
     <participant name="Solver1">
       <!-- Makes the named mesh available to the participant. Mesh is provided by the solver directly. -->
       <use-mesh name="Solver1_Nodes" provide="yes"/>
-      <use-mesh name="Solver2_Nodes" from="Solver2"/>
       <!-- Define input/output of the solver.  -->
-      <read-data name="DummyValue" mesh="Solver1_Nodes"/>
-      <!--<mapping:nearest-neighbor direction="write" from="Fluid_Nodes" to="Structure_Nodes" constraint="consistent" timing="initial"/>-->
-      <mapping:nearest-neighbor direction="read" from="Solver2_Nodes" to="Solver1_Nodes" constraint="consistent"/>
+      <write-data name="height" mesh="Solver1_Nodes"/>
+      <write-data name="hu" mesh="Solver1_Nodes"/>
+      <write-data name="hv" mesh="Solver1_Nodes"/>
     </participant>
 
     <participant name="Solver2">
+      <use-mesh name="Solver1_Nodes" from="Solver1"/>
       <use-mesh name="Solver2_Nodes" provide="yes"/>
-      <write-data  name="DummyValue" mesh="Solver2_Nodes"/>
+      <!--<mapping:nearest-neighbor direction="write" from="Fluid_Nodes" to="Structure_Nodes" constraint="consistent" timing="initial"/>-->
+      <mapping:nearest-neighbor direction="read" from="Solver1_Nodes" to="Solver2_Nodes" constraint="consistent"/>
+      <read-data  name="height" mesh="Solver2_Nodes"/>
+      <read-data  name="hu" mesh="Solver2_Nodes"/>
+      <read-data  name="hv" mesh="Solver2_Nodes"/>
     </participant>
 
     <m2n:sockets from="Solver1" to="Solver2"/>
@@ -38,8 +48,10 @@
     <coupling-scheme:serial-explicit>
         <participants first="Solver1" second="Solver2"/>
         <time-window-size value="1"/>
-        <max-time value="15.0"/>
-        <exchange data="DummyValue" mesh="Solver2_Nodes" from="Solver2" to="Solver1"/>
+        <max-time value="100.0"/>
+        <exchange data="height" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
+        <exchange data="hu" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
+        <exchange data="hv" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
       </coupling-scheme:serial-explicit>
 
   </solver-interface>

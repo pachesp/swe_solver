@@ -69,7 +69,7 @@ class Float1D
 		return elem;
 	}
 
-        inline int getSize() const { return rows; };
+  inline int getSize() const { return rows; };
 
   private:
     int rows;
@@ -100,6 +100,7 @@ class Float2D {
       allocateMemory(_allocateMemory) {
       if (_allocateMemory) {
         elem = new float[rows*cols];
+        doublePointer = new double[rows*cols];
       }
 	  }
 
@@ -112,11 +113,12 @@ class Float2D {
      * @param _rows rumber of rows (i.e., elements in vertical directions)
      * @param _elem pointer to a suitably allocated region of memory to be used for thew array elements
      */
-    Float2D(int _cols, int _rows, float* _elem):
+    Float2D(int _cols, int _rows, float* _elem, double* _doublePointer=NULL):
       rows(_rows),
       cols(_cols),
       allocateMemory(false) {
 		  elem = _elem;
+      doublePointer = _doublePointer;
 	  }
 
 
@@ -135,12 +137,15 @@ class Float2D {
       allocateMemory(!shallowCopy) {
       if (shallowCopy) {
         elem = _elem.elem;
+        doublePointer =_elem.doublePointer;
         allocateMemory = false;
       }
       else {
         elem = new float[rows*cols];
+        doublePointer = new double[rows*cols];
         for (int i=0; i<rows*cols; i++) {
           elem[i] = _elem.elem[i];
+          doublePointer[i] = (double)_elem.elem[i];
         }
         allocateMemory = true;
       }
@@ -149,10 +154,8 @@ class Float2D {
 	  ~Float2D() {
 		  if (allocateMemory) {
 		    delete[] elem;
-		  }
-      if (allocateDoubleMemory){
         delete[] doublePointer;
-      }
+		  }
   	}
 
 	  inline float* operator[](int i) {
@@ -166,6 +169,10 @@ class Float2D {
 	inline float* elemVector() {
 		return elem;
 	}
+
+  inline double* doubleElemVector() {
+    return doublePointer;
+  }
 
   inline int getRows() const { return rows; };
   inline int getCols() const { return cols; };
@@ -182,23 +189,22 @@ class Float2D {
 		return Float1D(elem + j, cols, rows);
 	};
 
-  double* float2D2doublePointer(){
+  double* float2D2doublePointer() const {
     if(allocateMemory){
-      doublePointer = new double[rows * cols];
        for (int i=0; i<rows*cols; i++) {
          doublePointer[i] = (double)elem[i];
        }
-       allocateDoubleMemory = true;
      }
        return doublePointer;
     }
 
-  static Float2D double2Float2D(double* doublePointer, int sizeX, int sizeY){
+
+  static const Float2D double2Float2D(double* doublePointer, int sizeX, int sizeY){
       float *floatPointer = new float[sizeX * sizeY];
        for (int i=0; i<sizeX*sizeY; i++) {
          floatPointer[i] = (float)doublePointer[i];
        }
-       Float2D float2D(sizeX, sizeY, floatPointer);
+      const Float2D float2D(sizeX, sizeY, floatPointer);
       return float2D;
     }
 
@@ -207,8 +213,7 @@ class Float2D {
     int cols;
     float* elem;
     double* doublePointer;
-	bool allocateMemory;
-  bool allocateDoubleMemory = false;
+    bool allocateMemory;
 };
 
 //-------- Methods for Visualistion of Results --------
