@@ -275,4 +275,7 @@ struct SWE_Block1D {
 };
 
 
+float* doublePointer2floatPointer(double* doublePointer, int size);
+
+
 #endif

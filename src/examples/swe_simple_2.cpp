@@ -121,17 +121,15 @@ int main( int argc, char** argv ) {
   int huId = interface.getDataID("hu", meshID);
   int hvId = interface.getDataID("hv", meshID);
   int* vertexIDs;
-  vertexIDs = new int[(l_nX + 2)  * (l_nY+2)];
+  vertexIDs = new int[(l_nY + 2)];
   double* grid;
-  grid = new double[dimensions * (l_nX + 2)  * (l_nY+2)];
+  grid = new double[dimensions * (l_nY + 2)];
   int count=0;
-  for (int i=0; i < l_nX + 2 ; i++){
-    for (int j=0; j < l_nY + 2; j++){
-      grid[count++] = (l_originX + i) * l_dX;
-      grid[count++] = (l_originY + j) * l_dY;
+  for (int j=0; j <= l_nY + 1 ; j++){
+      grid[count++] = 0;
+      grid[count++] = j;
     }
-  }
-  interface.setMeshVertices(meshID, (l_nX + 2)  * (l_nY+2) , grid, vertexIDs);
+  interface.setMeshVertices(meshID, (l_nY + 2) , grid, vertexIDs);
   cout << "Initialize preCICE..." << endl;
   float precice_dt = interface.initialize();
   // *
@@ -141,9 +139,9 @@ int main( int argc, char** argv ) {
   // initialize the wave propagation block
   l_wavePropgationBlock.initScenario(l_originX, l_originY, l_scenario);
 
-  double *height_db = new double[(l_nX + 2)  * (l_nY+2)];
-  double *hu_db = new double[(l_nX + 2)  * (l_nY+2)];
-  double *hv_db = new double[(l_nX + 2)  * (l_nY+2)];
+  double *height_db = new double[(l_nY+2)];
+  double *hu_db = new double[(l_nY+2)];
+  double *hv_db = new double[(l_nY+2)];
 
   //! time when the simulation ends.
   float l_endSimulation = l_scenario.endSimulation();
@@ -207,13 +205,18 @@ int main( int argc, char** argv ) {
 
   //***************preCICE**************************
   if(l_t < l_checkPoints[c]){
-      interface.readBlockScalarData(heightId, (l_nX + 2)  * (l_nY+2), vertexIDs, height_db);
-      interface.readBlockScalarData(huId, (l_nX + 2)  * (l_nY+2), vertexIDs, hu_db);
-      interface.readBlockScalarData(hvId, (l_nX + 2)  * (l_nY+2), vertexIDs, hv_db);
+      interface.readBlockScalarData(heightId, (l_nY + 2), vertexIDs, height_db);
+      interface.readBlockScalarData(huId, (l_nY + 2), vertexIDs, hu_db);
+      interface.readBlockScalarData(hvId, (l_nY + 2), vertexIDs, hv_db);
   //***************preCICE**************************
 
-    // Float1D height1D = convert
-    // l_wavePropgationBlock.setBoundaryType(BND_LEFT, i_scenario.getBoundaryType(BND_LEFT), height1D);
+
+    SWE_Block1D preCICEdata{ doublePointer2floatPointer(height_db, l_nY + 2),
+                      doublePointer2floatPointer(hu_db, l_nY + 2),
+                      doublePointer2floatPointer(hv_db, l_nY + 2 ), l_nY + 2 };
+
+
+    l_wavePropgationBlock.setBoundaryType(BND_LEFT, l_scenario.getBoundaryType(BND_LEFT), &preCICEdata);
 
     // do time steps until next checkpoint is reached
     // while( l_t < l_checkPoints[c] ) {

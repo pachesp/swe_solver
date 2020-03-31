@@ -118,24 +118,21 @@ int main( int argc, char** argv ) {
   int huId = interface.getDataID("hu", meshID);
   int hvId = interface.getDataID("hv", meshID);
   int* vertexIDs;
-  vertexIDs = new int[(l_nX + 2)  * (l_nY+2)];
+  vertexIDs = new int[(l_nY + 2)];
   double* grid;
-  grid = new double[dimensions * (l_nX + 2)  * (l_nY+2)];
+  grid = new double[dimensions * (l_nY + 2)];
   int count=0;
-  for (int i=0; i < l_nX + 2 ; i++){
-    for (int j=0; j < l_nY + 2; j++){
-      grid[count++] = (l_originX + i) * l_dX;
-      grid[count++] = (l_originY + j) * l_dY;
+  for (int j=0; j <= l_nY + 1 ; j++){
+      grid[count++] = 0;
+      grid[count++] = j;
     }
-  }
-  interface.setMeshVertices(meshID, (l_nX + 2)  * (l_nY+2) , grid, vertexIDs);
+  interface.setMeshVertices(meshID, (l_nY+2) , grid, vertexIDs);
   cout << "Initialize preCICE..." << endl;
   float precice_dt = interface.initialize();
   // *
   // *
   //***************preCICE**************************
 
-  // double *height = new double[(l_nX + 2)  * (l_nY+2)];
   double *height_db;
   double *hu_db;
   double *hv_db;
@@ -233,13 +230,13 @@ int main( int argc, char** argv ) {
       // std::cout << "**********l_maxTimeStepWidth after min = " << l_maxTimeStepWidth   << '\n';
 
       //***************preCICE**************************
-      // height_db = l_wavePropgationBlock.getWaterHeight().float2D2doublePointer();
-      // hu_db = l_wavePropgationBlock.getDischarge_hu().float2D2doublePointer();
-      // hv_db = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer();
-      //
-      // interface.writeBlockScalarData(heightId, (l_nX + 2)  * (l_nY+2), vertexIDs, height_db);
-      // interface.writeBlockScalarData(huId, (l_nX + 2)  * (l_nY+2), vertexIDs, hu_db);
-      // interface.writeBlockScalarData(hvId, (l_nX + 2)  * (l_nY+2), vertexIDs, hv_db);
+      height_db = l_wavePropgationBlock.getWaterHeight().float2D2doublePointer();
+      hu_db = l_wavePropgationBlock.getDischarge_hu().float2D2doublePointer();
+      hv_db = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer();
+
+      interface.writeBlockScalarData(heightId, (l_nY+2), vertexIDs, height_db);
+      interface.writeBlockScalarData(huId, (l_nY+2), vertexIDs, hu_db);
+      interface.writeBlockScalarData(hvId, (l_nY+2), vertexIDs, hv_db);
 
       precice_dt = interface.advance(l_maxTimeStepWidth);
       //***************preCICE**************************

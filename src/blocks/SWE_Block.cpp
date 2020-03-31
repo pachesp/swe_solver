@@ -762,3 +762,12 @@ void SWE_Block::synchBathymetryBeforeRead() {}
  * before an external access to the unknowns
  */
 void SWE_Block::synchCopyLayerBeforeRead() {}
+
+
+float* doublePointer2floatPointer(double* doublePointer, int size){
+  float* floatPointer = new float[size];
+  for(int i = 0; i< size; i++){
+    floatPointer[i] = (float) doublePointer[i];
+  }
+  return floatPointer;
+}
