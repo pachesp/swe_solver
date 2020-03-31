@@ -3,17 +3,19 @@
 cd ~/thesis/SWE/build
 rm output/*
 
+size=10
+
 if  [ $1 == "1" ];then
-  ./SWE_gnu_release_none_fwave_1 -x 60 -y 60 -o output/testrun1
-  # ./SWE_gnu_debug_none_fwave_1 -x 60 -y 60 -o output/testrun1
+  ./SWE_gnu_release_none_fwave_1 -x $size -y $size -o output/testrun1
+  # ./SWE_gnu_debug_none_fwave_1 -x $size -y $size -o output/testrun1
 elif [ $1 == "2" ]; then
-  ./SWE_gnu_release_none_fwave_2 -x 60 -y 60 -o output/testrun2
-  # ./SWE_gnu_debug_none_fwave_2 -x 60 -y 60 -o output/testrun2
+  ./SWE_gnu_release_none_fwave_2 -x $size -y $size -o output/testrun2
+  # ./SWE_gnu_debug_none_fwave_2 -x $size -y $size -o output/testrun2
 elif [ $1 == "b" ]; then
-   ./SWE_gnu_release_none_fwave_2 -x 60 -y 60 -o output/testrun1
-   ./SWE_gnu_release_none_fwave_2 -x 60 -y 60 -o output/testrun2
-  # ./SWE_gnu_debug_none_fwave_1 -x 60 -y 60 -o output/testrun1
-  # ./SWE_gnu_debug_none_fwave_2 -x 60 -y 60 -o output/testrun2
+   ./SWE_gnu_release_none_fwave_2 -x $size -y $size -o output/testrun1
+   ./SWE_gnu_release_none_fwave_2 -x $size -y $size -o output/testrun2
+  # ./SWE_gnu_debug_none_fwave_1 -x $size -y $size -o output/testrun1
+  # ./SWE_gnu_debug_none_fwave_2 -x $size -y $size -o output/testrun2
 else
   echo "not valid option"
 fi

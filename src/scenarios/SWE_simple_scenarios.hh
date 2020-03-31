@@ -39,10 +39,6 @@
  */
 class SWE_RadialDamBreakScenario : public SWE_Scenario {
 
-  private:
-
-  float side = 500.f;
-
   public:
 
     float getBathymetry(float x, float y) {
@@ -55,8 +51,6 @@ class SWE_RadialDamBreakScenario : public SWE_Scenario {
                       (y-((side * 0.5) + offsetY)) * (y-((side * 0.5) + offsetY)) ) < side * 0.1 ) ? 15.f: 10.0f;
     };
 
-  	virtual float endSimulation() { return (float) 100.f; };
-
     virtual BoundaryType getBoundaryType(BoundaryEdge edge) { return OUTFLOW; };
 
     /** Get the boundary positions
@@ -67,97 +61,75 @@ class SWE_RadialDamBreakScenario : public SWE_Scenario {
      virtual float getBoundaryPos(BoundaryEdge edge) {
         if (edge==BND_LEFT || edge==BND_BOTTOM)
            return 0.0f;
-        else if (edge == BND_LEFT_2 || edge == BND_TOP || edge == BND_RIGHT)
+        else
            return side;
-       else if (edge == BND_RIGHT_2)
-         return side * 2;
      };
 };
 
-class SWE_FranciscoScenario : public SWE_Scenario {
-
-  private:
-    float side = 500.0f;
+class SWE_RadialDamBreakScenario2 : public SWE_RadialDamBreakScenario {
 
   public:
 
-    float getBathymetry(float x, float y) {
-       return 0.f;
+    virtual float getBoundaryPos(BoundaryEdge edge) {
+       if (edge==BND_LEFT || edge==BND_TOP)
+          return side;
+       else if(edge==BND_BOTTOM)
+          return 0;
+       else
+       return side * 2;
     };
+};
 
-    float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
+class SWE_FranciscoScenario : public SWE_RadialDamBreakScenario {
 
-      float a = (x-((side * 0.125) +offsetX));
-      float a_0 = (x-((side * 0.875) +offsetX));
-      float b = (y-((side * 0.5)+offsetY));
-
-      bool circ_1 = sqrt(a*a + b*b) < (side * 0.1);
-      bool circ_2 = sqrt(a_0*a_0 + b*b) < (side * 0.1);
-
-     return ( circ_1 || circ_2 ) ? 15.f: 10.0f;
-    };
-
-	  virtual float endSimulation() { return (float) 100; };
-
+  public:
     virtual BoundaryType getBoundaryType(BoundaryEdge edge) {
       if (edge == BND_RIGHT){
-             return CONNECT;
-      }else {
+        // return CONNECT;
+        return OUTFLOW;
+      } else {
         return OUTFLOW;
       }
      };
 
-    /** Get the boundary positions
-     *
-     * @param i_edge which edge
-     * @return value in the corresponding dimension
-     */
-     virtual float getBoundaryPos(BoundaryEdge edge) {
-        if (edge==BND_LEFT || edge==BND_BOTTOM)
-           return 0.0f;
-        else if (edge == BND_LEFT_2 || edge == BND_TOP || edge == BND_RIGHT)
-           return side;
-       else if (edge == BND_RIGHT_2)
-         return side * 2;
-     };
+    // virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
+    //
+    //   float a = (x-((side * 0.125) +offsetX));
+    //   a = (x-((side * 0.5) +offsetX));
+    //   float a_0 = (x-((side * 0.875) +offsetX));
+    //   float b = (y-((side * 0.5)+offsetY));
+    //
+    //   bool circ_1 = sqrt(a*a + b*b) < (side * 0.1);
+    //   bool circ_2 = sqrt(a_0*a_0 + b*b) < (side * 0.1);
+    //   circ_2  = false;
+    //
+    //  return ( circ_1 || circ_2 ) ? 15.f: 10.0f;
+    // };
+
 };
 
-class SWE_NothingScenario : public SWE_Scenario {
-
-  private:
-    float side = 500.f;
+class SWE_FranciscoScenario_2 : public SWE_Scenario {
 
   public:
 
-    float getBathymetry(float x, float y) {
-       return 0.f;
+    virtual float getBoundaryPos(BoundaryEdge edge) {
+       if (edge==BND_LEFT || edge==BND_TOP)
+          return side;
+       else if(edge==BND_BOTTOM)
+          return 0;
+       else
+       return side * 2;
     };
 
-  	virtual float endSimulation() { return (float) 100; };
-
     virtual BoundaryType getBoundaryType(BoundaryEdge edge) {
-      if (edge == BND_LEFT_2){
-             return CONNECT;
-      }else {
+      if (edge == BND_LEFT){
+        return CONNECT;
+      } else {
         return OUTFLOW;
       }
      };
-    /** Get the boundary positions
-     *
-     * @param i_edge which edge
-     * @return value in the corresponding dimension
-     */
-     virtual float getBoundaryPos(BoundaryEdge edge) {
-        if (edge==BND_LEFT || edge==BND_BOTTOM)
-           return 0.0f;
-        else if (edge == BND_LEFT_2 || edge == BND_TOP || edge == BND_RIGHT)
-           return side;
-       else if (edge == BND_RIGHT_2)
-         return side * 2;
-     };
+
 };
-
-
 
 /**
  * Scenario "Bathymetry Dam Break":

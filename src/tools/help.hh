@@ -204,8 +204,7 @@ class Float2D {
        for (int i=0; i<sizeX*sizeY; i++) {
          floatPointer[i] = (float)doublePointer[i];
        }
-      const Float2D float2D(sizeX, sizeY, floatPointer);
-      return float2D;
+      return Float2D{sizeX, sizeY, floatPointer};
     }
 
   private:

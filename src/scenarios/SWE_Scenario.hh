@@ -39,9 +39,8 @@ typedef enum BoundaryType {
  * enum type: numbering of the boundary edges
  */
 typedef enum BoundaryEdge {
-   BND_LEFT, BND_RIGHT, BND_BOTTOM, BND_TOP,
-   BND_LEFT_2, BND_RIGHT_2
-} BoundaryEdge;
+   BND_LEFT, BND_RIGHT, BND_BOTTOM, BND_TOP
+ } BoundaryEdge;
 
 /**
  * SWE_Scenario defines an interface to initialise the unknowns of a
@@ -60,23 +59,26 @@ class SWE_Scenario {
     virtual float getVeloc_u(float x, float y) { return 0.0f; };
     virtual float getVeloc_v(float x, float y) { return 0.0f; };
     virtual float getBathymetry(float x, float y) { return 0.0f; };
-    virtual float getDummy(float x, float y){return 5.0f;};
+    // virtual float getDummy(float x, float y){return 5.0f;};
 
     virtual float waterHeightAtRest() { return 10.0f; };
 
-    virtual float endSimulation() { return 0.1f; };
+    // virtual float endSimulation() { return 0.1f; };
+    virtual float endSimulation() { return 20.f; };
+
 
     virtual BoundaryType getBoundaryType(BoundaryEdge edge) { return WALL; };
     virtual float getBoundaryPos(BoundaryEdge edge) {
        if (edge==BND_LEFT || edge==BND_BOTTOM)
           return 0.0f;
-       else if (edge == BND_LEFT_2 || edge == BND_TOP || edge == BND_RIGHT)
+       else
           return 1.0f;
-      else if (edge == BND_RIGHT_2)
-        return 2.0f;
-    };
+      };
 
     virtual ~SWE_Scenario() {};
+
+  protected:
+    float side = 500.f;
 
 };
 

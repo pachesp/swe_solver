@@ -84,7 +84,7 @@ int main( int argc, char** argv ) {
   l_baseName = args.getArgument<std::string>("output-basepath");
 
   // create a simple artificial scenario
-  SWE_FranciscoScenario l_scenario;
+  SWE_RadialDamBreakScenario l_scenario;
 
   //! number of checkpoints for visualization (at each checkpoint in time, an output file is written).
   int l_numberOfCheckPoints = 10;
@@ -207,7 +207,11 @@ int main( int argc, char** argv ) {
     // do time steps until next checkpoint is reached
     // while( l_t < l_checkPoints[c] ) {
       // set values in ghost cells:
+      // std::cout << "sssssssssssssssssssssss" << '\n';
+
       l_wavePropgationBlock.setGhostLayer();
+      // std::cout << "ccccccccccccccccccccccccc" << '\n';
+
 
       // reset the cpu clock
       tools::Logger::logger.resetClockToCurrentTime("Cpu");
@@ -219,6 +223,7 @@ int main( int argc, char** argv ) {
 
       // compute numerical flux on each edge
       l_wavePropgationBlock.computeNumericalFluxes();
+      // std::cout << "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii" << '\n';
 
       //! maximum allowed time step width.
       float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
@@ -226,17 +231,23 @@ int main( int argc, char** argv ) {
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
       // std::cout << "**********l_maxTimeStepWidth = " << l_maxTimeStepWidth   << '\n';
+      // std::cout << "sdffffffffffffffffffffffffffffffffffffffffS" << '\n';
+
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
       // std::cout << "**********l_maxTimeStepWidth after min = " << l_maxTimeStepWidth   << '\n';
 
       //***************preCICE**************************
-      height_db = l_wavePropgationBlock.getWaterHeight().float2D2doublePointer();
-      hu_db = l_wavePropgationBlock.getDischarge_hu().float2D2doublePointer();
-      hv_db = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer();
-
-      interface.writeBlockScalarData(heightId, (l_nY+2), vertexIDs, height_db);
-      interface.writeBlockScalarData(huId, (l_nY+2), vertexIDs, hu_db);
-      interface.writeBlockScalarData(hvId, (l_nY+2), vertexIDs, hv_db);
+      // height_db = l_wavePropgationBlock.getWaterHeight().float2D2doublePointer();
+      // hu_db = l_wavePropgationBlock.getDischarge_hu().float2D2doublePointer();
+      // hv_db = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer();
+      //
+      // for(int i = 0; i < l_nY +2; i++){
+      //   std::cout << height_db[i] << '\n';
+      // }
+      //
+      // interface.writeBlockScalarData(heightId, (l_nY+2), vertexIDs, height_db);
+      // interface.writeBlockScalarData(huId, (l_nY+2), vertexIDs, hu_db);
+      // interface.writeBlockScalarData(hvId, (l_nY+2), vertexIDs, hv_db);
 
       precice_dt = interface.advance(l_maxTimeStepWidth);
       //***************preCICE**************************

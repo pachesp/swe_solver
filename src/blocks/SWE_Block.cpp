@@ -103,7 +103,7 @@ void SWE_Block::initScenario( float _offsetX, float _offsetY,
       h[i][j] =  i_scenario.getWaterHeight(x,y, offsetX, offsetY);
       hu[i][j] = i_scenario.getVeloc_u(x,y) * h[i][j];
       hv[i][j] = i_scenario.getVeloc_v(x,y) * h[i][j];
-			dummy[i][j] = i_scenario.getDummy(x,y);
+			// dummy[i][j] = i_scenario.getDummy(x,y);
     };
 
   // initialize bathymetry
@@ -315,6 +315,7 @@ void SWE_Block::setBoundaryType( const BoundaryEdge i_edge,
                                  const SWE_Block1D* i_inflow) {
 	boundary[i_edge] = i_boundaryType;
 	neighbour[i_edge] = i_inflow;
+	// std::cout << "neighbour on edge: "<< i_edge << "=" << neighbour[i_edge]  << '\n';
 
 	if (i_boundaryType == OUTFLOW || i_boundaryType == WALL)
 		// One of the boundary was changed to OUTFLOW or WALL
