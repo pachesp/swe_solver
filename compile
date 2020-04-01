@@ -1,5 +1,4 @@
 #!/bin/bash
 
 cd ~/thesis/SWE
-rm build/SWE_gnu_* build/precice-Solver* build/reference.xml build/output/*
 scons buildVariablesFile=build/options/SWE_gnu.py

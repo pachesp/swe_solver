@@ -203,21 +203,21 @@ int main( int argc, char** argv ) {
 
   //***************preCICE**************************
   if(l_t < l_checkPoints[c]){
-  //     interface.readBlockScalarData(heightId, (l_nY + 2), vertexIDs, height_db);
-  //     interface.readBlockScalarData(huId, (l_nY + 2), vertexIDs, hu_db);
-  //     interface.readBlockScalarData(hvId, (l_nY + 2), vertexIDs, hv_db);
-  // //***************preCICE**************************
-  //
-  // // for(int i = 0; i < l_nY +2; i++){
-  // //   std::cout << height_db[i] << '\n';
-  // // }
-  //
-  //   SWE_Block1D preCICEdata{ doublePointer2floatPointer(height_db, l_nY + 2),
-  //                     doublePointer2floatPointer(hu_db, l_nY + 2),
-  //                     doublePointer2floatPointer(hv_db, l_nY + 2 ), l_nY + 2 };
-  //
-  //
-  //   l_wavePropgationBlock.setBoundaryType(BND_LEFT, l_scenario.getBoundaryType(BND_LEFT), &preCICEdata);
+      interface.readBlockScalarData(heightId, (l_nY + 2), vertexIDs, height_db);
+      interface.readBlockScalarData(huId, (l_nY + 2), vertexIDs, hu_db);
+      interface.readBlockScalarData(hvId, (l_nY + 2), vertexIDs, hv_db);
+  //***************preCICE**************************
+
+  // for(int i = 0; i < l_nY +2; i++){
+  //   std::cout << height_db[i] << '\n';
+  // }
+
+    SWE_Block1D preCICEdata{ doublePointer2floatPointer(height_db, l_nY + 2),
+                      doublePointer2floatPointer(hu_db, l_nY + 2),
+                      doublePointer2floatPointer(hv_db, l_nY + 2 ), l_nY + 2 };
+
+
+    l_wavePropgationBlock.setBoundaryType(BND_LEFT, l_scenario.getBoundaryType(BND_LEFT), &preCICEdata);
 
     // do time steps until next checkpoint is reached
     // while( l_t < l_checkPoints[c] ) {

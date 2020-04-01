@@ -133,9 +133,9 @@ int main( int argc, char** argv ) {
   // *
   //***************preCICE**************************
 
-  double *height_db;
-  double *hu_db;
-  double *hv_db;
+  double *height_db = new double[(l_nY+2)];
+  double *hu_db = new double[(l_nY+2)];
+  double *hv_db = new double[(l_nY+2)];
 
 
   // initialize the wave propagation block
@@ -230,24 +230,40 @@ int main( int argc, char** argv ) {
 
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
-      // std::cout << "**********l_maxTimeStepWidth = " << l_maxTimeStepWidth   << '\n';
       // std::cout << "sdffffffffffffffffffffffffffffffffffffffffS" << '\n';
-
+      // std::cout << "**********l_maxTimeStepWidth = " << l_maxTimeStepWidth   << '\n';
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
-      // std::cout << "**********l_maxTimeStepWidth after min = " << l_maxTimeStepWidth   << '\n';
+      // std::cout << "**********precicedtn = " << precice_dt   << '\n';
 
       //***************preCICE**************************
-      // height_db = l_wavePropgationBlock.getWaterHeight().float2D2doublePointer();
-      // hu_db = l_wavePropgationBlock.getDischarge_hu().float2D2doublePointer();
-      // hv_db = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer();
-      //
+      //TODO copy just the ghost cells on the right
+      for(int i = 0; i < l_nX +2 ; i++){
+        height_db[i] = l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[i*(l_nX+2)+(l_nY+1)];
+        hu_db[i] = l_wavePropgationBlock.getDischarge_hu().float2D2doublePointer()[i*(l_nX+2)+(l_nY+1)];
+        hv_db[i] = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer()[i*(l_nX+2)+(l_nY+1)];
+      }
+
+
+      //  std::cout << "output" << '\n';
+      //  for(int i = 0; i < l_nX +2 ; i++){
+      //     for(int j = 0; j < l_nY + 2; j++){
+      //       std::cout << l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[i*(l_nX+2)+j] << "\t";
+      //   }
+      //   std::cout <<"\n";
+      // }
+
+      // std::cout << "output 2" << '\n';
+      // for(int i = 0; i < l_nX +2 ; i++){
+      //      std::cout << height_db[i*(l_nX+2)+(l_nY+1)] << "\n";
+      //  }
+
       // for(int i = 0; i < l_nY +2; i++){
       //   std::cout << height_db[i] << '\n';
       // }
-      //
-      // interface.writeBlockScalarData(heightId, (l_nY+2), vertexIDs, height_db);
-      // interface.writeBlockScalarData(huId, (l_nY+2), vertexIDs, hu_db);
-      // interface.writeBlockScalarData(hvId, (l_nY+2), vertexIDs, hv_db);
+
+      interface.writeBlockScalarData(heightId, (l_nY+2), vertexIDs, height_db);
+      interface.writeBlockScalarData(huId, (l_nY+2), vertexIDs, hu_db);
+      interface.writeBlockScalarData(hvId, (l_nY+2), vertexIDs, hv_db);
 
       precice_dt = interface.advance(l_maxTimeStepWidth);
       //***************preCICE**************************

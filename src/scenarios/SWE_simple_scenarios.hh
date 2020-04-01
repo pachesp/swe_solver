@@ -83,14 +83,13 @@ class SWE_RadialDamBreakScenario2 : public SWE_RadialDamBreakScenario {
 class SWE_FranciscoScenario : public SWE_RadialDamBreakScenario {
 
   public:
-    virtual BoundaryType getBoundaryType(BoundaryEdge edge) {
-      if (edge == BND_RIGHT){
-        // return CONNECT;
-        return OUTFLOW;
-      } else {
-        return OUTFLOW;
-      }
-     };
+    // virtual BoundaryType getBoundaryType(BoundaryEdge edge) {
+    //   if (edge == BND_RIGHT){
+    //     return CONNECT;
+    //   } else {
+    //     return OUTFLOW;
+    //   }
+    //  };
 
     // virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
     //
