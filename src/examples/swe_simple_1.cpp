@@ -84,10 +84,10 @@ int main( int argc, char** argv ) {
   l_baseName = args.getArgument<std::string>("output-basepath");
 
   // create a simple artificial scenario
-  SWE_RadialDamBreakScenario l_scenario;
+  SWE_FranciscoScenario l_scenario;
 
   //! number of checkpoints for visualization (at each checkpoint in time, an output file is written).
-  int l_numberOfCheckPoints = 10;
+  int l_numberOfCheckPoints = 60;
 
   //! size of a single cell in x- and y-direction
   float l_dX, l_dY;

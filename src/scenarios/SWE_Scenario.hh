@@ -64,7 +64,7 @@ class SWE_Scenario {
     virtual float waterHeightAtRest() { return 10.0f; };
 
     // virtual float endSimulation() { return 0.1f; };
-    virtual float endSimulation() { return 20.f; };
+    virtual float endSimulation() { return 400.f; };
 
 
     virtual BoundaryType getBoundaryType(BoundaryEdge edge) { return WALL; };
@@ -78,7 +78,7 @@ class SWE_Scenario {
     virtual ~SWE_Scenario() {};
 
   protected:
-    float side = 500.f;
+    float side = 2000.f;
 
 };
 
