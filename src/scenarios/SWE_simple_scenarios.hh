@@ -91,19 +91,19 @@ class SWE_FranciscoScenario : public SWE_RadialDamBreakScenario {
     //   }
     //  };
 
-    // virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
-    //
-    //   float a = (x-((side * 0.125) +offsetX));
-    //   a = (x-((side * 0.5) +offsetX));
-    //   float a_0 = (x-((side * 0.875) +offsetX));
-    //   float b = (y-((side * 0.5)+offsetY));
-    //
-    //   bool circ_1 = sqrt(a*a + b*b) < (side * 0.1);
-    //   bool circ_2 = sqrt(a_0*a_0 + b*b) < (side * 0.1);
-    //   circ_2  = false;
-    //
-    //  return ( circ_1 || circ_2 ) ? 15.f: 10.0f;
-    // };
+    virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
+
+      float a = (x-((side * 0.125) +offsetX));
+      // a = (x-((side * 0.5) +offsetX));
+      float a_0 = (x-((side * 0.875) +offsetX));
+      float b = (y-((side * 0.5)+offsetY));
+
+      bool circ_1 = sqrt(a*a + b*b) < (side * 0.1);
+      bool circ_2 = sqrt(a_0*a_0 + b*b) < (side * 0.1);
+      // bool circ_2  = false;
+
+     return ( circ_1 || circ_2 ) ? 15.f: 10.0f;
+    };
 
 };
 

@@ -106,7 +106,6 @@ int main( int argc, char** argv ) {
   l_originX = l_scenario.getBoundaryPos(BND_LEFT);
   l_originY = l_scenario.getBoundaryPos(BND_BOTTOM);
 
-
   //***************preCICE**************************
   // *
   // *
@@ -137,9 +136,9 @@ int main( int argc, char** argv ) {
   // initialize the wave propagation block
   l_wavePropgationBlock.initScenario(l_originX, l_originY, l_scenario);
 
-  double *height_db = new double[(l_nY+2)];
-  double *hu_db = new double[(l_nY+2)];
-  double *hv_db = new double[(l_nY+2)];
+  double *height_db = new double[(l_nX+2)];
+  // double *hu_db = new double[(l_nX+2)];
+  // double *hv_db = new double[(l_nX+2)];
 
   //! time when the simulation ends.
   float l_endSimulation = l_scenario.endSimulation();
@@ -196,98 +195,87 @@ int main( int argc, char** argv ) {
   //***************preCICE**************************
   int c=1;
   while(interface.isCouplingOngoing()){
-  //***************preCICE**************************
+    //***************preCICE**************************
 
-  // loop over checkpoints
-  // for(int c=1; c<=l_numberOfCheckPoints; c++) {
+    // loop over checkpoints
+    // for(int c=1; c<=l_numberOfCheckPoints; c++) {
 
-  //***************preCICE**************************
-  if(l_t < l_checkPoints[c]){
-      interface.readBlockScalarData(heightId, (l_nY + 2), vertexIDs, height_db);
-      // interface.readBlockScalarData(huId, (l_nY + 2), vertexIDs, hu_db);
-      // interface.readBlockScalarData(hvId, (l_nY + 2), vertexIDs, hv_db);
-  //***************preCICE**************************
+    if(l_t < l_checkPoints[c]){
 
-  // for(int i = 0; i < l_nY +2; i++){
-  //   std::cout << height_db[i] << '\n';
-  // }
+      //***************preCICE**************************
+        interface.readBlockScalarData(heightId, (l_nY + 2), vertexIDs, height_db);
+        // interface.readBlockScalarData(huId, (l_nY + 2), vertexIDs, hu_db);
+        // interface.readBlockScalarData(hvId, (l_nY + 2), vertexIDs, hv_db);
 
-    // SWE_Block1D preCICEdata{ doublePointer2floatPointer(height_db, l_nY + 2),
-    //                   doublePointer2floatPointer(hu_db, l_nY + 2),
-    //                   doublePointer2floatPointer(hv_db, l_nY + 2), l_nY + 2 };
+      // SWE_Block1D preCICEdata{ doublePointer2floatPointer(height_db, l_nY + 2),
+      //                   doublePointer2floatPointer(hu_db, l_nY + 2),
+      //                   doublePointer2floatPointer(hv_db, l_nY + 2), l_nY + 2 };
 
-    SWE_Block1D preCICEdata{ doublePointer2floatPointer(height_db, l_nY + 2),
-                      NULL,
-                      NULL, l_nY + 2 };
+        SWE_Block1D preCICEdata{ doublePointer2floatPointer(height_db, l_nY + 2),
+                          NULL,
+                          NULL, l_nY + 2 };
 
+        l_wavePropgationBlock.setBoundaryType(BND_LEFT, l_scenario.getBoundaryType(BND_LEFT), &preCICEdata);
+        //***************preCICE**************************
 
-    l_wavePropgationBlock.setBoundaryType(BND_LEFT, l_scenario.getBoundaryType(BND_LEFT), &preCICEdata);
+        // do time steps until next checkpoint is reached
+        // while( l_t < l_checkPoints[c] ) {
+        // set values in ghost cells:
+        l_wavePropgationBlock.setGhostLayer();
 
-    // do time steps until next checkpoint is reached
-    // while( l_t < l_checkPoints[c] ) {
-      // set values in ghost cells:
-      l_wavePropgationBlock.setGhostLayer();
+        // reset the cpu clock
+        tools::Logger::logger.resetClockToCurrentTime("Cpu");
 
-      // reset the cpu clock
-      tools::Logger::logger.resetClockToCurrentTime("Cpu");
+        // approximate the maximum time step
+        // TODO: This calculation should be replaced by the usage of the wave speeds occuring during the flux computation
+        // Remark: The code is executed on the CPU, therefore a "valid result" depends on the CPU-GPU-synchronization.
+        l_wavePropgationBlock.computeMaxTimestep();
 
-      // approximate the maximum time step
-      // TODO: This calculation should be replaced by the usage of the wave speeds occuring during the flux computation
-      // Remark: The code is executed on the CPU, therefore a "valid result" depends on the CPU-GPU-synchronization.
-//      l_wavePropgationBlock.computeMaxTimestep();
-
-
-      // l_wavePropgationBlock.getWaterHeight() = Float2D::double2Float2D(height, l_nX+2, l_nY+2);
-
-
-      // compute numerical flux on each edge
-      l_wavePropgationBlock.computeNumericalFluxes();
-      // l_wavePropgationBlock.computeDummy();
-      // dummyDouble = l_wavePropgationBlock.getDummy().float2D2doublePointer();
+        // compute numerical flux on each edge
+        l_wavePropgationBlock.computeNumericalFluxes();
+        // l_wavePropgationBlock.computeDummy();
 
         //! maximum allowed time step width.
-      float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
+        float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
 
-      // update the cell values
-      l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
+        // update the cell values
+        l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
 
-      l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
-      //***************preCICE**************************
-      precice_dt = interface.advance(l_maxTimeStepWidth);
-      //***************preCICE**************************
+        l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
+        //***************preCICE**************************
+        precice_dt = interface.advance(l_maxTimeStepWidth);
+        //***************preCICE**************************
 
-      // update the cpu time in the logger
-      tools::Logger::logger.updateTime("Cpu");
+        // update the cpu time in the logger
+        tools::Logger::logger.updateTime("Cpu");
 
-      // update simulation time with time step width.
-      l_t += l_maxTimeStepWidth;
-      l_iterations++;
+        // update simulation time with time step width.
+        l_t += l_maxTimeStepWidth;
+        l_iterations++;
 
-      // print the current simulation time
+        // print the current simulation time
+        progressBar.clear();
+        tools::Logger::logger.printSimulationTime(l_t);
+        progressBar.update(l_t);
+      }
+    else{
+
+      // print current simulation time of the output
       progressBar.clear();
-      tools::Logger::logger.printSimulationTime(l_t);
+      tools::Logger::logger.printOutputTime(l_t);
       progressBar.update(l_t);
+
+      // write output
+      l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
+                              l_wavePropgationBlock.getDischarge_hu(),
+                              l_wavePropgationBlock.getDischarge_hv(),
+                              // l_wavePropgationBlock.getDummy(),
+                              l_t);
+      c++;
     }
-  else{
-
-    // print current simulation time of the output
-    progressBar.clear();
-    tools::Logger::logger.printOutputTime(l_t);
-    progressBar.update(l_t);
-
-    // write output
-    l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
-                            l_wavePropgationBlock.getDischarge_hu(),
-                            l_wavePropgationBlock.getDischarge_hv(),
-                            // l_wavePropgationBlock.getDummy(),
-                            l_t);
-
-    c++;
-  }
   }
 
   interface.finalize();
-
 
   /**
    * Finalize.

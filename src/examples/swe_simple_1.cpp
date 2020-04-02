@@ -133,9 +133,9 @@ int main( int argc, char** argv ) {
   // *
   //***************preCICE**************************
 
-  double *height_db = new double[(l_nY+2)];
-  double *hu_db = new double[(l_nY+2)];
-  double *hv_db = new double[(l_nY+2)];
+  double *height_db = new double[(l_nX+2)];
+  // double *hu_db = new double[(l_nX+2)];
+  // double *hv_db = new double[(l_nX+2)];
 
 
   // initialize the wave propagation block
@@ -195,23 +195,46 @@ int main( int argc, char** argv ) {
   //***************preCICE**************************
   int c=1;
   while(interface.isCouplingOngoing()){
-  //***************preCICE**************************
+    //***************preCICE**************************
 
-  // loop over checkpoints
-  // for(int c=1; c<=l_numberOfCheckPoints; c++) {
+    // loop over checkpoints
+    // for(int c=1; c<=l_numberOfCheckPoints; c++) {
 
-  //***************preCICE**************************
-  if(l_t < l_checkPoints[c]){
-  //***************preCICE**************************
+    //***************preCICE**************************
+    if(l_t < l_checkPoints[c]){
+    //***************preCICE**************************
 
-    // do time steps until next checkpoint is reached
-    // while( l_t < l_checkPoints[c] ) {
-      // set values in ghost cells:
-      // std::cout << "sssssssssssssssssssssss" << '\n';
+    //***************preCICE**************************
+      for(int i = 0; i < l_nX +2 ; i++){
+        height_db[i] = l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[l_nY * (l_nX+2)+(i)];
+        // hu_db[i] = l_wavePropgationBlock.getDischarge_hu().float2D2doublePointer()[l_nY * (l_nX+2)+(i)];
+        // hv_db[i] = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer()[l_nY * (l_nX+2)+(i)];
+      }
 
+     // // Debbugging
+     //  std::cout << "output1" << '\n';
+     //  for(int j = 0; j < l_nX +2 ; j++){
+     //     for(int i = 0; i < l_nY + 2; i++){
+     //       std::cout << l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[i*(l_nX+2)+(j)] << "\t";
+     //   }
+     //   std::cout <<"\n";
+     // }
+     //
+     //  std::cout << "output 2" << '\n';
+     //  for(int i = 0; i < l_nY +2; i++){
+     //    std::cout << height_db[i] << '\n';
+     //  }
+
+      interface.writeBlockScalarData(heightId, (l_nX+2), vertexIDs, height_db);
+      // interface.writeBlockScalarData(huId, (l_nX+2), vertexIDs, hu_db);
+      // interface.writeBlockScalarData(hvId, (l_nX+2), vertexIDs, hv_db);
+    //***************preCICE**************************
+
+      // do time steps until next checkpoint is reached
+      // while( l_t < l_checkPoints[c] ) {
+
+        // set values in ghost cells:
       l_wavePropgationBlock.setGhostLayer();
-      // std::cout << "ccccccccccccccccccccccccc" << '\n';
-
 
       // reset the cpu clock
       tools::Logger::logger.resetClockToCurrentTime("Cpu");
@@ -219,48 +242,21 @@ int main( int argc, char** argv ) {
       // approximate the maximum time step
       // TODO: This calculation should be replaced by the usage of the wave speeds occuring during the flux computation
       // Remark: The code is executed on the CPU, therefore a "valid result" depends on the CPU-GPU-synchronization.
-//      l_wavePropgationBlock.computeMaxTimestep();
+      l_wavePropgationBlock.computeMaxTimestep();
 
       // compute numerical flux on each edge
       l_wavePropgationBlock.computeNumericalFluxes();
-      // std::cout << "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii" << '\n';
 
       //! maximum allowed time step width.
       float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
 
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
-      // std::cout << "sdffffffffffffffffffffffffffffffffffffffffS" << '\n';
+
       // std::cout << "**********l_maxTimeStepWidth = " << l_maxTimeStepWidth   << '\n';
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
-      // std::cout << "**********precicedtn = " << precice_dt   << '\n';
 
       //***************preCICE**************************
-      for(int i = 0; i < l_nX +2 ; i++){
-        height_db[i] = l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[i*(l_nX+2)+(l_nY+1)];
-        // hu_db[i] = l_wavePropgationBlock.getDischarge_hu().float2D2doublePointer()[i*(l_nX+2)+(l_nY+1)];
-        // hv_db[i] = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer()[i*(l_nX+2)+(l_nY+1)];
-      }
-      //  std::cout << "output" << '\n';
-      //  for(int i = 0; i < l_nX +2 ; i++){
-      //     for(int j = 0; j < l_nY + 2; j++){
-      //       std::cout << l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[i*(l_nX+2)+j] << "\t";
-      //   }
-      //   std::cout <<"\n";
-      // }
-
-      // std::cout << "output 2" << '\n';
-      // for(int i = 0; i < l_nX +2 ; i++){
-      //      std::cout << height_db[i*(l_nX+2)+(l_nY+1)] << "\n";
-      //  }
-
-      // for(int i = 0; i < l_nY +2; i++){
-      //   std::cout << height_db[i] << '\n';
-      // }
-      interface.writeBlockScalarData(heightId, (l_nY+2), vertexIDs, height_db);
-      // interface.writeBlockScalarData(huId, (l_nY+2), vertexIDs, hu_db);
-      // interface.writeBlockScalarData(hvId, (l_nY+2), vertexIDs, hv_db);
-
       precice_dt = interface.advance(l_maxTimeStepWidth);
       //***************preCICE**************************
 
@@ -276,22 +272,22 @@ int main( int argc, char** argv ) {
       tools::Logger::logger.printSimulationTime(l_t);
       progressBar.update(l_t);
     }
-  else{
+    else{
 
-    // print current simulation time of the output
-    progressBar.clear();
-    tools::Logger::logger.printOutputTime(l_t);
-    progressBar.update(l_t);
+      // print current simulation time of the output
+      progressBar.clear();
+      tools::Logger::logger.printOutputTime(l_t);
+      progressBar.update(l_t);
 
 
-    // write output
-    l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
-                            l_wavePropgationBlock.getDischarge_hu(),
-                            l_wavePropgationBlock.getDischarge_hv(),
-                            // dummyFloat2D_n,
-                            l_t);
-    c++;
-  }
+      // write output
+      l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
+                              l_wavePropgationBlock.getDischarge_hu(),
+                              l_wavePropgationBlock.getDischarge_hv(),
+                              // dummyFloat2D_n,
+                              l_t);
+      c++;
+    }
   }
 
   interface.finalize();
@@ -311,33 +307,6 @@ int main( int argc, char** argv ) {
 
   // printer iteration counter
   tools::Logger::logger.printIterationsDone(l_iterations);
-
-// For debbuging
-
-// Float2D testFloat2D = Float2D::double2Float2D(test, l_nX+2, l_nY+2);
-//
-// l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
-//                         l_wavePropgationBlock.getDischarge_hu(),
-//                         l_wavePropgationBlock.getDischarge_hv(),
-//                         testFloat2D,
-//                         l_t);
-
-// count = 0;
-// for(int i = 1; i <= l_nX; i++){
-//   for(int j = 1; j <= l_nY; j++) {
-//     std::cout << grid[count++] << "\t";
-//     std::cout << grid[count++] << "\n";
-//   }
-// }
-
-//  std::cout << "output" << '\n';
-//  for(int i = 0; i < l_nX +2 ; i++){
-//     for(int j = 0; j < l_nY + 2; j++){
-//       std::cout << l_wavePropgationBlock.getDummy().elemVector()[i*(l_nX+2)+j] << "\t";
-//   }
-//   std::cout <<"\n";
-// }
-
 
   return 0;
 }
