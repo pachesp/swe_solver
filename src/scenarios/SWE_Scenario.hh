@@ -32,7 +32,7 @@
  * enum type: available types of boundary conditions
  */
 typedef enum BoundaryType {
-   OUTFLOW, WALL, INFLOW, CONNECT, PASSIVE
+   OUTFLOW, WALL, INFLOW, CONNECT, PASSIVE, PRECICE
 } BoundaryType;
 
 /**
@@ -64,7 +64,7 @@ class SWE_Scenario {
     virtual float waterHeightAtRest() { return 10.0f; };
 
     // virtual float endSimulation() { return 0.1f; };
-    virtual float endSimulation() { return 400.f; };
+    virtual float endSimulation() { return 80.f; };
 
 
     virtual BoundaryType getBoundaryType(BoundaryEdge edge) { return WALL; };
@@ -78,7 +78,7 @@ class SWE_Scenario {
     virtual ~SWE_Scenario() {};
 
   protected:
-    float side = 2000.f;
+    float side = 500.f;
 
 };
 

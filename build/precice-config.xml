@@ -48,7 +48,7 @@
     <coupling-scheme:serial-explicit>
         <participants first="Solver1" second="Solver2"/>
         <time-window-size value="1"/>
-        <max-time value="400.0"/>
+        <max-time value="80.0"/>
         <exchange data="height" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
         <exchange data="hu" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
         <exchange data="hv" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>

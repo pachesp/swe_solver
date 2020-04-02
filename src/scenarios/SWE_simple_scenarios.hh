@@ -122,7 +122,7 @@ class SWE_FranciscoScenario_2 : public SWE_Scenario {
 
     virtual BoundaryType getBoundaryType(BoundaryEdge edge) {
       if (edge == BND_LEFT){
-        return CONNECT;
+        return PRECICE;
       } else {
         return OUTFLOW;
       }

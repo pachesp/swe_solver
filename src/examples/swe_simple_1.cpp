@@ -87,7 +87,7 @@ int main( int argc, char** argv ) {
   SWE_FranciscoScenario l_scenario;
 
   //! number of checkpoints for visualization (at each checkpoint in time, an output file is written).
-  int l_numberOfCheckPoints = 60;
+  int l_numberOfCheckPoints = 100;
 
   //! size of a single cell in x- and y-direction
   float l_dX, l_dY;
@@ -236,14 +236,11 @@ int main( int argc, char** argv ) {
       // std::cout << "**********precicedtn = " << precice_dt   << '\n';
 
       //***************preCICE**************************
-      //TODO copy just the ghost cells on the right
       for(int i = 0; i < l_nX +2 ; i++){
         height_db[i] = l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[i*(l_nX+2)+(l_nY+1)];
-        hu_db[i] = l_wavePropgationBlock.getDischarge_hu().float2D2doublePointer()[i*(l_nX+2)+(l_nY+1)];
-        hv_db[i] = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer()[i*(l_nX+2)+(l_nY+1)];
+        // hu_db[i] = l_wavePropgationBlock.getDischarge_hu().float2D2doublePointer()[i*(l_nX+2)+(l_nY+1)];
+        // hv_db[i] = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer()[i*(l_nX+2)+(l_nY+1)];
       }
-
-
       //  std::cout << "output" << '\n';
       //  for(int i = 0; i < l_nX +2 ; i++){
       //     for(int j = 0; j < l_nY + 2; j++){
@@ -260,10 +257,9 @@ int main( int argc, char** argv ) {
       // for(int i = 0; i < l_nY +2; i++){
       //   std::cout << height_db[i] << '\n';
       // }
-
       interface.writeBlockScalarData(heightId, (l_nY+2), vertexIDs, height_db);
-      interface.writeBlockScalarData(huId, (l_nY+2), vertexIDs, hu_db);
-      interface.writeBlockScalarData(hvId, (l_nY+2), vertexIDs, hv_db);
+      // interface.writeBlockScalarData(huId, (l_nY+2), vertexIDs, hu_db);
+      // interface.writeBlockScalarData(hvId, (l_nY+2), vertexIDs, hv_db);
 
       precice_dt = interface.advance(l_maxTimeStepWidth);
       //***************preCICE**************************

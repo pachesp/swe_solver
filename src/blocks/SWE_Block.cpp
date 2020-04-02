@@ -418,7 +418,7 @@ void SWE_Block::setGhostLayer() {
   cout << "Set simple boundary conditions " << endl << flush;
 #endif
   // call to virtual function to set ghost layer values
-  setBoundaryConditions();
+	setBoundaryConditions();
 
   // for a CONNECT boundary, data will be copied from a neighbouring
   // SWE_Block (via a SWE_Block1D proxy object)
@@ -550,7 +550,16 @@ void SWE_Block::setBoundaryConditions() {
       };
       break;
     }
-    case CONNECT:
+    case PRECICE:
+		for(int j=1; j<=ny; j++) {
+			h[0][j] = h[1][j] = neighbour[BND_LEFT]->h[j];
+			hu[0][j] = hu[1][j];
+			hv[0][j] = hv[1][j];
+			// hu[0][j] = hu[1][j] = neighbour[BND_LEFT]->hu[j];
+			// hv[0][j] = hv[1][j] = neighbour[BND_LEFT]->hv[j];
+		};
+		case CONNECT:
+      break;
     case PASSIVE:
       break;
     default:
