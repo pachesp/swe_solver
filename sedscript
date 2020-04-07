@@ -1,0 +1,17 @@
+#!/bin/bash
+
+sed -i 's/height/heightS1/g' build/precice-config.xml
+sed -i 's/hu/huS1/g' build/precice-config.xml
+sed -i 's/hv/hvS1/g' build/precice-config.xml
+
+sed -i 's/heightId/heightS1Id/g' src/examples/swe_simple_*.cpp
+sed -i 's/huId/huS1Id/g' src/examples/swe_simple_*.cpp
+sed -i 's/hvId/hvS1Id/g' src/examples/swe_simple_*.cpp
+
+sed -i 's/height/heightS1/g' src/examples/swe_simple_*.cpp
+sed -i 's/hu/huS1/g' src/examples/swe_simple_*.cpp
+sed -i 's/hv/hvS1/g' src/examples/swe_simple_*.cpp
+
+sed -i 's/height_db/heightS1_db/g' src/examples/swe_simple_*.cpp
+sed -i 's/hu_db/huS1_db/g' src/examples/swe_simple_*.cpp
+sed -i 's/hv_db/hvS1_db/g' src/examples/swe_simple_*.cpp
