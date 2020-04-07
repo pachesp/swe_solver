@@ -551,13 +551,16 @@ void SWE_Block::setBoundaryConditions() {
       break;
     }
     case PRECICE:
-		for(int j=1; j<=ny; j++) {
-			h[0][j] = neighbour[BND_LEFT]->h[j];
-			hu[0][j] = neighbour[BND_LEFT]->hu[j];
-			hv[0][j] = neighbour[BND_LEFT]->hv[j];
-			// hu[0][j] = hu[1][j] = neighbour[BND_LEFT]->hu[j];
-			// hv[0][j] = hv[1][j] = neighbour[BND_LEFT]->hv[j];
-		};
+		{
+			for(int j=1; j<=ny; j++) {
+				h[0][j] = neighbour[BND_LEFT]->h[j];
+				hu[0][j] = neighbour[BND_LEFT]->hu[j];
+				hv[0][j] = neighbour[BND_LEFT]->hv[j];
+				// hu[0][j] = hu[1][j] = neighbour[BND_LEFT]->hu[j];
+				// hv[0][j] = hv[1][j] = neighbour[BND_LEFT]->hv[j];
+			};
+			break;
+		}
 		case CONNECT:
       break;
     case PASSIVE:
@@ -587,6 +590,17 @@ void SWE_Block::setBoundaryConditions() {
       };
       break;
     }
+		case PRECICE:
+		{
+			for(int j=1; j<=ny; j++) {
+				h[nx+1][j] = neighbour[BND_RIGHT]->h[j];
+				hu[nx+1][j] = neighbour[BND_RIGHT]->hu[j];
+				hv[nx+1][j] = neighbour[BND_RIGHT]->hv[j];
+				// hu[0][j] = hu[1][j] = neighbour[BND_LEFT]->hu[j];
+				// hv[0][j] = hv[1][j] = neighbour[BND_LEFT]->hv[j];
+			};
+			break;
+		}
     case CONNECT:
     case PASSIVE:
       break;
@@ -615,6 +629,14 @@ void SWE_Block::setBoundaryConditions() {
       };
       break;
     }
+		case PRECICE:
+		for(int j=1; j<=ny; j++) {
+			h[0][j] = neighbour[BND_LEFT]->h[j];
+			hu[0][j] = neighbour[BND_LEFT]->hu[j];
+			hv[0][j] = neighbour[BND_LEFT]->hv[j];
+			// hu[0][j] = hu[1][j] = neighbour[BND_LEFT]->hu[j];
+			// hv[0][j] = hv[1][j] = neighbour[BND_LEFT]->hv[j];
+		};
     case CONNECT:
     case PASSIVE:
       break;

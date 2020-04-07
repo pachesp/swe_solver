@@ -87,7 +87,8 @@ int main( int argc, char** argv ) {
   SWE_FranciscoScenario_2 l_scenario;
 
   //! number of checkpoints for visualization (at each checkpoint in time, an output file is written).
-  int l_numberOfCheckPoints = 100;
+  // int l_numberOfCheckPoints = 50;
+  int l_numberOfCheckPoints = l_scenario.setNumberCheckpoints();
 
   //! size of a single cell in x- and y-direction
   float l_dX, l_dY;
@@ -117,6 +118,9 @@ int main( int argc, char** argv ) {
   int heightS1Id = interface.getDataID("heightS1", meshID);
   int huS1Id = interface.getDataID("huS1", meshID);
   int hvS1Id = interface.getDataID("hvS1", meshID);
+  int heightS2Id = interface.getDataID("heightS2", meshID);
+  int huS2Id = interface.getDataID("huS2", meshID);
+  int hvS2Id = interface.getDataID("hvS2", meshID);
   int* vertexIDs;
   vertexIDs = new int[(l_nY + 2)];
   double* grid;
@@ -139,6 +143,10 @@ int main( int argc, char** argv ) {
   double *heightS1_db = new double[(l_nX+2)];
   double *huS1_db = new double[(l_nX+2)];
   double *hvS1_db = new double[(l_nX+2)];
+
+  double *heightS2_db = new double[(l_nX+2)];
+  double *huS2_db = new double[(l_nX+2)];
+  double *hvS2_db = new double[(l_nX+2)];
 
   //! time when the simulation ends.
   float l_endSimulation = l_scenario.endSimulation();
@@ -201,6 +209,21 @@ int main( int argc, char** argv ) {
     // for(int c=1; c<=l_numberOfCheckPoints; c++) {
 
     if(l_t < l_checkPoints[c]){
+
+      //***************preCICE**************************
+        for(int i = 0; i < l_nX +2 ; i++){
+          heightS2_db[i] = l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[l_nY * (l_nX+2)+(i)];
+          huS2_db[i] = l_wavePropgationBlock.getDischarge_hu().float2D2doublePointer()[l_nY * (l_nX+2)+(i)];
+          hvS2_db[i] = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer()[l_nY * (l_nX+2)+(i)];
+        }
+
+        interface.writeBlockScalarData(heightS2Id, (l_nX+2), vertexIDs, heightS2_db);
+        interface.writeBlockScalarData(huS2Id, (l_nX+2), vertexIDs, huS2_db);
+        interface.writeBlockScalarData(hvS2Id, (l_nX+2), vertexIDs, hvS2_db);
+      //***************preCICE**************************
+
+
+
 
       //***************preCICE**************************
         interface.readBlockScalarData(heightS1Id, (l_nY + 2), vertexIDs, heightS1_db);
