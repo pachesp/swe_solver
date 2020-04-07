@@ -64,7 +64,7 @@ class SWE_Scenario {
     virtual float waterHeightAtRest() { return 10.0f; };
 
     // virtual float endSimulation() { return 0.1f; };
-    virtual float endSimulation() { return 60.f; };
+    virtual float endSimulation() { return 180.f; };
 
     virtual int setNumberCheckpoints() { return 50; };
 

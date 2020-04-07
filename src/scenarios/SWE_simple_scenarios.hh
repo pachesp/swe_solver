@@ -41,26 +41,21 @@ class SWE_RadialDamBreakScenario : public SWE_Scenario {
 
   public:
 
-    float getBathymetry(float x, float y) {
+    virtual float getBathymetry(float x, float y) {
        return 0.f;
-    };
-
-    float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
-
-       return ( sqrt( (x-((side * 0.5) + offsetX)) * (x-((side * 0.5) + offsetX)) +
-                      (y-((side * 0.5) + offsetY)) * (y-((side * 0.5) + offsetY)) ) < side * 0.1 ) ? 15.f: 10.0f;
     };
 
     virtual BoundaryType getBoundaryType(BoundaryEdge edge) {
        return OUTFLOW;
     };
 
-    /** Get the boundary positions
-     *
-     * @param i_edge which edge
-     * @return value in the corresponding dimension
-     */
-     virtual float getBoundaryPos(BoundaryEdge edge) {
+    virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
+
+       return ( sqrt( (x-((side * 0.5) + offsetX)) * (x-((side * 0.5) + offsetX)) +
+                      (y-((side * 0.5) + offsetY)) * (y-((side * 0.5) + offsetY)) ) < side * 0.1 ) ? 15.f: 10.0f;
+    };
+
+    virtual float getBoundaryPos(BoundaryEdge edge) {
         if (edge==BND_LEFT || edge==BND_BOTTOM)
            return 0.0f;
         else
@@ -85,33 +80,50 @@ class SWE_RadialDamBreakScenario2 : public SWE_RadialDamBreakScenario {
 class SWE_FranciscoScenario : public SWE_RadialDamBreakScenario {
 
   public:
-    virtual BoundaryType getBoundaryType(BoundaryEdge edge) {
-      if (edge == BND_RIGHT){
-        return PRECICE;
-      } else {
-        return OUTFLOW;
-      }
-     };
 
     virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
 
-      float a = (x-((side * 0.125) +offsetX));
-      // a = (x-((side * 0.5) +offsetX));
-      float a_0 = (x-((side * 0.875) +offsetX));
-      float b = (y-((side * 0.5)+offsetY));
+        float a = (x-((side * 0.125) +offsetX));
+        // float a = (x-((side * 0.5) +offsetX));
 
-      bool circ_1 = sqrt(a*a + b*b) < (side * 0.1);
-      bool circ_2 = sqrt(a_0*a_0 + b*b) < (side * 0.1);
-      // bool circ_2  = false;
+        float a_0 = (x-((side * 0.875) +offsetX));
 
-     return ( circ_1 || circ_2 ) ? 15.f: 10.0f;
+        float b = (y-((side * 0.5)+offsetY));
+
+        bool circ_1 = sqrt(a*a + b*b) < (side * 0.1);
+        // bool circ_1  = false;
+
+        bool circ_2 = sqrt(a_0*a_0 + b*b) < (side * 0.1);
+        // bool circ_2  = false;
+
+       return ( circ_1 || circ_2 ) ? 15.f: 10.0f;
+       // return 10.f;
     };
 
 };
 
-class SWE_FranciscoScenario_2 : public SWE_Scenario {
+class SWE_FranciscoScenario_2 : public SWE_RadialDamBreakScenario {
 
   public:
+
+    virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
+
+      // float a = (x-((side * 0.125) +offsetX));
+      // float a = (x-((side * 0.5) +offsetX));
+
+      float a_0 = (x-((side * 0.875) +offsetX));
+
+      float b = (y-((side * 0.5)+offsetY));
+
+      // bool circ_1 = sqrt(a*a + b*b) < (side * 0.1);
+      bool circ_1  = false;
+
+      bool circ_2 = sqrt(a_0*a_0 + b*b) < (side * 0.1);
+      // bool circ_2  = false;
+
+     return ( circ_1 || circ_2 ) ? 15.f: 10.0f;
+     // return 10.f;
+    };
 
     virtual float getBoundaryPos(BoundaryEdge edge) {
        if (edge==BND_LEFT || edge==BND_TOP)
@@ -121,14 +133,6 @@ class SWE_FranciscoScenario_2 : public SWE_Scenario {
        else
        return side * 2;
     };
-
-    virtual BoundaryType getBoundaryType(BoundaryEdge edge) {
-      if (edge == BND_LEFT){
-        return PRECICE;
-      } else {
-        return OUTFLOW;
-      }
-     };
 
 };
 

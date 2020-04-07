@@ -272,10 +272,12 @@ struct SWE_Block1D {
     Float1D h;
     Float1D hu;
     Float1D hv;
+
+    void copyFrom(SWE_Block1D* source, int size);
 };
 
+void deepSWE_Block1DCopy(SWE_Block1D* source, SWE_Block1D* destination, int size);
 
 float* doublePointer2floatPointer(double* doublePointer, int size);
-
 
 #endif

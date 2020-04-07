@@ -133,12 +133,6 @@ int main( int argc, char** argv ) {
   interface.setMeshVertices(meshID, (l_nY + 2) , grid, vertexIDs);
   cout << "Initialize preCICE..." << endl;
   float precice_dt = interface.initialize();
-  // *
-  // *
-  //***************preCICE**************************
-
-  // initialize the wave propagation block
-  l_wavePropgationBlock.initScenario(l_originX, l_originY, l_scenario);
 
   double *heightS1_db = new double[(l_nX+2)];
   double *huS1_db = new double[(l_nX+2)];
@@ -147,6 +141,12 @@ int main( int argc, char** argv ) {
   double *heightS2_db = new double[(l_nX+2)];
   double *huS2_db = new double[(l_nX+2)];
   double *hvS2_db = new double[(l_nX+2)];
+  // *
+  // *
+  //***************preCICE**************************
+
+  // initialize the wave propagation block
+  l_wavePropgationBlock.initScenario(l_originX, l_originY, l_scenario);
 
   //! time when the simulation ends.
   float l_endSimulation = l_scenario.endSimulation();
@@ -159,6 +159,48 @@ int main( int argc, char** argv ) {
   for(int cp = 0; cp <= l_numberOfCheckPoints; cp++) {
      l_checkPoints[cp] = cp*(l_endSimulation/l_numberOfCheckPoints);
   }
+
+  // SWE_Block1D* l_leftInflow  = l_wavePropgationBlock.grabGhostLayer(BND_LEFT);
+
+  //***************preCICE SEND begin**************************
+    // for(int i = 0; i < l_nX +2 ; i++){
+    //   heightS2_db[i] = l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[2 * (l_nX+2)+(i)];
+    //   huS2_db[i] = l_wavePropgationBlock.getDischarge_hu().float2D2doublePointer()[2 * (l_nX+2)+(i)];
+    //   hvS2_db[i] = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer()[2 * (l_nX+2)+(i)];
+    // }
+    //
+    // interface.writeBlockScalarData(heightS2Id, (l_nX+2), vertexIDs, heightS2_db);
+    // interface.writeBlockScalarData(huS2Id, (l_nX+2), vertexIDs, huS2_db);
+    // interface.writeBlockScalarData(hvS2Id, (l_nX+2), vertexIDs, hvS2_db);
+  //***************preCICE SEND end**************************
+
+  // // Debbugging
+  //  std::cout << "output1" << '\n';
+  //  for(int j = 0; j < l_nX +2 ; j++){
+  //     for(int i = 0; i < l_nY + 2; i++){
+  //       std::cout << l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[i*(l_nX+2)+(j)] << "\t";
+  //   }
+  //   std::cout <<"\n";
+  // }
+  //
+  //  std::cout << "output 2" << '\n';
+  //  for(int i = 0; i < l_nY +2; i++){
+  //    std::cout << heightS2_db[i] << '\n';
+  //  }
+
+  // //***************preCICE RCV begin**************************
+  //   interface.readBlockScalarData(heightS1Id, (l_nX + 2), vertexIDs, heightS1_db);
+  //   interface.readBlockScalarData(huS1Id, (l_nX + 2), vertexIDs, huS1_db);
+  //   interface.readBlockScalarData(hvS1Id, (l_nX + 2), vertexIDs, hvS1_db);
+  //
+  //   // Data sent by left neighbour from precice
+  //   SWE_Block1D* leftNeighbourDataPreCICE = new SWE_Block1D{ doublePointer2floatPointer(heightS1_db, l_nX + 2),
+  //                                                           doublePointer2floatPointer(huS1_db, l_nX + 2),
+  //                                                           doublePointer2floatPointer(hvS1_db, l_nX + 2), 1 };
+  //
+  //   deepSWE_Block1DCopy(leftNeighbourDataPreCICE, l_leftInflow, l_nX+2);
+
+    //***************preCICE RCV end**************************
 
   // Init fancy progressbar
   tools::ProgressBar progressBar(l_endSimulation);
@@ -199,55 +241,43 @@ int main( int argc, char** argv ) {
   progressBar.update(l_t);
 
   unsigned int l_iterations = 0;
-
-  //***************preCICE**************************
   int c=1;
+
+  SWE_Block1D* l_leftInflow  = l_wavePropgationBlock.grabGhostLayer(BND_LEFT);
+
   while(interface.isCouplingOngoing()){
-    //***************preCICE**************************
 
     // loop over checkpoints
-    // for(int c=1; c<=l_numberOfCheckPoints; c++) {
-
     if(l_t < l_checkPoints[c]){
 
-      //***************preCICE**************************
+      //***************preCICE SEND begin**************************
         for(int i = 0; i < l_nX +2 ; i++){
-          heightS2_db[i] = l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[l_nY * (l_nX+2)+(i)];
-          huS2_db[i] = l_wavePropgationBlock.getDischarge_hu().float2D2doublePointer()[l_nY * (l_nX+2)+(i)];
-          hvS2_db[i] = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer()[l_nY * (l_nX+2)+(i)];
+          heightS2_db[i] = l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[1 * (l_nX+2)+(i)];
+          huS2_db[i] = l_wavePropgationBlock.getDischarge_hu().float2D2doublePointer()[1 * (l_nX+2)+(i)];
+          hvS2_db[i] = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer()[1 * (l_nX+2)+(i)];
         }
 
         interface.writeBlockScalarData(heightS2Id, (l_nX+2), vertexIDs, heightS2_db);
         interface.writeBlockScalarData(huS2Id, (l_nX+2), vertexIDs, huS2_db);
         interface.writeBlockScalarData(hvS2Id, (l_nX+2), vertexIDs, hvS2_db);
-      //***************preCICE**************************
+      //***************preCICE SEND end**************************
 
-
-
-
-      //***************preCICE**************************
+      //***************preCICE RCV begin**************************
         interface.readBlockScalarData(heightS1Id, (l_nY + 2), vertexIDs, heightS1_db);
         interface.readBlockScalarData(huS1Id, (l_nY + 2), vertexIDs, huS1_db);
         interface.readBlockScalarData(hvS1Id, (l_nY + 2), vertexIDs, hvS1_db);
-        //
-        // SWE_Block1D preCICEdata{ doublePointer2floatPointer(heightS1_db, l_nY + 2),
-        //                   doublePointer2floatPointer(huS1_db, l_nY + 2),
-        //                   NULL, l_nY + 2 };
 
-      SWE_Block1D preCICEdata{ doublePointer2floatPointer(heightS1_db, l_nY + 2),
-                        doublePointer2floatPointer(huS1_db, l_nY + 2),
-                        doublePointer2floatPointer(hvS1_db, l_nY + 2), l_nY + 2 };
+        // Data sent by left neighbour from precice
+        SWE_Block1D* leftNeighbourDataPreCICE = new SWE_Block1D{ doublePointer2floatPointer(heightS1_db, l_nY + 2),
+                                                                doublePointer2floatPointer(huS1_db, l_nY + 2),
+                                                                doublePointer2floatPointer(hvS1_db, l_nY + 2), l_nY + 2 };
 
-        // SWE_Block1D preCICEdata{ doublePointer2floatPointer(heightS1_db, l_nY + 2),
-        //                   NULL,
-        //                   NULL, l_nY + 2 };
+        // deepSWE_Block1DCopy(leftNeighbourDataPreCICE, l_leftInflow, l_nY+2);
+        l_leftInflow->copyFrom(leftNeighbourDataPreCICE, l_nY+2);
 
-        l_wavePropgationBlock.setBoundaryType(BND_LEFT, l_scenario.getBoundaryType(BND_LEFT), &preCICEdata);
-        //***************preCICE**************************
+        //***************preCICE RCV end**************************
 
-        // do time steps until next checkpoint is reached
-        // while( l_t < l_checkPoints[c] ) {
-        // set values in ghost cells:
+            // set values in ghost cells:
         l_wavePropgationBlock.setGhostLayer();
 
         // reset the cpu clock
@@ -269,9 +299,8 @@ int main( int argc, char** argv ) {
         l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
 
         l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
-        //***************preCICE**************************
+
         precice_dt = interface.advance(l_maxTimeStepWidth);
-        //***************preCICE**************************
 
         // update the cpu time in the logger
         tools::Logger::logger.updateTime("Cpu");

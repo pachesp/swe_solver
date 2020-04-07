@@ -534,6 +534,7 @@ void SWE_Block::setBoundaryConditions() {
   switch(boundary[BND_LEFT]) {
     case WALL:
     {
+			assert(false);
       for(int j=1; j<=ny; j++) {
         h[0][j] = h[1][j];
         hu[0][j] = -hu[1][j];
@@ -553,9 +554,12 @@ void SWE_Block::setBoundaryConditions() {
     case PRECICE:
 		{
 			for(int j=1; j<=ny; j++) {
-				h[0][j] = neighbour[BND_LEFT]->h[j];
-				hu[0][j] = neighbour[BND_LEFT]->hu[j];
-				hv[0][j] = neighbour[BND_LEFT]->hv[j];
+			 h[1][j] = neighbour[BND_LEFT]->h[j];
+			 h[0][j] = h[1][j];
+				hu[0][j] = hu[1][j];
+        hv[0][j] = hv[1][j];
+				// hu[0][j] = neighbour[BND_LEFT]->hu[j];
+				// hv[0][j] = neighbour[BND_LEFT]->hv[j];
 				// hu[0][j] = hu[1][j] = neighbour[BND_LEFT]->hu[j];
 				// hv[0][j] = hv[1][j] = neighbour[BND_LEFT]->hv[j];
 			};
@@ -574,6 +578,7 @@ void SWE_Block::setBoundaryConditions() {
   switch(boundary[BND_RIGHT]) {
     case WALL:
     {
+			assert(false);
       for(int j=1; j<=ny; j++) {
         h[nx+1][j] = h[nx][j];
         hu[nx+1][j] = -hu[nx][j];
@@ -592,10 +597,11 @@ void SWE_Block::setBoundaryConditions() {
     }
 		case PRECICE:
 		{
+			assert(false);
 			for(int j=1; j<=ny; j++) {
-				h[nx+1][j] = neighbour[BND_RIGHT]->h[j];
-				hu[nx+1][j] = neighbour[BND_RIGHT]->hu[j];
-				hv[nx+1][j] = neighbour[BND_RIGHT]->hv[j];
+				h[nx+1][j] = h[nx+1][j] = neighbour[BND_RIGHT]->h[j];
+				// hu[nx+1][j] = neighbour[BND_RIGHT]->hu[j];
+				// hv[nx+1][j] = neighbour[BND_RIGHT]->hv[j];
 				// hu[0][j] = hu[1][j] = neighbour[BND_LEFT]->hu[j];
 				// hv[0][j] = hv[1][j] = neighbour[BND_LEFT]->hv[j];
 			};
@@ -613,6 +619,7 @@ void SWE_Block::setBoundaryConditions() {
   switch(boundary[BND_BOTTOM]) {
     case WALL:
     {
+			assert(false);
       for(int i=1; i<=nx; i++) {
         h[i][0] = h[i][1];
         hu[i][0] = hu[i][1];
@@ -630,6 +637,7 @@ void SWE_Block::setBoundaryConditions() {
       break;
     }
 		case PRECICE:
+		assert(false);
 		for(int j=1; j<=ny; j++) {
 			h[0][j] = neighbour[BND_LEFT]->h[j];
 			hu[0][j] = neighbour[BND_LEFT]->hu[j];
@@ -649,6 +657,7 @@ void SWE_Block::setBoundaryConditions() {
   switch(boundary[BND_TOP]) {
     case WALL:
     {
+			assert(false);
       for(int i=1; i<=nx; i++) {
         h[i][ny+1] = h[i][ny];
         hu[i][ny+1] = hu[i][ny];
@@ -666,7 +675,9 @@ void SWE_Block::setBoundaryConditions() {
       break;
     }
     case CONNECT:
+		assert(false);
     case PASSIVE:
+		assert(false);
       break;
     default:
       assert(false);
@@ -802,4 +813,20 @@ float* doublePointer2floatPointer(double* doublePointer, int size){
     floatPointer[i] = (float) doublePointer[i];
   }
   return floatPointer;
+}
+
+void SWE_Block1D::copyFrom(SWE_Block1D* source, int size){
+	for (int i = 0; i < size; i++) {
+		this->h[i] = source->h[i];
+		this->hu[i] = source->hu[i];
+		this->hv[i] = source->hv[i];
+	}
+}
+
+void deepSWE_Block1DCopy(SWE_Block1D* source, SWE_Block1D* destination, int size){
+	for (int i = 0; i < size; i++) {
+		destination->h[i] = source->h[i];
+		destination->hu[i] = source->hu[i];
+		destination->hv[i] = source->hv[i];
+	}
 }
