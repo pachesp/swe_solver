@@ -552,9 +552,9 @@ void SWE_Block::setBoundaryConditions() {
     }
     case PRECICE:
 		for(int j=1; j<=ny; j++) {
-			h[0][j] = h[1][j] = neighbour[BND_LEFT]->h[j];
-			hu[0][j] = hu[1][j];
-			hv[0][j] = hv[1][j];
+			h[0][j] = neighbour[BND_LEFT]->h[j];
+			hu[0][j] = neighbour[BND_LEFT]->hu[j];
+			hv[0][j] = neighbour[BND_LEFT]->hv[j];
 			// hu[0][j] = hu[1][j] = neighbour[BND_LEFT]->hu[j];
 			// hv[0][j] = hv[1][j] = neighbour[BND_LEFT]->hv[j];
 		};

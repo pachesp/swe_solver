@@ -8,29 +8,43 @@
 
   <solver-interface dimensions="2">
 
-    <data:scalar name="height"/>
-    <data:scalar name="hu"/>
-    <data:scalar name="hv"/>
+    <data:scalar name="heightS1"/>
+    <data:scalar name="huS1"/>
+    <data:scalar name="hvS1"/>
+    <data:scalar name="heightS2"/>
+    <data:scalar name="huS2"/>
+    <data:scalar name="hvS2"/>
 
     <mesh name="Solver1_Nodes">
-      <use-data name="height"/>
-      <use-data name="hu"/>
-      <use-data name="hv"/>
+      <use-data name="heightS1"/>
+      <use-data name="huS1"/>
+      <use-data name="hvS1"/>
+      <use-data name="heightS2"/>
+      <use-data name="huS2"/>
+      <use-data name="hvS2"/>
     </mesh>
 
     <mesh name="Solver2_Nodes">
-      <use-data name="height"/>
-      <use-data name="hu"/>
-      <use-data name="hv"/>
+      <use-data name="heightS1"/>
+      <use-data name="huS1"/>
+      <use-data name="hvS1"/>
+      <use-data name="heightS2"/>
+      <use-data name="huS2"/>
+      <use-data name="hvS2"/>
     </mesh>
 
     <participant name="Solver1">
       <!-- Makes the named mesh available to the participant. Mesh is provided by the solver directly. -->
       <use-mesh name="Solver1_Nodes" provide="yes"/>
+      <use-mesh name="Solver2_Nodes" from="Solver2"/>
       <!-- Define input/output of the solver.  -->
-      <write-data name="height" mesh="Solver1_Nodes"/>
-      <write-data name="hu" mesh="Solver1_Nodes"/>
-      <write-data name="hv" mesh="Solver1_Nodes"/>
+      <mapping:nearest-neighbor direction="read" from="Solver2_Nodes" to="Solver1_Nodes" constraint="consistent"/>
+      <write-data name="heightS1" mesh="Solver1_Nodes"/>
+      <write-data name="huS1" mesh="Solver1_Nodes"/>
+      <write-data name="hvS1" mesh="Solver1_Nodes"/>
+      <read-data name="heightS2" mesh="Solver1_Nodes"/>
+      <read-data name="huS2" mesh="Solver1_Nodes"/>
+      <read-data name="hvS2" mesh="Solver1_Nodes"/>
     </participant>
 
     <participant name="Solver2">
@@ -38,9 +52,12 @@
       <use-mesh name="Solver2_Nodes" provide="yes"/>
       <!--<mapping:nearest-neighbor direction="write" from="Fluid_Nodes" to="Structure_Nodes" constraint="consistent" timing="initial"/>-->
       <mapping:nearest-neighbor direction="read" from="Solver1_Nodes" to="Solver2_Nodes" constraint="consistent"/>
-      <read-data  name="height" mesh="Solver2_Nodes"/>
-      <read-data  name="hu" mesh="Solver2_Nodes"/>
-      <read-data  name="hv" mesh="Solver2_Nodes"/>
+      <read-data  name="heightS1" mesh="Solver2_Nodes"/>
+      <read-data  name="huS1" mesh="Solver2_Nodes"/>
+      <read-data  name="hvS1" mesh="Solver2_Nodes"/>
+      <write-data  name="heightS2" mesh="Solver2_Nodes"/>
+      <write-data  name="huS2" mesh="Solver2_Nodes"/>
+      <write-data  name="hvS2" mesh="Solver2_Nodes"/>
     </participant>
 
     <m2n:sockets from="Solver1" to="Solver2"/>
@@ -49,9 +66,12 @@
         <participants first="Solver1" second="Solver2"/>
         <time-window-size value="1"/>
         <max-time value="100.0"/>
-        <exchange data="height" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
-        <exchange data="hu" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
-        <exchange data="hv" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
+        <exchange data="heightS1" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
+        <exchange data="huS1" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
+        <exchange data="hvS1" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
+        <exchange data="heightS2" mesh="Solver2_Nodes" from="Solver2" to="Solver1"/>
+        <exchange data="huS2" mesh="Solver2_Nodes" from="Solver2" to="Solver1"/>
+        <exchange data="hvS2" mesh="Solver2_Nodes" from="Solver2" to="Solver1"/>
       </coupling-scheme:serial-explicit>
 
   </solver-interface>

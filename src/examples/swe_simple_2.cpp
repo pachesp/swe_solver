@@ -114,9 +114,9 @@ int main( int argc, char** argv ) {
   SolverInterface interface(solverName, configFileName, 0, 1);
   int dimensions = interface.getDimensions();
   int meshID = interface.getMeshID("Solver2_Nodes");
-  int heightId = interface.getDataID("height", meshID);
-  int huId = interface.getDataID("hu", meshID);
-  int hvId = interface.getDataID("hv", meshID);
+  int heightS1Id = interface.getDataID("heightS1", meshID);
+  int huS1Id = interface.getDataID("huS1", meshID);
+  int hvS1Id = interface.getDataID("hvS1", meshID);
   int* vertexIDs;
   vertexIDs = new int[(l_nY + 2)];
   double* grid;
@@ -136,9 +136,9 @@ int main( int argc, char** argv ) {
   // initialize the wave propagation block
   l_wavePropgationBlock.initScenario(l_originX, l_originY, l_scenario);
 
-  double *height_db = new double[(l_nX+2)];
-  // double *hu_db = new double[(l_nX+2)];
-  // double *hv_db = new double[(l_nX+2)];
+  double *heightS1_db = new double[(l_nX+2)];
+  double *huS1_db = new double[(l_nX+2)];
+  double *hvS1_db = new double[(l_nX+2)];
 
   //! time when the simulation ends.
   float l_endSimulation = l_scenario.endSimulation();
@@ -203,17 +203,21 @@ int main( int argc, char** argv ) {
     if(l_t < l_checkPoints[c]){
 
       //***************preCICE**************************
-        interface.readBlockScalarData(heightId, (l_nY + 2), vertexIDs, height_db);
-        // interface.readBlockScalarData(huId, (l_nY + 2), vertexIDs, hu_db);
-        // interface.readBlockScalarData(hvId, (l_nY + 2), vertexIDs, hv_db);
+        interface.readBlockScalarData(heightS1Id, (l_nY + 2), vertexIDs, heightS1_db);
+        interface.readBlockScalarData(huS1Id, (l_nY + 2), vertexIDs, huS1_db);
+        interface.readBlockScalarData(hvS1Id, (l_nY + 2), vertexIDs, hvS1_db);
+        //
+        // SWE_Block1D preCICEdata{ doublePointer2floatPointer(heightS1_db, l_nY + 2),
+        //                   doublePointer2floatPointer(huS1_db, l_nY + 2),
+        //                   NULL, l_nY + 2 };
 
-      // SWE_Block1D preCICEdata{ doublePointer2floatPointer(height_db, l_nY + 2),
-      //                   doublePointer2floatPointer(hu_db, l_nY + 2),
-      //                   doublePointer2floatPointer(hv_db, l_nY + 2), l_nY + 2 };
+      SWE_Block1D preCICEdata{ doublePointer2floatPointer(heightS1_db, l_nY + 2),
+                        doublePointer2floatPointer(huS1_db, l_nY + 2),
+                        doublePointer2floatPointer(hvS1_db, l_nY + 2), l_nY + 2 };
 
-        SWE_Block1D preCICEdata{ doublePointer2floatPointer(height_db, l_nY + 2),
-                          NULL,
-                          NULL, l_nY + 2 };
+        // SWE_Block1D preCICEdata{ doublePointer2floatPointer(heightS1_db, l_nY + 2),
+        //                   NULL,
+        //                   NULL, l_nY + 2 };
 
         l_wavePropgationBlock.setBoundaryType(BND_LEFT, l_scenario.getBoundaryType(BND_LEFT), &preCICEdata);
         //***************preCICE**************************

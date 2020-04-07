@@ -114,9 +114,9 @@ int main( int argc, char** argv ) {
   SolverInterface interface(solverName, configFileName, 0, 1);
   int dimensions = interface.getDimensions();
   int meshID = interface.getMeshID("Solver1_Nodes");
-  int heightId = interface.getDataID("height", meshID);
-  int huId = interface.getDataID("hu", meshID);
-  int hvId = interface.getDataID("hv", meshID);
+  int heightS1Id = interface.getDataID("heightS1", meshID);
+  int huS1Id = interface.getDataID("huS1", meshID);
+  int hvS1Id = interface.getDataID("hvS1", meshID);
   int* vertexIDs;
   vertexIDs = new int[(l_nY + 2)];
   double* grid;
@@ -133,9 +133,9 @@ int main( int argc, char** argv ) {
   // *
   //***************preCICE**************************
 
-  double *height_db = new double[(l_nX+2)];
-  // double *hu_db = new double[(l_nX+2)];
-  // double *hv_db = new double[(l_nX+2)];
+  double *heightS1_db = new double[(l_nX+2)];
+  double *huS1_db = new double[(l_nX+2)];
+  double *hvS1_db = new double[(l_nX+2)];
 
 
   // initialize the wave propagation block
@@ -206,29 +206,23 @@ int main( int argc, char** argv ) {
 
     //***************preCICE**************************
       for(int i = 0; i < l_nX +2 ; i++){
-        height_db[i] = l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[l_nY * (l_nX+2)+(i)];
-        // hu_db[i] = l_wavePropgationBlock.getDischarge_hu().float2D2doublePointer()[l_nY * (l_nX+2)+(i)];
-        // hv_db[i] = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer()[l_nY * (l_nX+2)+(i)];
+        heightS1_db[i] = l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[l_nY * (l_nX+2)+(i)];
+        huS1_db[i] = l_wavePropgationBlock.getDischarge_hu().float2D2doublePointer()[l_nY * (l_nX+2)+(i)];
+        hvS1_db[i] = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer()[l_nY * (l_nX+2)+(i)];
       }
 
-     // // Debbugging
-     //  std::cout << "output1" << '\n';
-     //  for(int j = 0; j < l_nX +2 ; j++){
-     //     for(int i = 0; i < l_nY + 2; i++){
-     //       std::cout << l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[i*(l_nX+2)+(j)] << "\t";
-     //   }
-     //   std::cout <<"\n";
-     // }
-     //
-     //  std::cout << "output 2" << '\n';
-     //  for(int i = 0; i < l_nY +2; i++){
-     //    std::cout << height_db[i] << '\n';
-     //  }
-
-      interface.writeBlockScalarData(heightId, (l_nX+2), vertexIDs, height_db);
-      // interface.writeBlockScalarData(huId, (l_nX+2), vertexIDs, hu_db);
-      // interface.writeBlockScalarData(hvId, (l_nX+2), vertexIDs, hv_db);
+      interface.writeBlockScalarData(heightS1Id, (l_nX+2), vertexIDs, heightS1_db);
+      interface.writeBlockScalarData(huS1Id, (l_nX+2), vertexIDs, huS1_db);
+      interface.writeBlockScalarData(hvS1Id, (l_nX+2), vertexIDs, hvS1_db);
     //***************preCICE**************************
+
+
+
+
+
+
+
+
 
       // do time steps until next checkpoint is reached
       // while( l_t < l_checkPoints[c] ) {
@@ -310,3 +304,17 @@ int main( int argc, char** argv ) {
 
   return 0;
 }
+
+// // Debbugging
+//  std::cout << "output1" << '\n';
+//  for(int j = 0; j < l_nX +2 ; j++){
+//     for(int i = 0; i < l_nY + 2; i++){
+//       std::cout << l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[i*(l_nX+2)+(j)] << "\t";
+//   }
+//   std::cout <<"\n";
+// }
+//
+//  std::cout << "output 2" << '\n';
+//  for(int i = 0; i < l_nY +2; i++){
+//    std::cout << heightS1_db[i] << '\n';
+//  }
