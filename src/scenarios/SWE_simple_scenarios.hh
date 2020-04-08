@@ -133,7 +133,6 @@ class SWE_FranciscoScenario_2 : public SWE_RadialDamBreakScenario {
        else
        return side * 2;
     };
-
 };
 
 /**

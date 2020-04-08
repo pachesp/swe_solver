@@ -63,7 +63,7 @@ for i in sourceFiles:
   env.src_files_2.append(env.Object(i))
 
 # SWE_Block and Logger is used in every implementation
-sourceFiles = ['blocks/SWE_Block.cpp', 'tools/Logger.cpp']
+sourceFiles = ['blocks/SWE_Block.cpp', 'tools/Logger.cpp', 'tools/precice.cpp']
 
 # OpenGL CPU-files
 if env['openGL'] == True:
