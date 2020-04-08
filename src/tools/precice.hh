@@ -6,10 +6,10 @@ using namespace precice;
 using namespace precice::constants;
 
 #include "blocks/SWE_WavePropagationBlock.hh"
-
 #include "tools/help.hh"
 
 struct PreciceData{
+
   int  snd_heightId;
   int  snd_huId;
   int  snd_hvId;
@@ -26,12 +26,13 @@ struct PreciceData{
   double* recv_hu_db;
   double* recv_hv_db;
 
-  int * vertexIDs;
+  int* vertexIDs;
 };
+
+void snd_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock, PreciceData *data,
+                 int columNr, int size);
 
 void recv_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock, SWE_Block1D* ghoshtBlock,
                   SWE_Block1D* newBlock, PreciceData *data, int columNr, int size);
-
-void snd_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock, PreciceData *data, int columNr, int size);
 
 #endif // TOOLS_PRECICE_H

@@ -163,15 +163,6 @@ SWE_WavePropagationBlock::computeNumericalFluxes ()
 	}
 }
 
-void SWE_WavePropagationBlock::computeDummy(){
-	for (int i=1; i < nx + 1; i++) {
-		for (int j=1; j < ny + 1; j++) {
-	 	dummy[i][j] += 10;
-		}
-	}
-}
-
-
 /**
  * Updates the unknowns with the already computed net-updates.
  *

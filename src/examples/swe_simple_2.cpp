@@ -67,6 +67,8 @@ int main( int argc, char** argv ) {
 	  return 1;
   case tools::Args::Help:
 	  return 0;
+  default:
+    break;
   }
 
   //! number of grid cells in x- and y-direction.
@@ -131,13 +133,13 @@ int main( int argc, char** argv ) {
   cout << "Initialize preCICE..." << endl;
   float precice_dt = interface.initialize();
 
-  double *heightS1_db = new double[(l_nX+2)];
-  double *huS1_db = new double[(l_nX+2)];
-  double *hvS1_db = new double[(l_nX+2)];
+  double* heightS1_db = new double[l_nX + 2];
+  double* huS1_db = new double[l_nX + 2];
+  double* hvS1_db = new double[l_nX + 2];
 
-  double *heightS2_db = new double[(l_nX+2)];
-  double *huS2_db = new double[(l_nX+2)];
-  double *hvS2_db = new double[(l_nX+2)];
+  double* heightS2_db = new double[l_nX + 2];
+  double* huS2_db = new double[l_nX + 2];
+  double* hvS2_db = new double[l_nX + 2];
 
   PreciceData preciceData{heightS2Id, huS2Id, hvS2Id, heightS2_db, huS2_db, hvS2_db,
             heightS1Id, huS1Id, hvS1Id, heightS1_db, huS1_db, hvS1_db, vertexIDs};
@@ -183,7 +185,6 @@ int main( int argc, char** argv ) {
   l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
                           l_wavePropgationBlock.getDischarge_hu(),
                           l_wavePropgationBlock.getDischarge_hv(),
-                          // l_wavePropgationBlock.getDummy(),
                           (float) 0.);
 
   /**
@@ -202,7 +203,7 @@ int main( int argc, char** argv ) {
   int c=1;
 
   SWE_Block1D* l_leftGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_LEFT);
-  SWE_Block1D* leftNeighbourData;
+  SWE_Block1D* leftNeighbourData{NULL};
 
   while(interface.isCouplingOngoing()){
 
@@ -227,7 +228,6 @@ int main( int argc, char** argv ) {
 
         // compute numerical flux on each edge
         l_wavePropgationBlock.computeNumericalFluxes();
-        // l_wavePropgationBlock.computeDummy();
 
         //! maximum allowed time step width.
         float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
@@ -262,7 +262,6 @@ int main( int argc, char** argv ) {
       l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
                               l_wavePropgationBlock.getDischarge_hu(),
                               l_wavePropgationBlock.getDischarge_hv(),
-                              // l_wavePropgationBlock.getDummy(),
                               l_t);
       c++;
     }

@@ -137,8 +137,6 @@ class SWE_Block {
     /// provides read access to the bathymetry data
     const Float2D& getBathymetry();
 
-    const Float2D& getDummy();
-
     // defining boundary conditions
     /// set type of boundary condition for the specified boundary
     void setBoundaryType(BoundaryEdge edge, BoundaryType boundtype,
@@ -194,6 +192,8 @@ class SWE_Block {
     /// returns #ny, i.e. the grid size in y-direction
     int getNy() { return ny; }
 
+    virtual BoundaryType* getBoundaryType(){return boundary;}
+
   // Konstanten:
     /// static variable that holds the gravity constant (g = 9.81 m/s^2):
     static const float g;
@@ -237,7 +237,6 @@ class SWE_Block {
     Float2D hu; ///< array that holds the x-component of the momentum for each element (water height h multiplied by velocity in x-direction)
     Float2D hv; ///< array that holds the y-component of the momentum for each element (water height h multiplied by velocity in y-direction)
     Float2D b;  ///< array that holds the bathymetry data (sea floor elevation) for each element
-    Float2D dummy;
 
     /// type of boundary conditions at LEFT, RIGHT, TOP, and BOTTOM boundary
     BoundaryType boundary[4];
@@ -273,10 +272,10 @@ struct SWE_Block1D {
     Float1D hu;
     Float1D hv;
 
-    void copyFrom(SWE_Block1D* source, int size);
+    void copyFrom(const SWE_Block1D* source, int size);
 };
 
-void deepSWE_Block1DCopy(SWE_Block1D* source, SWE_Block1D* destination, int size);
+void deepSWE_Block1DCopy(const SWE_Block1D* source, SWE_Block1D* destination, int size);
 
 float* doublePointer2floatPointer(double* doublePointer, int size);
 

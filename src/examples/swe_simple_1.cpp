@@ -68,6 +68,8 @@ int main( int argc, char** argv ) {
 	  return 1;
   case tools::Args::Help:
 	  return 0;
+  default:
+    break;
   }
 
   //! number of grid cells in x- and y-direction.
@@ -132,13 +134,13 @@ int main( int argc, char** argv ) {
   cout << "Initialize preCICE..." << endl;
   float precice_dt = interface.initialize();
 
-  double *heightS1_db = new double[(l_nX+2)];
-  double *huS1_db = new double[(l_nX+2)];
-  double *hvS1_db = new double[(l_nX+2)];
-  //
-  double *heightS2_db = new double[(l_nX+2)];
-  double *huS2_db = new double[(l_nX+2)];
-  double *hvS2_db = new double[(l_nX+2)];
+  double* heightS1_db = new double[l_nX + 2];
+  double* huS1_db = new double[l_nX + 2];
+  double* hvS1_db = new double[l_nX + 2];
+
+  double* heightS2_db = new double[l_nX + 2];
+  double* huS2_db = new double[l_nX + 2];
+  double* hvS2_db = new double[l_nX + 2];
 
   PreciceData preciceData{heightS1Id, huS1Id, hvS1Id, heightS1_db, huS1_db, hvS1_db,
             heightS2Id, huS2Id, hvS2Id, heightS2_db, huS2_db, hvS2_db, vertexIDs};
@@ -183,7 +185,6 @@ int main( int argc, char** argv ) {
   l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
                           l_wavePropgationBlock.getDischarge_hu(),
                           l_wavePropgationBlock.getDischarge_hv(),
-                          // l_wavePropgationBlock.getDummy(),
                           (float) 0.);
 
   /**
@@ -199,7 +200,7 @@ int main( int argc, char** argv ) {
   progressBar.update(l_t);
 
   SWE_Block1D* l_rightGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_RIGHT);
-  SWE_Block1D* rightNeighbourData;
+  SWE_Block1D* rightNeighbourData{NULL};
 
   unsigned int l_iterations = 0;
   int c=1;
@@ -260,7 +261,6 @@ int main( int argc, char** argv ) {
       l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
                               l_wavePropgationBlock.getDischarge_hu(),
                               l_wavePropgationBlock.getDischarge_hv(),
-                              // dummyFloat2D_n,
                               l_t);
       c++;
     }

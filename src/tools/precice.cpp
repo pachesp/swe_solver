@@ -21,9 +21,9 @@ void recv_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock,
   interface.readBlockScalarData(data->recv_hvId, size, data->vertexIDs, data->recv_hv_db);
 
   // Data sent by left neighbour from precice
-  newBlock = new SWE_Block1D{  doublePointer2floatPointer(data->recv_height_db, size),
-                                                doublePointer2floatPointer(data->recv_hu_db, size),
-                                                doublePointer2floatPointer(data->recv_hv_db, size), 1 };
+  newBlock = new SWE_Block1D{ doublePointer2floatPointer(data->recv_height_db, size),
+                              doublePointer2floatPointer(data->recv_hu_db, size),
+                              doublePointer2floatPointer(data->recv_hv_db, size), 1 };
 
   // deepSWE_Block1DCopy(newBlock, ghoshtBlock, l_nY+2);
   ghoshtBlock->copyFrom(newBlock, size );

@@ -55,7 +55,7 @@ SWE_Block::SWE_Block(int l_nx, int l_ny,
 		float l_dx, float l_dy)
 	: nx(l_nx), ny(l_ny),
 	  dx(l_dx), dy(l_dy),
-	  h(nx+2,ny+2), hu(nx+2,ny+2), hv(nx+2,ny+2), b(nx+2,ny+2), dummy(nx+2, ny+2),
+	  h(nx+2,ny+2), hu(nx+2,ny+2), hv(nx+2,ny+2), b(nx+2,ny+2),
 	  // This three are only set here, so eclipse does not complain
 	  maxTimestep(0), offsetX(0), offsetY(0)
 {
@@ -103,7 +103,6 @@ void SWE_Block::initScenario( float _offsetX, float _offsetY,
       h[i][j] =  i_scenario.getWaterHeight(x,y, offsetX, offsetY);
       hu[i][j] = i_scenario.getVeloc_u(x,y) * h[i][j];
       hv[i][j] = i_scenario.getVeloc_v(x,y) * h[i][j];
-			// dummy[i][j] = i_scenario.getDummy(x,y);
     };
 
   // initialize bathymetry
@@ -250,10 +249,6 @@ const Float2D& SWE_Block::getBathymetry() {
   return b;
 };
 
-const Float2D& SWE_Block::getDummy() {
-	// syncDummyBeforeRead();
-	return dummy;
-}
 //==================================================================
 // methods for simulation
 //==================================================================
@@ -315,7 +310,6 @@ void SWE_Block::setBoundaryType( const BoundaryEdge i_edge,
                                  const SWE_Block1D* i_inflow) {
 	boundary[i_edge] = i_boundaryType;
 	neighbour[i_edge] = i_inflow;
-	// std::cout << "neighbour on edge: "<< i_edge << "=" << neighbour[i_edge]  << '\n';
 
 	if (i_boundaryType == OUTFLOW || i_boundaryType == WALL)
 		// One of the boundary was changed to OUTFLOW or WALL
@@ -551,21 +545,7 @@ void SWE_Block::setBoundaryConditions() {
       };
       break;
     }
-    case PRECICE:
-		{
-			for(int j=1; j<=ny; j++) {
-			 h[1][j] = neighbour[BND_LEFT]->h[j];
-			 h[0][j] = h[1][j];
-				hu[0][j] = hu[1][j];
-        hv[0][j] = hv[1][j];
-				// hu[0][j] = neighbour[BND_LEFT]->hu[j];
-				// hv[0][j] = neighbour[BND_LEFT]->hv[j];
-				// hu[0][j] = hu[1][j] = neighbour[BND_LEFT]->hu[j];
-				// hv[0][j] = hv[1][j] = neighbour[BND_LEFT]->hv[j];
-			};
-			break;
-		}
-		case CONNECT:
+    case CONNECT:
       break;
     case PASSIVE:
       break;
@@ -595,19 +575,7 @@ void SWE_Block::setBoundaryConditions() {
       };
       break;
     }
-		case PRECICE:
-		{
-			assert(false);
-			for(int j=1; j<=ny; j++) {
-				h[nx+1][j] = h[nx+1][j] = neighbour[BND_RIGHT]->h[j];
-				// hu[nx+1][j] = neighbour[BND_RIGHT]->hu[j];
-				// hv[nx+1][j] = neighbour[BND_RIGHT]->hv[j];
-				// hu[0][j] = hu[1][j] = neighbour[BND_LEFT]->hu[j];
-				// hv[0][j] = hv[1][j] = neighbour[BND_LEFT]->hv[j];
-			};
-			break;
-		}
-    case CONNECT:
+	  case CONNECT:
     case PASSIVE:
       break;
     default:
@@ -636,16 +604,7 @@ void SWE_Block::setBoundaryConditions() {
       };
       break;
     }
-		case PRECICE:
-		assert(false);
-		for(int j=1; j<=ny; j++) {
-			h[0][j] = neighbour[BND_LEFT]->h[j];
-			hu[0][j] = neighbour[BND_LEFT]->hu[j];
-			hv[0][j] = neighbour[BND_LEFT]->hv[j];
-			// hu[0][j] = hu[1][j] = neighbour[BND_LEFT]->hu[j];
-			// hv[0][j] = hv[1][j] = neighbour[BND_LEFT]->hv[j];
-		};
-    case CONNECT:
+	  case CONNECT:
     case PASSIVE:
       break;
     default:
@@ -806,7 +765,6 @@ void SWE_Block::synchBathymetryBeforeRead() {}
  */
 void SWE_Block::synchCopyLayerBeforeRead() {}
 
-
 float* doublePointer2floatPointer(double* doublePointer, int size){
   float* floatPointer = new float[size];
   for(int i = 0; i< size; i++){
@@ -815,7 +773,7 @@ float* doublePointer2floatPointer(double* doublePointer, int size){
   return floatPointer;
 }
 
-void SWE_Block1D::copyFrom(SWE_Block1D* source, int size){
+void SWE_Block1D::copyFrom(const SWE_Block1D* source, int size){
 	for (int i = 0; i < size; i++) {
 		this->h[i] = source->h[i];
 		this->hu[i] = source->hu[i];
@@ -823,7 +781,7 @@ void SWE_Block1D::copyFrom(SWE_Block1D* source, int size){
 	}
 }
 
-void deepSWE_Block1DCopy(SWE_Block1D* source, SWE_Block1D* destination, int size){
+void deepSWE_Block1DCopy(const SWE_Block1D* source, SWE_Block1D* destination, int size){
 	for (int i = 0; i < size; i++) {
 		destination->h[i] = source->h[i];
 		destination->hu[i] = source->hu[i];
