@@ -8,6 +8,11 @@ void snd_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock, P
     data->snd_hv_db[i] = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer()[columNr * size + i];
   }
 
+   std::cout << "sending column "<< columNr << " to neighbour" << '\n';
+   for(int i = 0; i <size; i++){
+     std::cout << data->snd_height_db[i] << '\n';
+   }
+
   interface.writeBlockScalarData(data->snd_heightId, size, data->vertexIDs, data->snd_height_db);
   interface.writeBlockScalarData(data->snd_huId, size, data->vertexIDs, data->snd_hu_db);
   interface.writeBlockScalarData(data->snd_hvId, size, data->vertexIDs, data->snd_hv_db);
@@ -19,6 +24,11 @@ void recv_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock,
   interface.readBlockScalarData(data->recv_heightId, size, data->vertexIDs, data->recv_height_db);
   interface.readBlockScalarData(data->recv_huId, size, data->vertexIDs, data->recv_hu_db);
   interface.readBlockScalarData(data->recv_hvId, size, data->vertexIDs, data->recv_hv_db);
+
+  std::cout << "receiving column "<< columNr <<" from neighbour" <<'\n';
+  for(int i = 0; i <size; i++){
+    std::cout << data->recv_height_db[i] << '\n';
+  }
 
   // Data sent by left neighbour from precice
   newBlock = new SWE_Block1D{ doublePointer2floatPointer(data->recv_height_db, size),

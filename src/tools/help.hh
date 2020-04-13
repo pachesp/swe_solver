@@ -166,11 +166,11 @@ class Float2D {
   		return (elem + (rows * i));
   	}
 
-	inline float* elemVector() {
+	inline float* elemVector() const {
 		return elem;
 	}
 
-  inline double* doubleElemVector() {
+  inline double* doubleElemVector() const {
     return doublePointer;
   }
 

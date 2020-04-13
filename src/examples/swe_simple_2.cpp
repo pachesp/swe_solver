@@ -142,7 +142,7 @@ int main( int argc, char** argv ) {
   double* hvS2_db = new double[l_nX + 2];
 
   PreciceData preciceData{heightS2Id, huS2Id, hvS2Id, heightS2_db, huS2_db, hvS2_db,
-            heightS1Id, huS1Id, hvS1Id, heightS1_db, huS1_db, hvS1_db, vertexIDs};
+                          heightS1Id, huS1Id, hvS1Id, heightS1_db, huS1_db, hvS1_db, vertexIDs};
   // *
   // *
   //***************preCICE**************************
@@ -160,6 +160,13 @@ int main( int argc, char** argv ) {
   // compute the checkpoints in time
   for(int cp = 0; cp <= l_numberOfCheckPoints; cp++) {
      l_checkPoints[cp] = cp*(l_endSimulation/l_numberOfCheckPoints);
+  }
+
+  SWE_Block1D* l_leftGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_LEFT);
+  SWE_Block1D* leftNeighbourData{NULL};
+
+  for (int i = 0; i < 4; i++) {
+    std::cout <<  l_wavePropgationBlock.getBoundaryType()[i] << '\n';
   }
 
   // Init fancy progressbar
@@ -202,18 +209,36 @@ int main( int argc, char** argv ) {
   unsigned int l_iterations = 0;
   int c=1;
 
-  SWE_Block1D* l_leftGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_LEFT);
-  SWE_Block1D* leftNeighbourData{NULL};
 
   while(interface.isCouplingOngoing()){
 
     // loop over checkpoints
     if(l_t < l_checkPoints[c]){
 
+      // Debbugging
+      std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
+      std::cout << "before receive" << '\n';
+      for(int j = 0; j < l_nX +2 ; j++){
+        for(int i = 0; i < l_nY + 2; i++){
+          std::cout << l_wavePropgationBlock.getWaterHeight().elemVector()[i*(l_nX+2)+(j)] << "\t";
+        }
+        std::cout <<"\n";
+      }
+
         snd_preCICE(interface, l_wavePropgationBlock, &preciceData, 1, l_nX+2);
 
         recv_preCICE(interface, l_wavePropgationBlock, l_leftGhostCells, leftNeighbourData,
-            &preciceData, l_nY, l_nX+2);
+          &preciceData, l_nY, l_nX+2);
+
+      std::cout << "after receive" << '\n';
+      for(int j = 0; j < l_nX +2 ; j++){
+        for(int i = 0; i < l_nY + 2; i++){
+          std::cout << l_wavePropgationBlock.getWaterHeight().elemVector()[i*(l_nX+2)+(j)] << "\t";
+        }
+        std::cout <<"\n";
+      }
+      std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
+
 
         // set values in ghost cells:
         l_wavePropgationBlock.setGhostLayer();

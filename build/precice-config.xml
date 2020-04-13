@@ -37,35 +37,35 @@
       <!-- Makes the named mesh available to the participant. Mesh is provided by the solver directly. -->
       <use-mesh name="Solver1_Nodes" provide="yes"/>
       <use-mesh name="Solver2_Nodes" from="Solver2"/>
-      <!-- Define input/output of the solver.  -->
-      <mapping:nearest-neighbor direction="read" from="Solver2_Nodes" to="Solver1_Nodes" constraint="consistent"/>
       <write-data name="heightS1" mesh="Solver1_Nodes"/>
       <write-data name="huS1" mesh="Solver1_Nodes"/>
       <write-data name="hvS1" mesh="Solver1_Nodes"/>
       <read-data name="heightS2" mesh="Solver1_Nodes"/>
       <read-data name="huS2" mesh="Solver1_Nodes"/>
       <read-data name="hvS2" mesh="Solver1_Nodes"/>
+      <!-- Define input/output of the solver.  -->
+      <mapping:nearest-neighbor direction="read" from="Solver2_Nodes" to="Solver1_Nodes" constraint="consistent" timing="initial"/>
     </participant>
 
     <participant name="Solver2">
-      <use-mesh name="Solver1_Nodes" from="Solver1"/>
       <use-mesh name="Solver2_Nodes" provide="yes"/>
-      <!--<mapping:nearest-neighbor direction="write" from="Fluid_Nodes" to="Structure_Nodes" constraint="consistent" timing="initial"/>-->
-      <mapping:nearest-neighbor direction="read" from="Solver1_Nodes" to="Solver2_Nodes" constraint="consistent"/>
-      <read-data  name="heightS1" mesh="Solver2_Nodes"/>
-      <read-data  name="huS1" mesh="Solver2_Nodes"/>
-      <read-data  name="hvS1" mesh="Solver2_Nodes"/>
+      <use-mesh name="Solver1_Nodes" from="Solver1"/>
       <write-data  name="heightS2" mesh="Solver2_Nodes"/>
       <write-data  name="huS2" mesh="Solver2_Nodes"/>
       <write-data  name="hvS2" mesh="Solver2_Nodes"/>
+      <read-data  name="heightS1" mesh="Solver2_Nodes"/>
+      <read-data  name="huS1" mesh="Solver2_Nodes"/>
+      <read-data  name="hvS1" mesh="Solver2_Nodes"/>
+      <!--<mapping:nearest-neighbor direction="write" from="Fluid_Nodes" to="Structure_Nodes" constraint="consistent" timing="initial"/>-->
+      <mapping:nearest-neighbor direction="read" from="Solver1_Nodes" to="Solver2_Nodes" constraint="consistent" timing="initial"/>
     </participant>
 
-    <m2n:sockets from="Solver1" to="Solver2"/>
+    <m2n:sockets from="Solver1" to="Solver2" network="lo"/>
 
     <coupling-scheme:serial-explicit>
         <participants first="Solver1" second="Solver2"/>
         <time-window-size value="2"/>
-        <max-time value="180.0"/>
+        <max-time value="20.0"/>
         <exchange data="heightS1" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
         <exchange data="huS1" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
         <exchange data="hvS1" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
