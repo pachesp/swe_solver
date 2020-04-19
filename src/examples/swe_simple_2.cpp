@@ -44,6 +44,8 @@
 using namespace precice;
 using namespace precice::constants;
 
+#define deb
+
 #include "tools/precice.hh"
 /**
  * Main program for the simulation on a single SWE_WavePropagationBlock.
@@ -165,6 +167,7 @@ int main( int argc, char** argv ) {
   SWE_Block1D* l_leftGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_LEFT);
   SWE_Block1D* leftNeighbourData{NULL};
 
+// Debbug for seeing bounday type
   for (int i = 0; i < 4; i++) {
     std::cout <<  l_wavePropgationBlock.getBoundaryType()[i] << '\n';
   }
@@ -209,36 +212,37 @@ int main( int argc, char** argv ) {
   unsigned int l_iterations = 0;
   int c=1;
 
+  if (interface.isActionRequired(actionWriteInitialData())) {
+    std::cout << "solver2 action write initial data" << '\n';
+    write_preCICE(interface, l_wavePropgationBlock, &preciceData, 1, l_nX+2);
+    interface.markActionFulfilled(actionWriteInitialData());
+  }
+
+  interface.initializeData();
+
+  if (interface.isReadDataAvailable()) {
+    std::cout << " Solver2 Read data Available outside loop" << '\n';
+    read_preCICE(interface, l_wavePropgationBlock, l_leftGhostCells, leftNeighbourData, &preciceData, l_nY, l_nX+2);
+  }
 
   while(interface.isCouplingOngoing()){
 
     // loop over checkpoints
     if(l_t < l_checkPoints[c]){
+      // read_preCICE(interface, l_wavePropgationBlock, l_leftGhostCells, leftNeighbourData, &preciceData, l_nY, l_nX+2);
+
 
       // Debbugging
+      #ifdef deb
       std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
-      std::cout << "before receive" << '\n';
+      std::cout << "starting loop with this data " << l_iterations << '\n';
       for(int j = 0; j < l_nX +2 ; j++){
         for(int i = 0; i < l_nY + 2; i++){
           std::cout << l_wavePropgationBlock.getWaterHeight().elemVector()[i*(l_nX+2)+(j)] << "\t";
         }
         std::cout <<"\n";
       }
-
-        snd_preCICE(interface, l_wavePropgationBlock, &preciceData, 1, l_nX+2);
-
-        recv_preCICE(interface, l_wavePropgationBlock, l_leftGhostCells, leftNeighbourData,
-          &preciceData, l_nY, l_nX+2);
-
-      std::cout << "after receive" << '\n';
-      for(int j = 0; j < l_nX +2 ; j++){
-        for(int i = 0; i < l_nY + 2; i++){
-          std::cout << l_wavePropgationBlock.getWaterHeight().elemVector()[i*(l_nX+2)+(j)] << "\t";
-        }
-        std::cout <<"\n";
-      }
-      std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
-
+      #endif
 
         // set values in ghost cells:
         l_wavePropgationBlock.setGhostLayer();
@@ -260,9 +264,39 @@ int main( int argc, char** argv ) {
         // update the cell values
         l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
 
+        // Debbugging
+        #ifdef deb
+        std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
+        std::cout << "after updating values. This will be send. Iteration: " << l_iterations << '\n';
+        for(int j = 0; j < l_nX +2 ; j++){
+          for(int i = 0; i < l_nY + 2; i++){
+            std::cout << l_wavePropgationBlock.getWaterHeight().elemVector()[i*(l_nX+2)+(j)] << "\t";
+          }
+          std::cout <<"\n";
+        }
+        #endif
+
+        write_preCICE(interface, l_wavePropgationBlock, &preciceData, 1, l_nX+2);
+
+
         l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
 
         precice_dt = interface.advance(l_maxTimeStepWidth);
+
+        read_preCICE(interface, l_wavePropgationBlock, l_leftGhostCells, leftNeighbourData,
+          &preciceData, l_nY, l_nX+2);
+
+          // Debugging
+        #ifdef deb
+        std::cout << "Received this data. Iteration:  " << l_iterations << '\n';
+        for(int j = 0; j < l_nX +2 ; j++){
+          for(int i = 0; i < l_nY + 2; i++){
+            std::cout << l_wavePropgationBlock.getWaterHeight().elemVector()[i*(l_nX+2)+(j)] << "\t";
+          }
+          std::cout <<"\n";
+        }
+        std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
+        #endif
 
         // update the cpu time in the logger
         tools::Logger::logger.updateTime("Cpu");

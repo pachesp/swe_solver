@@ -88,14 +88,21 @@ class SWE_FranciscoScenario : public SWE_RadialDamBreakScenario {
 
         float b = (y-((side * 0.5)+offsetY));
 
-        bool circ_1 = sqrt(a*a + b*b) < (side * 0.1);
-        // bool circ_1  = false;
+        // bool circ_1 = sqrt(a*a + b*b) < (side * 0.1);
+        bool circ_1  = false;
 
         bool circ_2 = sqrt(a_0*a_0 + b*b) < (side * 0.1);
         // bool circ_2  = false;
 
        return ( circ_1 || circ_2 ) ? 15.f: 10.0f;
-       // return 10.f;
+
+        // if(circ_1)
+        //   return 15.f;
+        // else if (circ_2)
+        //   return 25.f;
+        // else
+        //   return 10.f;
+
     };
 
 };
@@ -116,10 +123,10 @@ class SWE_FranciscoScenario_2 : public SWE_RadialDamBreakScenario {
       bool circ_1 = sqrt(a*a + b*b) < (side * 0.1);
       // bool circ_1  = false;
 
-      bool circ_2 = sqrt(a_0*a_0 + b*b) < (side * 0.1);
-      // bool circ_2  = false;
+      // bool circ_2 = sqrt(a_0*a_0 + b*b) < (side * 0.1);
+      bool circ_2  = false;
 
-     return ( circ_1 || circ_2 ) ? 20.f: 10.0f;
+     return ( circ_1 || circ_2 ) ? 25.f: 10.0f;
      // return 10.f;
     };
 

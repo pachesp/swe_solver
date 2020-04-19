@@ -39,6 +39,9 @@
 #include "tools/Logger.hh"
 #include "tools/ProgressBar.hh"
 
+#define deb
+
+
 //precice
 #include "precice/SolverInterface.hpp"
 using namespace precice;
@@ -166,6 +169,7 @@ int main( int argc, char** argv ) {
   SWE_Block1D* l_rightGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_RIGHT);
   SWE_Block1D* rightNeighbourData{NULL};
 
+// Debbug for bounday type
   for (int i = 0; i < 4; i++) {
     std::cout << l_wavePropgationBlock.getBoundaryType()[i] << '\n';
   }
@@ -206,37 +210,36 @@ int main( int argc, char** argv ) {
   float l_t = 0.0;
   progressBar.update(l_t);
 
+  interface.initializeData();
+  // write_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, l_nX+2);
+
+
+  if (interface.isReadDataAvailable()) {
+    std::cout << "Solver1 Read Data Available" << '\n';
+    read_preCICE(interface, l_wavePropgationBlock, l_rightGhostCells, rightNeighbourData, &preciceData, 1 , l_nX+2);
+  }
+
   unsigned int l_iterations = 0;
   int c=1;
+
   while(interface.isCouplingOngoing()){
 
     // loop over checkpoints
     if(l_t < l_checkPoints[c]){
 
-
       // Debbugging
+      #ifdef deb
       std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
-      std::cout << "before receive" << '\n';
+      std::cout << "starting loop with this data " << l_iterations << '\n';
       for(int j = 0; j < l_nX +2 ; j++){
         for(int i = 0; i < l_nY + 2; i++){
           std::cout << l_wavePropgationBlock.getWaterHeight().elemVector()[i*(l_nX+2)+(j)] << "\t";
         }
         std::cout <<"\n";
       }
+      #endif
 
-      snd_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, l_nX+2);
-
-      recv_preCICE(interface, l_wavePropgationBlock, l_rightGhostCells, rightNeighbourData,
-          &preciceData, 1 , l_nX+2);
-
-      std::cout << "after receive" << '\n';
-      for(int j = 0; j < l_nX +2 ; j++){
-        for(int i = 0; i < l_nY + 2; i++){
-          std::cout << l_wavePropgationBlock.getWaterHeight().elemVector()[i*(l_nX+2)+(j)] << "\t";
-        }
-        std::cout <<"\n";
-      }
-      std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
+      write_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, l_nX+2);
 
 
       // set values in ghost cells:
@@ -259,9 +262,41 @@ int main( int argc, char** argv ) {
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
 
+
+      // Debbugging
+      #ifdef deb
+      std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
+      std::cout << "after updating values. This will be send. Iteration: " << l_iterations << '\n';
+      for(int j = 0; j < l_nX +2 ; j++){
+        for(int i = 0; i < l_nY + 2; i++){
+          std::cout << l_wavePropgationBlock.getWaterHeight().elemVector()[i*(l_nX+2)+(j)] << "\t";
+        }
+        std::cout <<"\n";
+      }
+      #endif
+
+      // write_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, l_nX+2);
+
+
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
 
+
       precice_dt = interface.advance(l_maxTimeStepWidth);
+
+      read_preCICE(interface, l_wavePropgationBlock, l_rightGhostCells, rightNeighbourData,
+          &preciceData, 1 , l_nX+2);
+
+      //Debbuging
+      #ifdef deb
+      std::cout << "Received this data. Iteration:  " << l_iterations << '\n';
+      for(int j = 0; j < l_nX +2 ; j++){
+        for(int i = 0; i < l_nY + 2; i++){
+          std::cout << l_wavePropgationBlock.getWaterHeight().elemVector()[i*(l_nX+2)+(j)] << "\t";
+        }
+        std::cout <<"\n";
+      }
+      std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
+      #endif
 
       // update the cpu time in the logger
       tools::Logger::logger.updateTime("Cpu");

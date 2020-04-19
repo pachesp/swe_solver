@@ -29,10 +29,10 @@ struct PreciceData{
   int* vertexIDs;
 };
 
-void snd_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock, PreciceData *data,
+void write_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock, PreciceData *data,
                  int columNr, int size);
 
-void recv_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock, SWE_Block1D* ghoshtBlock,
+void read_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock, SWE_Block1D* ghoshtBlock,
                   SWE_Block1D* newBlock, PreciceData *data, int columNr, int size);
 
 #endif // TOOLS_PRECICE_H
