@@ -2,7 +2,6 @@
 
 void write_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock, PreciceData *data, int columNr, int size){
 
-  // if (interface.isActionRequired(actionWriteInitialData())) {
 
     for(int i = 0; i < size ; i++){
       data->snd_height_db[i] = l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[columNr * size + i];
@@ -21,6 +20,36 @@ void write_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock,
 
   //   interface.markActionFulfilled(actionWriteInitialData());
   // }
+
+}
+
+
+void storeData_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock, PreciceData *data, int columNr, int size){
+
+    for(int i = 0; i < size ; i++){
+      data->snd_height_db[i] = l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[columNr * size + i];
+      data->snd_hu_db[i] = l_wavePropgationBlock.getDischarge_hu().float2D2doublePointer()[columNr * size + i];
+      data->snd_hv_db[i] = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer()[columNr * size + i];
+    }
+
+    std::cout << "sending column "<< columNr << " to neighbour" << '\n';
+    for(int i = 0; i <size; i++){
+      std::cout << data->snd_height_db[i] << '\n';
+    }
+
+}
+
+void writeData_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock, PreciceData *data, int columNr, int size){
+
+    std::cout << "sending column Corrobore "<< columNr << " to neighbour" << '\n';
+    for(int i = 0; i <size; i++){
+      std::cout << data->snd_height_db[i] << '\n';
+    }
+
+    interface.writeBlockScalarData(data->snd_heightId, size, data->vertexIDs, data->snd_height_db);
+    interface.writeBlockScalarData(data->snd_huId, size, data->vertexIDs, data->snd_hu_db);
+    interface.writeBlockScalarData(data->snd_hvId, size, data->vertexIDs, data->snd_hv_db);
+
 
 }
 

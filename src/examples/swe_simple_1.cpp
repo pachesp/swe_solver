@@ -39,8 +39,7 @@
 #include "tools/Logger.hh"
 #include "tools/ProgressBar.hh"
 
-#define deb
-
+// #define deb
 
 //precice
 #include "precice/SolverInterface.hpp"
@@ -231,13 +230,16 @@ int main( int argc, char** argv ) {
       #ifdef deb
       std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
       std::cout << "starting loop with this data " << l_iterations << '\n';
-      for(int j = 0; j < l_nX +2 ; j++){
-        for(int i = 0; i < l_nY + 2; i++){
+      for(int j = 0 ; j < l_nY +2 ; j++){
+        for(int i = l_nX +1 - 10; i < l_nX + 2; i++){
           std::cout << l_wavePropgationBlock.getWaterHeight().elemVector()[i*(l_nX+2)+(j)] << "\t";
         }
         std::cout <<"\n";
       }
       #endif
+
+
+      // storeData_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, l_nX+2);
 
       write_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, l_nX+2);
 
@@ -257,7 +259,8 @@ int main( int argc, char** argv ) {
       l_wavePropgationBlock.computeNumericalFluxes();
 
       //! maximum allowed time step width.
-      float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
+      // float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
+      float l_maxTimeStepWidth = 0.125;
 
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
@@ -267,8 +270,8 @@ int main( int argc, char** argv ) {
       #ifdef deb
       std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
       std::cout << "after updating values. This will be send. Iteration: " << l_iterations << '\n';
-      for(int j = 0; j < l_nX +2 ; j++){
-        for(int i = 0; i < l_nY + 2; i++){
+      for(int j = 0 ; j < l_nY +2 ; j++){
+        for(int i = l_nX +1 - 10; i < l_nX + 2; i++){
           std::cout << l_wavePropgationBlock.getWaterHeight().elemVector()[i*(l_nX+2)+(j)] << "\t";
         }
         std::cout <<"\n";
@@ -283,14 +286,15 @@ int main( int argc, char** argv ) {
 
       precice_dt = interface.advance(l_maxTimeStepWidth);
 
+      std::cout << "l_maxTimeStepWidth is " << l_maxTimeStepWidth << '\n';
       read_preCICE(interface, l_wavePropgationBlock, l_rightGhostCells, rightNeighbourData,
           &preciceData, 1 , l_nX+2);
 
       //Debbuging
       #ifdef deb
       std::cout << "Received this data. Iteration:  " << l_iterations << '\n';
-      for(int j = 0; j < l_nX +2 ; j++){
-        for(int i = 0; i < l_nY + 2; i++){
+      for(int j = 0 ; j < l_nY +2 ; j++){
+        for(int i = l_nX +1 - 10; i < l_nX + 2; i++){
           std::cout << l_wavePropgationBlock.getWaterHeight().elemVector()[i*(l_nX+2)+(j)] << "\t";
         }
         std::cout <<"\n";

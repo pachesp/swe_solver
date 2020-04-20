@@ -44,7 +44,7 @@
 using namespace precice;
 using namespace precice::constants;
 
-#define deb
+// #define deb
 
 #include "tools/precice.hh"
 /**
@@ -221,6 +221,7 @@ int main( int argc, char** argv ) {
   interface.initializeData();
 
   if (interface.isReadDataAvailable()) {
+    std::cout << "precicedt = " << precice_dt <<'\n';
     std::cout << " Solver2 Read data Available outside loop" << '\n';
     read_preCICE(interface, l_wavePropgationBlock, l_leftGhostCells, leftNeighbourData, &preciceData, l_nY, l_nX+2);
   }
@@ -236,8 +237,8 @@ int main( int argc, char** argv ) {
       #ifdef deb
       std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
       std::cout << "starting loop with this data " << l_iterations << '\n';
-      for(int j = 0; j < l_nX +2 ; j++){
-        for(int i = 0; i < l_nY + 2; i++){
+      for(int j = 0; j < l_nY + 2 ; j++){
+        for(int i = 0; i < 11; i++){
           std::cout << l_wavePropgationBlock.getWaterHeight().elemVector()[i*(l_nX+2)+(j)] << "\t";
         }
         std::cout <<"\n";
@@ -259,7 +260,9 @@ int main( int argc, char** argv ) {
         l_wavePropgationBlock.computeNumericalFluxes();
 
         //! maximum allowed time step width.
-        float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
+        // float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
+        float l_maxTimeStepWidth = 0.125;
+
 
         // update the cell values
         l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
@@ -268,8 +271,8 @@ int main( int argc, char** argv ) {
         #ifdef deb
         std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
         std::cout << "after updating values. This will be send. Iteration: " << l_iterations << '\n';
-        for(int j = 0; j < l_nX +2 ; j++){
-          for(int i = 0; i < l_nY + 2; i++){
+        for(int j = 0; j < l_nY + 2 ; j++){
+          for(int i = 0; i < 11; i++){
             std::cout << l_wavePropgationBlock.getWaterHeight().elemVector()[i*(l_nX+2)+(j)] << "\t";
           }
           std::cout <<"\n";
@@ -281,6 +284,8 @@ int main( int argc, char** argv ) {
 
         l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
 
+
+        std::cout << "l_maxTimeStepWidth is " << l_maxTimeStepWidth << '\n';
         precice_dt = interface.advance(l_maxTimeStepWidth);
 
         read_preCICE(interface, l_wavePropgationBlock, l_leftGhostCells, leftNeighbourData,
@@ -289,8 +294,8 @@ int main( int argc, char** argv ) {
           // Debugging
         #ifdef deb
         std::cout << "Received this data. Iteration:  " << l_iterations << '\n';
-        for(int j = 0; j < l_nX +2 ; j++){
-          for(int i = 0; i < l_nY + 2; i++){
+        for(int j = 0; j < l_nY + 2 ; j++){
+          for(int i = 0; i < 11; i++){
             std::cout << l_wavePropgationBlock.getWaterHeight().elemVector()[i*(l_nX+2)+(j)] << "\t";
           }
           std::cout <<"\n";

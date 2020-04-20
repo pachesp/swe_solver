@@ -64,7 +64,7 @@
     <coupling-scheme:serial-explicit>
     <!-- <coupling-scheme:serial-implicit> -->
         <participants first="Solver1" second="Solver2"/>
-        <time-window-size value="2"/>
+        <time-window-size value="0.125"/>
         <max-time value="20.0"/>
         <!-- <max-iterations value="40"/> -->
         <exchange data="heightS1" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>

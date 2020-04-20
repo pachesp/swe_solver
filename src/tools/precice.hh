@@ -35,4 +35,10 @@ void write_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock,
 void read_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock, SWE_Block1D* ghoshtBlock,
                   SWE_Block1D* newBlock, PreciceData *data, int columNr, int size);
 
+void storeData_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock, PreciceData *data,
+                     int columNr, int size);
+
+void writeData_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock, PreciceData *data,
+                int columNr, int size);
+
 #endif // TOOLS_PRECICE_H
