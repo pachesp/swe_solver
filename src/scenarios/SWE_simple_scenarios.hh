@@ -126,7 +126,7 @@ class SWE_FranciscoScenario_2 : public SWE_RadialDamBreakScenario {
       // bool circ_2 = sqrt(a_0*a_0 + b*b) < (side * 0.1);
       bool circ_2  = false;
 
-     return ( circ_1 || circ_2 ) ? 15.f: 10.0f;
+     return ( circ_1 || circ_2 ) ? 25.f: 10.0f;
      // return 10.f;
     };
 

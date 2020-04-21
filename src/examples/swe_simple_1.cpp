@@ -260,7 +260,7 @@ int main( int argc, char** argv ) {
 
       //! maximum allowed time step width.
       // float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
-      float l_maxTimeStepWidth = 0.125;
+      float l_maxTimeStepWidth = 0.25;
 
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
