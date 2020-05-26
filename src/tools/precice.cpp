@@ -1,12 +1,12 @@
 #include "tools/precice.hh"
 
-void write_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock, PreciceData *data, int columNr, int size){
+void write_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data, int columNr, int size){
 
 
     for(int i = 0; i < size ; i++){
-      data->snd_height_db[i] = l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[columNr * size + i];
-      data->snd_hu_db[i] = l_wavePropgationBlock.getDischarge_hu().float2D2doublePointer()[columNr * size + i];
-      data->snd_hv_db[i] = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer()[columNr * size + i];
+      data->snd_height_db[i] = wavePropagationBlock.getWaterHeight().float2D2doublePointer()[columNr * size + i];
+      data->snd_hu_db[i] = wavePropagationBlock.getDischarge_hu().float2D2doublePointer()[columNr * size + i];
+      data->snd_hv_db[i] = wavePropagationBlock.getDischarge_hv().float2D2doublePointer()[columNr * size + i];
     }
 
      // std::cout << "sending column "<< columNr << " to neighbour" << '\n';
@@ -24,12 +24,12 @@ void write_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock,
 }
 
 
-void storeData_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock, PreciceData *data, int columNr, int size){
+void storeData_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data, int columNr, int size){
 
     for(int i = 0; i < size ; i++){
-      data->snd_height_db[i] = l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[columNr * size + i];
-      data->snd_hu_db[i] = l_wavePropgationBlock.getDischarge_hu().float2D2doublePointer()[columNr * size + i];
-      data->snd_hv_db[i] = l_wavePropgationBlock.getDischarge_hv().float2D2doublePointer()[columNr * size + i];
+      data->snd_height_db[i] = wavePropagationBlock.getWaterHeight().float2D2doublePointer()[columNr * size + i];
+      data->snd_hu_db[i] = wavePropagationBlock.getDischarge_hu().float2D2doublePointer()[columNr * size + i];
+      data->snd_hv_db[i] = wavePropagationBlock.getDischarge_hv().float2D2doublePointer()[columNr * size + i];
     }
 
     std::cout << "sending column "<< columNr << " to neighbour" << '\n';
@@ -39,7 +39,7 @@ void storeData_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBl
 
 }
 
-void writeData_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock, PreciceData *data, int columNr, int size){
+void writeData_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data, int columNr, int size){
 
     std::cout << "sending column Corrobore "<< columNr << " to neighbour" << '\n';
     for(int i = 0; i <size; i++){
@@ -53,7 +53,7 @@ void writeData_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBl
 
 }
 
-void read_preCICE(SolverInterface &interface, SWE_Block &l_wavePropgationBlock,
+void read_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock,
                   SWE_Block1D* ghoshtBlock, SWE_Block1D* newBlock, PreciceData *data, int columNr, int size){
 
   // if (interface.isReadDataAvailable()) {
