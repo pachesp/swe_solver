@@ -34,18 +34,18 @@ struct PreciceData{
 };
 
 void write_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
-                 int columNr, int size);
+                  int size, int columNr);
 
 void read_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, SWE_Block1D* ghoshtBlock,
-                  PreciceData *data, int columNr, int size);
+                  PreciceData *data, int size, int columNr = 0);
 
-void storeData_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
-                     int columNr, int size);
+void writeCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float time, float &time_CP, int size, int columNr);
 
-void writeData_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
-                int columNr, int size);
+void restoreCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float &time, float time_CP, int size, int columNr);
 
-void writeCheckpoint(PreciceData *data, int size, float time, float &time_CP, SWE_Block &wavePropagationBlock,  int columNr);
-
-void restoreCheckpoint(SWE_Block &wavePropagationBlock, PreciceData *data, float &time, float time_CP, int columNr, int size);
+// void storeData_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+//                      int columNr, int size);
+//
+// void writeData_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+//                 int columNr, int size);
 #endif // TOOLS_PRECICE_H

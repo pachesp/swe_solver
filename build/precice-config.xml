@@ -61,34 +61,35 @@
 
     <m2n:sockets from="Solver1" to="Solver2" network="lo"/>
 
-    <coupling-scheme:serial-explicit>
-    <!-- <coupling-scheme:serial-implicit> -->
+    <!-- <coupling-scheme:serial-explicit> -->
+
+    <coupling-scheme:serial-implicit>
         <participants first="Solver1" second="Solver2"/>
-        <time-window-size value="0.25"/>
-        <max-time value="150.0"/>
-        <!-- <max-iterations value="40"/> -->
+        <time-window-size value="0.125"/>
+        <max-time value="70.0"/>
+
+        <max-iterations value="5"/>
+
         <exchange data="heightS1" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
         <exchange data="huS1" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
         <exchange data="hvS1" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
-        <!-- <exchange data="heightS1" mesh="Solver1_Nodes" from="Solver1" to="Solver2" initialize="true"/>
-        <exchange data="huS1" mesh="Solver1_Nodes" from="Solver1" to="Solver2" initialize="true"/>
-        <exchange data="hvS1" mesh="Solver1_Nodes" from="Solver1" to="Solver2" initialize="true"/> -->
+        <relative-convergence-measure data="heightS1"    mesh="Solver1_Nodes" limit="1e-3"/>
 
-        <!-- <exchange data="heightS2" mesh="Solver2_Nodes" from="Solver2" to="Solver1" />
-        <exchange data="huS2" mesh="Solver2_Nodes" from="Solver2" to="Solver1" />
-        <exchange data="hvS2" mesh="Solver2_Nodes" from="Solver2" to="Solver1" /> -->
         <exchange data="heightS2" mesh="Solver2_Nodes" from="Solver2" to="Solver1" initialize="true"/>
         <exchange data="huS2" mesh="Solver2_Nodes" from="Solver2" to="Solver1" initialize="true"/>
         <exchange data="hvS2" mesh="Solver2_Nodes" from="Solver2" to="Solver1" initialize="true"/>
-        <!-- <relative-convergence-measure data="heightS1"        mesh="Solver1_Nodes" limit="1e-5"/>
-        <relative-convergence-measure data="huS1"        mesh="Solver1_Nodes" limit="1e-5"/>
-        <relative-convergence-measure data="hvS1"        mesh="Solver1_Nodes" limit="1e-5"/>
-        <relative-convergence-measure data="heightS2" mesh="Solver2_Nodes" limit="1e-5"/>
-        <relative-convergence-measure data="huS2"        mesh="Solver2_Nodes" limit="1e-5"/>
-        <relative-convergence-measure data="hvS2"        mesh="Solver2_Nodes" limit="1e-5"/>
-        <extrapolation-order value="2"/> -->
-      <!-- </coupling-scheme:serial-implicit> -->
-    </coupling-scheme:serial-explicit>
+        <relative-convergence-measure data="heightS2" mesh="Solver2_Nodes" limit="1e-3"/>
+        
+        <extrapolation-order value="2"/>
+
+        <acceleration:aitken>
+          <data name="heightS2" mesh="Solver2_Nodes"/>
+          <initial-relaxation value="0.1"/>
+        </acceleration:aitken>
+
+      </coupling-scheme:serial-implicit>
+
+    <!-- </coupling-scheme:serial-explicit> -->
 
   </solver-interface>
 </precice-configuration>

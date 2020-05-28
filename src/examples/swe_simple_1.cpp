@@ -147,6 +147,8 @@ int main( int argc, char** argv ) {
   double* huS1_db_CP = new double[l_nX + 2];
   double* hvS1_db_CP = new double[l_nX + 2];
 
+  float time_CP;
+
   PreciceData preciceData{heightS1Id, huS1Id, hvS1Id, heightS1_db, huS1_db, hvS1_db,
                           heightS2Id, huS2Id, hvS2Id, heightS2_db, huS2_db, hvS2_db,
                           heightS1_db_CP, huS1_db_CP, hvS1_db_CP,
@@ -209,7 +211,7 @@ int main( int argc, char** argv ) {
   if (interface.isReadDataAvailable()) {
     std::cout << "Solver1 Read Data Available" << '\n';
     read_preCICE(interface, l_wavePropgationBlock, l_rightGhostCells,
-        &preciceData, 1 , l_nX+2);
+        &preciceData, l_nX+2);
   }
 
   //! simulation time.
@@ -219,15 +221,12 @@ int main( int argc, char** argv ) {
   int chkpt=1;
   while(interface.isCouplingOngoing()){
 
-    // loop over checkpoints
-    if(l_t < l_checkPoints[chkpt]){
+      write_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, l_nY);
 
-      write_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, l_nX+2);
-
-      // if (interface.isActionRequired(actionWriteIterationCheckpoint())) {
-      //   writeCheckpoint(PreciceData *data, size, time, &time_CP, wavePropagationBlock,  columNr);
-      //   interface.markActionFulfilled(actionWriteIterationCheckpoint());
-      // }
+      if(interface.isActionRequired(actionWriteIterationCheckpoint())) {
+        writeCheckpoint(&preciceData, l_wavePropgationBlock, l_t, time_CP, l_nX+2, l_nY);
+        interface.markActionFulfilled(actionWriteIterationCheckpoint());
+      }
 
       // set values in ghost cells:
       l_wavePropgationBlock.setGhostLayer();
@@ -245,7 +244,7 @@ int main( int argc, char** argv ) {
 
       //! maximum allowed time step width.
       // float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
-      float l_maxTimeStepWidth = 0.25;
+      float l_maxTimeStepWidth = 0.125;
 
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
@@ -255,7 +254,7 @@ int main( int argc, char** argv ) {
       precice_dt = interface.advance(l_maxTimeStepWidth);
 
       read_preCICE(interface, l_wavePropgationBlock, l_rightGhostCells,
-          &preciceData, 1 , l_nX+2);
+          &preciceData, l_nX+2);
 
       // update the cpu time in the logger
       tools::Logger::logger.updateTime("Cpu");
@@ -269,19 +268,20 @@ int main( int argc, char** argv ) {
       tools::Logger::logger.printSimulationTime(l_t);
       progressBar.update(l_t);
 
-    }else{
-
-      // print current simulation time of the output
-      progressBar.clear();
-      tools::Logger::logger.printOutputTime(l_t);
-      progressBar.update(l_t);
-
-      // write output
-      l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
-                              l_wavePropgationBlock.getDischarge_hu(),
-                              l_wavePropgationBlock.getDischarge_hv(),
-                              l_t);
-      chkpt++;
+      if (interface.isActionRequired(actionReadIterationCheckpoint())) {
+        restoreCheckpoint(&preciceData, l_wavePropgationBlock, l_t, time_CP, l_nX+2, l_nY);
+        interface.markActionFulfilled(actionReadIterationCheckpoint());
+      }else{
+        if(l_t >= l_checkPoints[chkpt] - l_maxTimeStepWidth && l_t < l_checkPoints[chkpt] + l_maxTimeStepWidth){
+            progressBar.clear();
+            tools::Logger::logger.printOutputTime(l_t);
+            progressBar.update(l_t);
+            l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
+                                    l_wavePropgationBlock.getDischarge_hu(),
+                                    l_wavePropgationBlock.getDischarge_hv(),
+                                    l_t);
+            chkpt++;
+        }
     }
   }
 
