@@ -39,14 +39,15 @@
 #include "tools/Logger.hh"
 #include "tools/ProgressBar.hh"
 
+// #define deb
+
 //precice
 #include "precice/SolverInterface.hpp"
 using namespace precice;
 using namespace precice::constants;
 
-// #define deb
-
 #include "tools/precice.hh"
+
 /**
  * Main program for the simulation on a single SWE_WavePropagationBlock.
  */
@@ -110,7 +111,6 @@ int main( int argc, char** argv ) {
 
   //***************preCICE**************************
   // *
-  // *
   std::string configFileName("precice-config.xml");
   std::string solverName = "Solver2";
   SolverInterface interface(solverName, configFileName, 0, 1);
@@ -143,9 +143,16 @@ int main( int argc, char** argv ) {
   double* huS2_db = new double[l_nX + 2];
   double* hvS2_db = new double[l_nX + 2];
 
+  double* heightS2_db_CP = new double[l_nX + 2];
+  double* huS2_db_CP = new double[l_nX + 2];
+  double* hvS2_db_CP = new double[l_nX + 2];
+
+  float time_CP;
+
   PreciceData preciceData{heightS2Id, huS2Id, hvS2Id, heightS2_db, huS2_db, hvS2_db,
-                          heightS1Id, huS1Id, hvS1Id, heightS1_db, huS1_db, hvS1_db, vertexIDs};
-  // *
+                          heightS1Id, huS1Id, hvS1Id, heightS1_db, huS1_db, hvS1_db,
+                          heightS2_db_CP, huS2_db_CP, hvS2_db_CP,
+                          vertexIDs};
   // *
   //***************preCICE**************************
 
@@ -165,12 +172,6 @@ int main( int argc, char** argv ) {
   }
 
   SWE_Block1D* l_leftGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_LEFT);
-  SWE_Block1D* leftNeighbourData{NULL};
-
-// Debbug for seeing bounday type
-  for (int i = 0; i < 4; i++) {
-    std::cout <<  l_wavePropgationBlock.getBoundaryType()[i] << '\n';
-  }
 
   // Init fancy progressbar
   tools::ProgressBar progressBar(l_endSimulation);
@@ -205,13 +206,7 @@ int main( int argc, char** argv ) {
   tools::Logger::logger.printStartMessage();
   tools::Logger::logger.initWallClockTime(time(NULL));
 
-  //! simulation time.
-  float l_t = 0.0;
-  progressBar.update(l_t);
-
-  unsigned int l_iterations = 0;
-  int c=1;
-
+//this apparently comes from the config file
   if (interface.isActionRequired(actionWriteInitialData())) {
     std::cout << "solver2 action write initial data" << '\n';
     write_preCICE(interface, l_wavePropgationBlock, &preciceData, 1, l_nX+2);
@@ -223,28 +218,22 @@ int main( int argc, char** argv ) {
   if (interface.isReadDataAvailable()) {
     std::cout << "precicedt = " << precice_dt <<'\n';
     std::cout << " Solver2 Read data Available outside loop" << '\n';
-    read_preCICE(interface, l_wavePropgationBlock, l_leftGhostCells, leftNeighbourData, &preciceData, l_nY, l_nX+2);
+    read_preCICE(interface, l_wavePropgationBlock, l_leftGhostCells, &preciceData, l_nY, l_nX+2);
   }
 
+  //! simulation time.
+  float l_t = 0.0;
+  progressBar.update(l_t);
+  unsigned int l_iterations = 0;
+  int chkpt=1;
   while(interface.isCouplingOngoing()){
 
     // loop over checkpoints
-    if(l_t < l_checkPoints[c]){
-      // read_preCICE(interface, l_wavePropgationBlock, l_leftGhostCells, leftNeighbourData, &preciceData, l_nY, l_nX+2);
+    if(l_t < l_checkPoints[chkpt]){
 
-
-      // Debbugging
-      #ifdef deb
-      std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
-      std::cout << "starting loop with this data " << l_iterations << '\n';
-      for(int j = 0; j < l_nY + 2 ; j++){
-        for(int i = 0; i < 11; i++){
-          std::cout << l_wavePropgationBlock.getWaterHeight().elemVector()[i*(l_nX+2)+(j)] << "\t";
-        }
-        std::cout <<"\n";
-      }
-      #endif
-
+        // if (interface.isActionRequired(actionWriteIterationCheckpoint())) {
+        //     interface.markActionFulfilled(actionWriteIterationCheckpoint());
+        //   }
         // set values in ghost cells:
         l_wavePropgationBlock.setGhostLayer();
 
@@ -263,45 +252,17 @@ int main( int argc, char** argv ) {
         // float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
         float l_maxTimeStepWidth = 0.25;
 
-
         // update the cell values
         l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
 
-        // Debbugging
-        #ifdef deb
-        std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
-        std::cout << "after updating values. This will be send. Iteration: " << l_iterations << '\n';
-        for(int j = 0; j < l_nY + 2 ; j++){
-          for(int i = 0; i < 11; i++){
-            std::cout << l_wavePropgationBlock.getWaterHeight().elemVector()[i*(l_nX+2)+(j)] << "\t";
-          }
-          std::cout <<"\n";
-        }
-        #endif
-
         write_preCICE(interface, l_wavePropgationBlock, &preciceData, 1, l_nX+2);
-
 
         l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
 
-
-        std::cout << "l_maxTimeStepWidth is " << l_maxTimeStepWidth << '\n';
         precice_dt = interface.advance(l_maxTimeStepWidth);
 
-        read_preCICE(interface, l_wavePropgationBlock, l_leftGhostCells, leftNeighbourData,
+        read_preCICE(interface, l_wavePropgationBlock, l_leftGhostCells,
           &preciceData, l_nY, l_nX+2);
-
-          // Debugging
-        #ifdef deb
-        std::cout << "Received this data. Iteration:  " << l_iterations << '\n';
-        for(int j = 0; j < l_nY + 2 ; j++){
-          for(int i = 0; i < 11; i++){
-            std::cout << l_wavePropgationBlock.getWaterHeight().elemVector()[i*(l_nX+2)+(j)] << "\t";
-          }
-          std::cout <<"\n";
-        }
-        std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
-        #endif
 
         // update the cpu time in the logger
         tools::Logger::logger.updateTime("Cpu");
@@ -314,8 +275,8 @@ int main( int argc, char** argv ) {
         progressBar.clear();
         tools::Logger::logger.printSimulationTime(l_t);
         progressBar.update(l_t);
-      }
-    else{
+
+      }else{
 
       // print current simulation time of the output
       progressBar.clear();
@@ -327,7 +288,7 @@ int main( int argc, char** argv ) {
                               l_wavePropgationBlock.getDischarge_hu(),
                               l_wavePropgationBlock.getDischarge_hv(),
                               l_t);
-      c++;
+      chkpt++;
     }
   }
 

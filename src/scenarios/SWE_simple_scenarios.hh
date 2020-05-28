@@ -81,7 +81,7 @@ class SWE_FranciscoScenario : public SWE_RadialDamBreakScenario {
 
     virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
 
-        float a = (x-((side * 0.125) +offsetX));
+        // float a = (x-((side * 0.125) +offsetX));
         // float a = (x-((side * 0.5) +offsetX));
 
         float a_0 = (x-((side * 0.875) +offsetX));
@@ -105,7 +105,7 @@ class SWE_FranciscoScenario_2 : public SWE_RadialDamBreakScenario {
 
     virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
 
-      float a = (x-((side * 0.125) +offsetX));
+      // float a = (x-((side * 0.125) +offsetX));
       // float a = (x-((side * 0.5) +offsetX));
 
       float a_0 = (x-((side * 0.875) +offsetX));
