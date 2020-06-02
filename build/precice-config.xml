@@ -15,7 +15,7 @@
     <data:scalar name="huS2"/>
     <data:scalar name="hvS2"/>
 
-    <mesh name="Solver1_Nodes">
+    <mesh name="Solver1_Mesh">
       <use-data name="heightS1"/>
       <use-data name="huS1"/>
       <use-data name="hvS1"/>
@@ -24,7 +24,7 @@
       <use-data name="hvS2"/>
     </mesh>
 
-    <mesh name="Solver2_Nodes">
+    <mesh name="Solver2_Mesh">
       <use-data name="heightS1"/>
       <use-data name="huS1"/>
       <use-data name="hvS1"/>
@@ -35,28 +35,28 @@
 
     <participant name="Solver1">
       <!-- Makes the named mesh available to the participant. Mesh is provided by the solver directly. -->
-      <use-mesh name="Solver1_Nodes" provide="yes"/>
-      <use-mesh name="Solver2_Nodes" from="Solver2"/>
-      <write-data name="heightS1" mesh="Solver1_Nodes"/>
-      <write-data name="huS1" mesh="Solver1_Nodes"/>
-      <write-data name="hvS1" mesh="Solver1_Nodes"/>
-      <read-data name="heightS2" mesh="Solver1_Nodes"/>
-      <read-data name="huS2" mesh="Solver1_Nodes"/>
-      <read-data name="hvS2" mesh="Solver1_Nodes"/>
+      <use-mesh name="Solver1_Mesh" provide="yes"/>
+      <use-mesh name="Solver2_Mesh" from="Solver2"/>
+      <write-data name="heightS1" mesh="Solver1_Mesh"/>
+      <write-data name="huS1" mesh="Solver1_Mesh"/>
+      <write-data name="hvS1" mesh="Solver1_Mesh"/>
+      <read-data name="heightS2" mesh="Solver1_Mesh"/>
+      <read-data name="huS2" mesh="Solver1_Mesh"/>
+      <read-data name="hvS2" mesh="Solver1_Mesh"/>
       <!-- Define input/output of the solver.  -->
-      <mapping:nearest-neighbor direction="read" from="Solver2_Nodes" to="Solver1_Nodes" constraint="consistent" timing="initial"/>
+      <mapping:nearest-neighbor direction="read" from="Solver2_Mesh" to="Solver1_Mesh" constraint="consistent" timing="initial"/>
     </participant>
 
     <participant name="Solver2">
-      <use-mesh name="Solver2_Nodes" provide="yes"/>
-      <use-mesh name="Solver1_Nodes" from="Solver1"/>
-      <write-data  name="heightS2" mesh="Solver2_Nodes"/>
-      <write-data  name="huS2" mesh="Solver2_Nodes"/>
-      <write-data  name="hvS2" mesh="Solver2_Nodes"/>
-      <read-data  name="heightS1" mesh="Solver2_Nodes"/>
-      <read-data  name="huS1" mesh="Solver2_Nodes"/>
-      <read-data  name="hvS1" mesh="Solver2_Nodes"/>
-      <mapping:nearest-neighbor direction="read" from="Solver1_Nodes" to="Solver2_Nodes" constraint="consistent" timing="initial"/>
+      <use-mesh name="Solver2_Mesh" provide="yes"/>
+      <use-mesh name="Solver1_Mesh" from="Solver1"/>
+      <write-data  name="heightS2" mesh="Solver2_Mesh"/>
+      <write-data  name="huS2" mesh="Solver2_Mesh"/>
+      <write-data  name="hvS2" mesh="Solver2_Mesh"/>
+      <read-data  name="heightS1" mesh="Solver2_Mesh"/>
+      <read-data  name="huS1" mesh="Solver2_Mesh"/>
+      <read-data  name="hvS1" mesh="Solver2_Mesh"/>
+      <mapping:nearest-neighbor direction="read" from="Solver1_Mesh" to="Solver2_Mesh" constraint="consistent" timing="initial"/>
     </participant>
 
     <m2n:sockets from="Solver1" to="Solver2" network="lo"/>
@@ -66,24 +66,23 @@
     <coupling-scheme:serial-implicit>
         <participants first="Solver1" second="Solver2"/>
         <time-window-size value="0.125"/>
-        <max-time value="70.0"/>
+        <max-time value="20.0"/>
+        <max-iterations value="20"/>
 
-        <max-iterations value="5"/>
+        <exchange data="heightS1" mesh="Solver1_Mesh" from="Solver1" to="Solver2"/>
+        <exchange data="huS1" mesh="Solver1_Mesh" from="Solver1" to="Solver2"/>
+        <exchange data="hvS1" mesh="Solver1_Mesh" from="Solver1" to="Solver2"/>
+        <relative-convergence-measure data="heightS1"    mesh="Solver1_Mesh" limit="1e-2"/>
 
-        <exchange data="heightS1" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
-        <exchange data="huS1" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
-        <exchange data="hvS1" mesh="Solver1_Nodes" from="Solver1" to="Solver2"/>
-        <relative-convergence-measure data="heightS1"    mesh="Solver1_Nodes" limit="1e-3"/>
+        <exchange data="heightS2" mesh="Solver2_Mesh" from="Solver2" to="Solver1" initialize="true"/>
+        <exchange data="huS2" mesh="Solver2_Mesh" from="Solver2" to="Solver1" initialize="true"/>
+        <exchange data="hvS2" mesh="Solver2_Mesh" from="Solver2" to="Solver1" initialize="true"/>
+        <relative-convergence-measure data="heightS2" mesh="Solver2_Mesh" limit="1e-2"/>
 
-        <exchange data="heightS2" mesh="Solver2_Nodes" from="Solver2" to="Solver1" initialize="true"/>
-        <exchange data="huS2" mesh="Solver2_Nodes" from="Solver2" to="Solver1" initialize="true"/>
-        <exchange data="hvS2" mesh="Solver2_Nodes" from="Solver2" to="Solver1" initialize="true"/>
-        <relative-convergence-measure data="heightS2" mesh="Solver2_Nodes" limit="1e-3"/>
-        
         <extrapolation-order value="2"/>
 
         <acceleration:aitken>
-          <data name="heightS2" mesh="Solver2_Nodes"/>
+          <data name="heightS2" mesh="Solver2_Mesh"/>
           <initial-relaxation value="0.1"/>
         </acceleration:aitken>
 

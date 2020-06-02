@@ -115,7 +115,7 @@ int main( int argc, char** argv ) {
   std::string solverName = "Solver1";
   SolverInterface interface(solverName, configFileName, 0, 1);
   int dimensions = interface.getDimensions();
-  int meshID = interface.getMeshID("Solver1_Nodes");
+  int meshID = interface.getMeshID("Solver1_Mesh");
   int heightS1Id = interface.getDataID("heightS1", meshID);
   int huS1Id = interface.getDataID("huS1", meshID);
   int hvS1Id = interface.getDataID("hvS1", meshID);
