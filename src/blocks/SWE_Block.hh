@@ -129,11 +129,11 @@ class SWE_Block {
 
     // read access to arrays of unknowns
     /// provides read access to the water height array
-    const Float2D& getWaterHeight();
+     Float2D& getWaterHeight();
     /// provides read access to the momentum/discharge array (x-component)
-    const Float2D& getDischarge_hu();
+     Float2D& getDischarge_hu();
     /// provides read access to the momentum/discharge array (y-component)
-    const Float2D& getDischarge_hv();
+     Float2D& getDischarge_hv();
     /// provides read access to the bathymetry data
     const Float2D& getBathymetry();
 

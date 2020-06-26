@@ -220,7 +220,7 @@ void SWE_Block::setBathymetry(float (*_b)(float, float)) {
 /**
  * return reference to water height unknown h
  */
-const Float2D& SWE_Block::getWaterHeight() {
+ Float2D& SWE_Block::getWaterHeight() {
   synchWaterHeightBeforeRead();
   return h;
 };
@@ -228,7 +228,7 @@ const Float2D& SWE_Block::getWaterHeight() {
 /**
  * return reference to discharge unknown hu
  */
-const Float2D& SWE_Block::getDischarge_hu() {
+ Float2D& SWE_Block::getDischarge_hu() {
   synchDischargeBeforeRead();
   return hu;
 };
@@ -236,7 +236,7 @@ const Float2D& SWE_Block::getDischarge_hu() {
 /**
  * return reference to discharge unknown hv
  */
-const Float2D& SWE_Block::getDischarge_hv() {
+ Float2D& SWE_Block::getDischarge_hv() {
   synchDischargeBeforeRead();
   return hv;
 };

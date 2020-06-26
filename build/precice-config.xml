@@ -73,13 +73,17 @@
         <exchange data="huS1" mesh="Solver1_Mesh" from="Solver1" to="Solver2"/>
         <exchange data="hvS1" mesh="Solver1_Mesh" from="Solver1" to="Solver2"/>
         <relative-convergence-measure data="heightS1"    mesh="Solver1_Mesh" limit="1e-2"/>
+        <relative-convergence-measure data="huS1"    mesh="Solver1_Mesh" limit="1e-2"/>
+        <relative-convergence-measure data="hvS1"    mesh="Solver1_Mesh" limit="1e-2"/>
 
         <exchange data="heightS2" mesh="Solver2_Mesh" from="Solver2" to="Solver1" initialize="true"/>
         <exchange data="huS2" mesh="Solver2_Mesh" from="Solver2" to="Solver1" initialize="true"/>
         <exchange data="hvS2" mesh="Solver2_Mesh" from="Solver2" to="Solver1" initialize="true"/>
         <relative-convergence-measure data="heightS2" mesh="Solver2_Mesh" limit="1e-2"/>
+        <relative-convergence-measure data="huS2" mesh="Solver2_Mesh" limit="1e-2"/>
+        <relative-convergence-measure data="hvS2" mesh="Solver2_Mesh" limit="1e-2"/>
 
-        <extrapolation-order value="2"/>
+        <!-- <extrapolation-order value="2"/> -->
 
         <acceleration:aitken>
           <data name="heightS2" mesh="Solver2_Mesh"/>
