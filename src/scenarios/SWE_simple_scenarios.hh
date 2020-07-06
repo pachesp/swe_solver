@@ -79,6 +79,9 @@ class SWE_FranciscoScenario : public SWE_RadialDamBreakScenario {
 
   public:
 
+    virtual BoundaryType getBoundaryType(BoundaryEdge edge) {return OUTFLOW;};
+
+
     virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
 
         // float a = (x-((side * 0.125) +offsetX));
@@ -102,6 +105,8 @@ class SWE_FranciscoScenario : public SWE_RadialDamBreakScenario {
 class SWE_FranciscoScenario_2 : public SWE_RadialDamBreakScenario {
 
   public:
+
+    virtual BoundaryType getBoundaryType(BoundaryEdge edge) {return OUTFLOW;};
 
     virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
 

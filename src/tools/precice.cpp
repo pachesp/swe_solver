@@ -13,6 +13,19 @@ void write_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, 
     interface.writeBlockScalarData(data->snd_hvId, size, data->vertexIDs, data->snd_hv_db);
 }
 
+void writeGradient_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data, int size, int columNr){
+
+    for(int i = 0; i < size ; i++){ //Data stored column-wise
+      data->snd_height_db[i] = (double)wavePropagationBlock.calculateGradient(i);
+      data->snd_hu_db[i] = (double)wavePropagationBlock.calculateGradient(i);
+      data->snd_hv_db[i] = (double)wavePropagationBlock.calculateGradient(i);
+    }
+
+    interface.writeBlockScalarData(data->snd_heightId, size, data->vertexIDs, data->snd_height_db);
+    interface.writeBlockScalarData(data->snd_huId, size, data->vertexIDs, data->snd_hu_db);
+    interface.writeBlockScalarData(data->snd_hvId, size, data->vertexIDs, data->snd_hv_db);
+}
+
 void read_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock,
                   SWE_Block1D* ghoshtBlock, PreciceData *data, int size, int columNr){
 
@@ -25,7 +38,7 @@ void read_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock,
     float* hv = doublePointer2floatPointer(data->recv_hv_db, size);
 
     // Data sent by left neighbour from precice
-    SWE_Block1D* newBlock = new SWE_Block1D{ h,hu,hv,1};
+    SWE_Block1D* newBlock = new SWE_Block1D{h, hu, hv, 1};
     ghoshtBlock->copyFrom(newBlock, size );
 
     if(newBlock) delete newBlock;

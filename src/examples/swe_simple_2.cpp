@@ -119,9 +119,9 @@ int main( int argc, char** argv ) {
   int heightS1Id = interface.getDataID("heightS1", meshID);
   int huS1Id = interface.getDataID("huS1", meshID);
   int hvS1Id = interface.getDataID("hvS1", meshID);
-  int heightS2Id = interface.getDataID("heightS2", meshID);
-  int huS2Id = interface.getDataID("huS2", meshID);
-  int hvS2Id = interface.getDataID("hvS2", meshID);
+  int heightGradId = interface.getDataID("heightGrad", meshID);
+  int huGradId = interface.getDataID("huGrad", meshID);
+  int hvGradId = interface.getDataID("hvGrad", meshID);
   int* vertexIDs;
   vertexIDs = new int[(l_nY + 2)];
   double* grid;
@@ -139,15 +139,14 @@ int main( int argc, char** argv ) {
   double* huS1_db = new double[l_nX + 2];
   double* hvS1_db = new double[l_nX + 2];
 
-  double* heightS2_db = new double[l_nX + 2];
-  double* huS2_db = new double[l_nX + 2];
-  double* hvS2_db = new double[l_nX + 2];
+  double* heightGrad_db = new double[l_nX + 2];
+  double* huGrad_db = new double[l_nX + 2];
+  double* hvGrad_db = new double[l_nX + 2];
 
   float time_CP;
 
-  PreciceData preciceData{heightS2Id, huS2Id, hvS2Id, heightS2_db, huS2_db, hvS2_db,
+  PreciceData preciceData{heightGradId, huGradId, hvGradId, heightGrad_db, huGrad_db, hvGrad_db,
                           heightS1Id, huS1Id, hvS1Id, heightS1_db, huS1_db, hvS1_db,
-                          // heightS2_db_CP, huS2_db_CP, hvS2_db_CP,
                           vertexIDs};
   // *
   //***************preCICE**************************
@@ -168,6 +167,8 @@ int main( int argc, char** argv ) {
   }
 
   SWE_Block1D* l_leftGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_LEFT);
+  // SWE_Block1D* l_leftGhostCells  = l_wavePropgationBlock.grabEdge(BND_LEFT);
+
 
   // Init fancy progressbar
   tools::ProgressBar progressBar(l_endSimulation);
@@ -205,7 +206,7 @@ int main( int argc, char** argv ) {
 //this apparently comes from the config file
   if (interface.isActionRequired(actionWriteInitialData())) {
     std::cout << "solver2 action write initial data" << '\n';
-    write_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, 1);
+    writeGradient_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, 1);
     interface.markActionFulfilled(actionWriteInitialData());
   }
 
@@ -250,7 +251,7 @@ int main( int argc, char** argv ) {
         // update the cell values
         l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
 
-        write_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, 1);
+        writeGradient_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, 1);
 
         l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
 

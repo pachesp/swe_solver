@@ -307,9 +307,11 @@ SWE_Block::simulate (float i_tStart, float i_tEnd)
  */
 void SWE_Block::setBoundaryType( const BoundaryEdge i_edge,
                                  const BoundaryType i_boundaryType,
-                                 const SWE_Block1D* i_inflow) {
+                                 const SWE_Block1D* i_inflow,
+							 	 const SWE_Block1D* i_gradient) {
 	boundary[i_edge] = i_boundaryType;
 	neighbour[i_edge] = i_inflow;
+	gradient[i_edge] = i_gradient;
 
 	if (i_boundaryType == OUTFLOW || i_boundaryType == WALL)
 		// One of the boundary was changed to OUTFLOW or WALL
@@ -399,6 +401,17 @@ SWE_Block1D* SWE_Block::grabGhostLayer(BoundaryEdge edge){
   return NULL;
 }
 
+
+SWE_Block1D* SWE_Block::grabEdge(BoundaryEdge edge){
+
+  switch (edge) {
+    case BND_LEFT:
+      return new SWE_Block1D( h.getColProxy(1), hu.getColProxy(1), hv.getColProxy(1) );
+    default:
+		assert(false);
+  };
+  return NULL;
+}
 
 /**
  * set the values of all ghost cells depending on the specifed
@@ -528,7 +541,7 @@ void SWE_Block::setBoundaryConditions() {
   switch(boundary[BND_LEFT]) {
     case WALL:
     {
-			assert(false);
+	  assert(false);
       for(int j=1; j<=ny; j++) {
         h[0][j] = h[1][j];
         hu[0][j] = -hu[1][j];
@@ -558,7 +571,7 @@ void SWE_Block::setBoundaryConditions() {
   switch(boundary[BND_RIGHT]) {
     case WALL:
     {
-			assert(false);
+	  assert(false);
       for(int j=1; j<=ny; j++) {
         h[nx+1][j] = h[nx][j];
         hu[nx+1][j] = -hu[nx][j];
@@ -572,6 +585,16 @@ void SWE_Block::setBoundaryConditions() {
         h[nx+1][j] = h[nx][j];
         hu[nx+1][j] = hu[nx][j];
         hv[nx+1][j] = hv[nx][j];
+      };
+      break;
+    }
+	case OUTFLOW_COUPLE:
+    {
+		std::cout << "oh yeeeah" << '\n';
+      for(int j=1; j<=ny; j++) {
+        h[nx+1][j] = h[nx][j] + gradient[BND_RIGHT]->h[j];
+        hu[nx+1][j] = hu[nx][j] + gradient[BND_RIGHT]->hu[j];
+        hv[nx+1][j] = hv[nx][j] + gradient[BND_RIGHT]->hv[j];
       };
       break;
     }
@@ -687,6 +710,9 @@ void SWE_Block::setBoundaryConditions() {
 }
 
 
+float SWE_Block::calculateGradient(int i){return 1.f;}
+
+
 //==================================================================
 // protected member functions for memory model:
 // in case of temporary variables (especial in non-local memory, for
@@ -765,12 +791,12 @@ void SWE_Block::synchBathymetryBeforeRead() {}
  */
 void SWE_Block::synchCopyLayerBeforeRead() {}
 
-float* doublePointer2floatPointer(double* doublePointer, int size){
-  float* floatPointer = new float[size];
+float* doublePointer2floatPointer(double* doubleArray, int size){
+  float* floatArray = new float[size];
   for(int i = 0; i< size; i++){
-    floatPointer[i] = (float) doublePointer[i];
+    floatArray[i] = (float) doubleArray[i];
   }
-  return floatPointer;
+  return floatArray;
 }
 
 void SWE_Block1D::copyFrom(const SWE_Block1D* source, int size){

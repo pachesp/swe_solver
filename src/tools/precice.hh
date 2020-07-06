@@ -37,6 +37,9 @@ struct PreciceData{
 void write_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
                   int size, int columNr);
 
+void writeGradient_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+                int size, int columNr);
+                
 void read_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, SWE_Block1D* ghoshtBlock,
                   PreciceData *data, int size, int columNr = 0);
 

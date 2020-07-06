@@ -32,7 +32,7 @@
  * enum type: available types of boundary conditions
  */
 typedef enum BoundaryType {
-   OUTFLOW, WALL, INFLOW, CONNECT, PASSIVE
+   OUTFLOW, WALL, INFLOW, CONNECT, PASSIVE, OUTFLOW_COUPLE
 } BoundaryType;
 
 /**
