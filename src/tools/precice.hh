@@ -29,7 +29,7 @@ struct PreciceData{
   int* vertexIDs;
 
   Float2D* CP_height_f2d;
-  Float2D* CP_hu_f2d ;
+  Float2D* CP_hu_f2d;
   Float2D* CP_hv_f2d;
 
 };
@@ -39,9 +39,12 @@ void write_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, 
 
 void writeGradient_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
                 int size, int columNr);
-                
+
 void read_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, SWE_Block1D* ghoshtBlock,
                   PreciceData *data, int size, int columNr = 0);
+
+void readGradient_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock,
+                  PreciceData *data, int size, int columNr=0);
 
 void writeCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float time, float &time_CP, int size, int columNr);
 

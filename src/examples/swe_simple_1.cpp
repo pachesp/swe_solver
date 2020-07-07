@@ -201,12 +201,22 @@ int main( int argc, char** argv ) {
   tools::Logger::logger.printStartMessage();
   tools::Logger::logger.initWallClockTime(time(NULL));
 
+  l_wavePropgationBlock.setBoundaryType(BND_RIGHT, OUTFLOW_COUPLE);
+
+
+  //this apparently comes from the config file
+    if (interface.isActionRequired(actionWriteInitialData())) {
+      std::cout << "solver1 action write initial data" << '\n';
+      write_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, l_nY);
+      interface.markActionFulfilled(actionWriteInitialData());
+    }
+
   interface.initializeData();
 
   if (interface.isReadDataAvailable()) {
     std::cout << "Solver1 Read Data Available" << '\n';
-    read_preCICE(interface, l_wavePropgationBlock, l_rightGhostCells,
-        &preciceData, l_nX+2);
+    readGradient_preCICE(interface, l_wavePropgationBlock,
+        &preciceData,  l_nX +2);
   }
 
   //! simulation time.
@@ -216,14 +226,11 @@ int main( int argc, char** argv ) {
   int chkpt=1;
   while(interface.isCouplingOngoing()){
 
-      write_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, l_nY);
-
       if(interface.isActionRequired(actionWriteIterationCheckpoint())) {
         writeCheckpoint(&preciceData, l_wavePropgationBlock, l_t, time_CP, l_nX+2, l_nY);
         interface.markActionFulfilled(actionWriteIterationCheckpoint());
       }
 
-      l_wavePropgationBlock.setBoundaryType(BND_RIGHT, OUTFLOW_COUPLE, NULL, l_rightGhostCells);
 
       // set values in ghost cells:
       l_wavePropgationBlock.setGhostLayer();
@@ -246,11 +253,13 @@ int main( int argc, char** argv ) {
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
 
+      write_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, l_nY);
+
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt);
 
       precice_dt = interface.advance(l_maxTimeStepWidth);
 
-      read_preCICE(interface, l_wavePropgationBlock, l_rightGhostCells,
+      readGradient_preCICE(interface, l_wavePropgationBlock,
           &preciceData, l_nX+2);
 
       // update the cpu time in the logger

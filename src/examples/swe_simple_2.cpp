@@ -203,19 +203,23 @@ int main( int argc, char** argv ) {
   tools::Logger::logger.printStartMessage();
   tools::Logger::logger.initWallClockTime(time(NULL));
 
-//this apparently comes from the config file
-  if (interface.isActionRequired(actionWriteInitialData())) {
-    std::cout << "solver2 action write initial data" << '\n';
-    writeGradient_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, 1);
-    interface.markActionFulfilled(actionWriteInitialData());
-  }
+  l_wavePropgationBlock.setBoundaryType(BND_LEFT, INFLOW_COUPLE);
+
+
+// //this apparently comes from the config file
+//   if (interface.isActionRequired(actionWriteInitialData())) {
+//     std::cout << "solver2 action write initial data" << '\n';
+//     writeGradient_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, 1);
+//     interface.markActionFulfilled(actionWriteInitialData());
+//   }
 
   interface.initializeData();
+
 
   if (interface.isReadDataAvailable()) {
     std::cout << "precicedt = " << precice_dt <<'\n';
     std::cout << " Solver2 Read data Available outside loop" << '\n';
-    read_preCICE(interface, l_wavePropgationBlock, l_leftGhostCells, &preciceData, l_nX+2);
+    read_preCICE(interface, l_wavePropgationBlock, l_leftGhostCells, &preciceData, l_nX +2);
   }
 
   //! simulation time.
@@ -232,6 +236,10 @@ int main( int argc, char** argv ) {
 
         // set values in ghost cells:
         l_wavePropgationBlock.setGhostLayer();
+
+        l_wavePropgationBlock.calculateGradient(l_leftGhostCells);
+
+        writeGradient_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, 1);
 
         // reset the cpu clock
         tools::Logger::logger.resetClockToCurrentTime("Cpu");
@@ -251,14 +259,12 @@ int main( int argc, char** argv ) {
         // update the cell values
         l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
 
-        writeGradient_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, 1);
 
         l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
 
         precice_dt = interface.advance(l_maxTimeStepWidth);
 
-        read_preCICE(interface, l_wavePropgationBlock, l_leftGhostCells,
-          &preciceData, l_nX+2);
+        read_preCICE(interface, l_wavePropgationBlock, l_leftGhostCells,  &preciceData,  l_nX +2);
 
         // update the cpu time in the logger
         tools::Logger::logger.updateTime("Cpu");

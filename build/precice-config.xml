@@ -64,21 +64,21 @@
     <coupling-scheme:serial-explicit>
 
     <!-- <coupling-scheme:serial-implicit> -->
-        <participants first="Solver1" second="Solver2"/>
+        <participants first="Solver2" second="Solver1"/>
         <time-window-size value="0.125"/>
         <max-time value="20.0"/>
         <!-- <max-iterations value="20"/> -->
 
-        <exchange data="heightS1" mesh="Solver1_Mesh" from="Solver1" to="Solver2"/>
-        <exchange data="huS1" mesh="Solver1_Mesh" from="Solver1" to="Solver2"/>
-        <exchange data="hvS1" mesh="Solver1_Mesh" from="Solver1" to="Solver2"/>
+        <exchange data="heightS1" mesh="Solver1_Mesh" from="Solver1" to="Solver2" initialize="true"/>
+        <exchange data="huS1" mesh="Solver1_Mesh" from="Solver1" to="Solver2" initialize="true"/>
+        <exchange data="hvS1" mesh="Solver1_Mesh" from="Solver1" to="Solver2" initialize="true"/>
         <!-- <relative-convergence-measure data="heightS1"    mesh="Solver1_Mesh" limit="1e-2"/>
         <relative-convergence-measure data="huS1"    mesh="Solver1_Mesh" limit="1e-2"/>
         <relative-convergence-measure data="hvS1"    mesh="Solver1_Mesh" limit="1e-2"/> -->
 
-        <exchange data="heightGrad" mesh="Solver2_Mesh" from="Solver2" to="Solver1" initialize="true"/>
-        <exchange data="huGrad" mesh="Solver2_Mesh" from="Solver2" to="Solver1" initialize="true"/>
-        <exchange data="hvGrad" mesh="Solver2_Mesh" from="Solver2" to="Solver1" initialize="true"/>
+        <exchange data="heightGrad" mesh="Solver2_Mesh" from="Solver2" to="Solver1" initialize="false"/>
+        <exchange data="huGrad" mesh="Solver2_Mesh" from="Solver2" to="Solver1" initialize="false"/>
+        <exchange data="hvGrad" mesh="Solver2_Mesh" from="Solver2" to="Solver1" initialize="false"/>
         <!-- <relative-convergence-measure data="heightGrad" mesh="Solver2_Mesh" limit="1e-2"/>
         <relative-convergence-measure data="huGrad" mesh="Solver2_Mesh" limit="1e-2"/>
         <relative-convergence-measure data="hvGrad" mesh="Solver2_Mesh" limit="1e-2"/> -->

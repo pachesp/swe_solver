@@ -127,7 +127,7 @@ class SWE_Block {
     /// set the bathymetry according to a given function
     void setBathymetry(float (*_b)(float, float));
 
-    float calculateGradient(int i = 0);
+    void calculateGradient(SWE_Block1D* ghostlayer);
 
     // read access to arrays of unknowns
     /// provides read access to the water height array
@@ -142,7 +142,7 @@ class SWE_Block {
     // defining boundary conditions
     /// set type of boundary condition for the specified boundary
     void setBoundaryType(BoundaryEdge edge, BoundaryType boundtype,
-                         const SWE_Block1D* inflow = NULL, const SWE_Block1D* i_grad = NULL);
+                         const SWE_Block1D* inflow = NULL);
 //     void connectBoundaries(BoundaryEdge edge, SWE_Block &neighbour, BoundaryEdge neighEdge);
 
     /// return a pointer to proxy class to access the copy layer
@@ -247,8 +247,13 @@ class SWE_Block {
     BoundaryType boundary[4];
     /// for CONNECT boundaries: pointer to connected neighbour block
     const SWE_Block1D* neighbour[4];
-    const SWE_Block1D* gradient[4];
 
+public:
+    float* hGrad = new float[ny+2];
+    float* huGrad = new float[ny+2];
+    float* hvGrad = new float[ny+2];
+
+protected:
 
     /// maximum time step allowed to ensure stability of the method
     /**

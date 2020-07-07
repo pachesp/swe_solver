@@ -241,6 +241,7 @@ void SWE_Block::setBathymetry(float (*_b)(float, float)) {
   return hv;
 };
 
+
 /**
  * return reference to bathymetry unknown b
  */
@@ -307,11 +308,10 @@ SWE_Block::simulate (float i_tStart, float i_tEnd)
  */
 void SWE_Block::setBoundaryType( const BoundaryEdge i_edge,
                                  const BoundaryType i_boundaryType,
-                                 const SWE_Block1D* i_inflow,
-							 	 const SWE_Block1D* i_gradient) {
+                                 const SWE_Block1D* i_inflow
+							 	 ) {
 	boundary[i_edge] = i_boundaryType;
 	neighbour[i_edge] = i_inflow;
-	gradient[i_edge] = i_gradient;
 
 	if (i_boundaryType == OUTFLOW || i_boundaryType == WALL)
 		// One of the boundary was changed to OUTFLOW or WALL
@@ -560,6 +560,8 @@ void SWE_Block::setBoundaryConditions() {
     }
     case CONNECT:
       break;
+  	case INFLOW_COUPLE:
+    	break;
     case PASSIVE:
       break;
     default:
@@ -592,9 +594,9 @@ void SWE_Block::setBoundaryConditions() {
     {
 		std::cout << "oh yeeeah" << '\n';
       for(int j=1; j<=ny; j++) {
-        h[nx+1][j] = h[nx][j] + gradient[BND_RIGHT]->h[j];
-        hu[nx+1][j] = hu[nx][j] + gradient[BND_RIGHT]->hu[j];
-        hv[nx+1][j] = hv[nx][j] + gradient[BND_RIGHT]->hv[j];
+        h[nx+1][j] = h[nx][j] + hGrad[j];
+        hu[nx+1][j] = hu[nx][j] + huGrad[j];
+        hv[nx+1][j] = hv[nx][j] + hvGrad[j];
       };
       break;
     }
@@ -710,7 +712,14 @@ void SWE_Block::setBoundaryConditions() {
 }
 
 
-float SWE_Block::calculateGradient(int i){return 1.f;}
+void SWE_Block::calculateGradient(SWE_Block1D* ghostlayer){
+
+	for (int i = 0; i < nx; i++) {
+		hGrad[i] = h[1][i] - ghostlayer->h[i];
+		huGrad[i] = hu[1][i] - ghostlayer->hu[i];
+		hvGrad[i] = hv[1][i] - ghostlayer->hv[i];
+	}
+}
 
 
 //==================================================================

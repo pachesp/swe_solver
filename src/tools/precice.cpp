@@ -16,9 +16,10 @@ void write_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, 
 void writeGradient_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data, int size, int columNr){
 
     for(int i = 0; i < size ; i++){ //Data stored column-wise
-      data->snd_height_db[i] = (double)wavePropagationBlock.calculateGradient(i);
-      data->snd_hu_db[i] = (double)wavePropagationBlock.calculateGradient(i);
-      data->snd_hv_db[i] = (double)wavePropagationBlock.calculateGradient(i);
+
+      data->snd_height_db[i] = (double)wavePropagationBlock.hGrad[i];
+      data->snd_hu_db[i] = (double)wavePropagationBlock.huGrad[i];
+      data->snd_hv_db[i] = (double)wavePropagationBlock.hvGrad[i];
     }
 
     interface.writeBlockScalarData(data->snd_heightId, size, data->vertexIDs, data->snd_height_db);
@@ -45,6 +46,21 @@ void read_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock,
     if(h) delete h;
     if(hu) delete hu;
     if(hv) delete hv;
+}
+
+void readGradient_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock,
+                   PreciceData *data, int size, int columNr){
+
+    interface.readBlockScalarData(data->recv_heightId, size, data->vertexIDs, data->recv_height_db);
+    interface.readBlockScalarData(data->recv_huId, size, data->vertexIDs, data->recv_hu_db);
+    interface.readBlockScalarData(data->recv_hvId, size, data->vertexIDs, data->recv_hv_db);
+
+    for (size_t i = 0; i < size; i++) {
+        wavePropagationBlock.hGrad[i] = data->recv_height_db[i];
+        wavePropagationBlock.huGrad[i] = data->recv_hu_db[i];
+        wavePropagationBlock.hvGrad[i] = data->recv_hv_db[i];
+    }
+
 }
 
 void writeCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float time, float &time_CP, int size, int columNr){
