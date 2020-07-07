@@ -55,7 +55,7 @@ void readGradient_preCICE(SolverInterface &interface, SWE_Block &wavePropagation
     interface.readBlockScalarData(data->recv_huId, size, data->vertexIDs, data->recv_hu_db);
     interface.readBlockScalarData(data->recv_hvId, size, data->vertexIDs, data->recv_hv_db);
 
-    for (size_t i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++) {
         wavePropagationBlock.hGrad[i] = data->recv_height_db[i];
         wavePropagationBlock.huGrad[i] = data->recv_hu_db[i];
         wavePropagationBlock.hvGrad[i] = data->recv_hv_db[i];

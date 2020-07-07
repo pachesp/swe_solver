@@ -44,7 +44,7 @@ void read_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, S
                   PreciceData *data, int size, int columNr = 0);
 
 void readGradient_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock,
-                  PreciceData *data, int size, int columNr=0);
+                  PreciceData *data, int size, int columNr = 0);
 
 void writeCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float time, float &time_CP, int size, int columNr);
 

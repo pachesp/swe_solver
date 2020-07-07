@@ -84,16 +84,14 @@ class SWE_FranciscoScenario : public SWE_RadialDamBreakScenario {
 
     virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
 
-        // float a = (x-((side * 0.125) +offsetX));
-        // float a = (x-((side * 0.5) +offsetX));
-
-        float a_0 = (x-((side * 0.875) +offsetX));
 
         float b = (y-((side * 0.5)+offsetY));
 
+        // float a = (x-((side * 0.125) +offsetX));
         // bool circ_1 = sqrt(a*a + b*b) < (side * 0.1);
         bool circ_1  = false;
 
+        float a_0 = (x-((side * 0.875) +offsetX));
         bool circ_2 = sqrt(a_0*a_0 + b*b) < (side * 0.1);
         // bool circ_2  = false;
 
@@ -110,16 +108,14 @@ class SWE_FranciscoScenario_2 : public SWE_RadialDamBreakScenario {
 
     virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
 
-      float a = (x-((side * 0.125) +offsetX));
-      // float a = (x-((side * 0.5) +offsetX));
 
-      // float a_0 = (x-((side * 0.875) +offsetX));
-
-      float b = (y-((side * 0.5)+offsetY));
-
+      // float b = (y-((side * 0.5)+offsetY));
+      //
+      // float a = (x-((side * 0.125) +offsetX));
       // bool circ_1 = sqrt(a*a + b*b) < (side * 0.1);
       bool circ_1  = false;
 
+      // float a_0 = (x-((side * 0.875) +offsetX));
       // bool circ_2 = sqrt(a_0*a_0 + b*b) < (side * 0.1);
       bool circ_2  = false;
 

@@ -592,7 +592,6 @@ void SWE_Block::setBoundaryConditions() {
     }
 	case OUTFLOW_COUPLE:
     {
-		std::cout << "oh yeeeah" << '\n';
       for(int j=1; j<=ny; j++) {
         h[nx+1][j] = h[nx][j] + hGrad[j];
         hu[nx+1][j] = hu[nx][j] + huGrad[j];
@@ -718,6 +717,10 @@ void SWE_Block::calculateGradient(SWE_Block1D* ghostlayer){
 		hGrad[i] = h[1][i] - ghostlayer->h[i];
 		huGrad[i] = hu[1][i] - ghostlayer->hu[i];
 		hvGrad[i] = hv[1][i] - ghostlayer->hv[i];
+
+		// hGrad[i] = 0.f;
+		// huGrad[i] = 0.f;
+		// hvGrad[i] = 0.f;
 	}
 }
 
