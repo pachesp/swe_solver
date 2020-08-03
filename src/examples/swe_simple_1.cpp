@@ -111,11 +111,11 @@ int main( int argc, char** argv ) {
 
   //***************preCICE**************************
   //*
-  std::string configFileName("precice-config.xml");
-  std::string solverName = "Solver1";
+  std::string configFileName("../../precice-config.xml");
+  std::string solverName = "SWE_solver";
   SolverInterface interface(solverName, configFileName, 0, 1);
   int dimensions = interface.getDimensions();
-  int meshID = interface.getMeshID("Solver1_Mesh");
+  int meshID = interface.getMeshID("SWE_solver_Mesh");
   int heightS1Id = interface.getDataID("heightS1", meshID);
   int huS1Id = interface.getDataID("huS1", meshID);
   int hvS1Id = interface.getDataID("hvS1", meshID);
@@ -206,7 +206,7 @@ int main( int argc, char** argv ) {
 
   //this apparently comes from the config file
     if (interface.isActionRequired(actionWriteInitialData())) {
-      std::cout << "solver1 action write initial data" << '\n';
+      std::cout << "SWE_solver action write initial data" << '\n';
       write_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, l_nY);
       interface.markActionFulfilled(actionWriteInitialData());
     }
@@ -214,7 +214,7 @@ int main( int argc, char** argv ) {
   interface.initializeData();
 
   if (interface.isReadDataAvailable()) {
-    std::cout << "Solver1 Read Data Available" << '\n';
+    std::cout << "SWE_solver Read Data Available" << '\n';
     readGradient_preCICE(interface, l_wavePropgationBlock,
         &preciceData,  l_nX +2);
   }

@@ -1,4 +1,3 @@
 #!/bin/bash
 
-cd ~/thesis/SWE
 scons buildVariablesFile=build/options/SWE_gnu.py
