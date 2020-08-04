@@ -8,41 +8,41 @@
 
   <solver-interface dimensions="2">
 
-    <data:scalar name="heightS1"/>
-    <data:scalar name="huS1"/>
-    <data:scalar name="hvS1"/>
-    <data:scalar name="heightGrad"/>
-    <data:scalar name="huGrad"/>
-    <data:scalar name="hvGrad"/>
+    <data:scalar name="height_SWE"/>
+    <data:scalar name="hu_SWE"/>
+    <data:scalar name="hv_SWE"/>
+    <data:scalar name="heightGrad_SWE"/>
+    <data:scalar name="huGrad_SWE"/>
+    <data:scalar name="hvGrad_SWE"/>
 
     <mesh name="Solver1_Mesh">
-      <use-data name="heightS1"/>
-      <use-data name="huS1"/>
-      <use-data name="hvS1"/>
-      <use-data name="heightGrad"/>
-      <use-data name="huGrad"/>
-      <use-data name="hvGrad"/>
+      <use-data name="height_SWE"/>
+      <use-data name="hu_SWE"/>
+      <use-data name="hv_SWE"/>
+      <use-data name="heightGrad_SWE"/>
+      <use-data name="huGrad_SWE"/>
+      <use-data name="hvGrad_SWE"/>
     </mesh>
 
     <mesh name="Solver2_Mesh">
-      <use-data name="heightS1"/>
-      <use-data name="huS1"/>
-      <use-data name="hvS1"/>
-      <use-data name="heightGrad"/>
-      <use-data name="huGrad"/>
-      <use-data name="hvGrad"/>
+      <use-data name="height_SWE"/>
+      <use-data name="hu_SWE"/>
+      <use-data name="hv_SWE"/>
+      <use-data name="heightGrad_SWE"/>
+      <use-data name="huGrad_SWE"/>
+      <use-data name="hvGrad_SWE"/>
     </mesh>
 
     <participant name="Solver1">
       <!-- Makes the named mesh available to the participant. Mesh is provided by the solver directly. -->
       <use-mesh name="Solver1_Mesh" provide="yes"/>
       <use-mesh name="Solver2_Mesh" from="Solver2"/>
-      <write-data name="heightS1" mesh="Solver1_Mesh"/>
-      <write-data name="huS1" mesh="Solver1_Mesh"/>
-      <write-data name="hvS1" mesh="Solver1_Mesh"/>
-      <read-data name="heightGrad" mesh="Solver1_Mesh"/>
-      <read-data name="huGrad" mesh="Solver1_Mesh"/>
-      <read-data name="hvGrad" mesh="Solver1_Mesh"/>
+      <write-data name="height_SWE" mesh="Solver1_Mesh"/>
+      <write-data name="hu_SWE" mesh="Solver1_Mesh"/>
+      <write-data name="hv_SWE" mesh="Solver1_Mesh"/>
+      <read-data name="heightGrad_SWE" mesh="Solver1_Mesh"/>
+      <read-data name="huGrad_SWE" mesh="Solver1_Mesh"/>
+      <read-data name="hvGrad_SWE" mesh="Solver1_Mesh"/>
       <!-- Define input/output of the solver.  -->
       <mapping:nearest-neighbor direction="read" from="Solver2_Mesh" to="Solver1_Mesh" constraint="consistent" timing="initial"/>
     </participant>
@@ -50,12 +50,12 @@
     <participant name="Solver2">
       <use-mesh name="Solver2_Mesh" provide="yes"/>
       <use-mesh name="Solver1_Mesh" from="Solver1"/>
-      <write-data  name="heightGrad" mesh="Solver2_Mesh"/>
-      <write-data  name="huGrad" mesh="Solver2_Mesh"/>
-      <write-data  name="hvGrad" mesh="Solver2_Mesh"/>
-      <read-data  name="heightS1" mesh="Solver2_Mesh"/>
-      <read-data  name="huS1" mesh="Solver2_Mesh"/>
-      <read-data  name="hvS1" mesh="Solver2_Mesh"/>
+      <write-data  name="heightGrad_SWE" mesh="Solver2_Mesh"/>
+      <write-data  name="huGrad_SWE" mesh="Solver2_Mesh"/>
+      <write-data  name="hvGrad_SWE" mesh="Solver2_Mesh"/>
+      <read-data  name="height_SWE" mesh="Solver2_Mesh"/>
+      <read-data  name="hu_SWE" mesh="Solver2_Mesh"/>
+      <read-data  name="hv_SWE" mesh="Solver2_Mesh"/>
       <mapping:nearest-neighbor direction="read" from="Solver1_Mesh" to="Solver2_Mesh" constraint="consistent" timing="initial"/>
     </participant>
 
@@ -69,24 +69,24 @@
         <max-time value="20.0"/>
         <!-- <max-iterations value="20"/> -->
 
-        <exchange data="heightS1" mesh="Solver1_Mesh" from="Solver1" to="Solver2" initialize="true"/>
-        <exchange data="huS1" mesh="Solver1_Mesh" from="Solver1" to="Solver2" initialize="true"/>
-        <exchange data="hvS1" mesh="Solver1_Mesh" from="Solver1" to="Solver2" initialize="true"/>
-        <!-- <relative-convergence-measure data="heightS1"    mesh="Solver1_Mesh" limit="1e-2"/>
-        <relative-convergence-measure data="huS1"    mesh="Solver1_Mesh" limit="1e-2"/>
-        <relative-convergence-measure data="hvS1"    mesh="Solver1_Mesh" limit="1e-2"/> -->
+        <exchange data="height_SWE" mesh="Solver1_Mesh" from="Solver1" to="Solver2" initialize="true"/>
+        <exchange data="hu_SWE" mesh="Solver1_Mesh" from="Solver1" to="Solver2" initialize="true"/>
+        <exchange data="hv_SWE" mesh="Solver1_Mesh" from="Solver1" to="Solver2" initialize="true"/>
+        <!-- <relative-convergence-measure data="height_SWE"    mesh="Solver1_Mesh" limit="1e-2"/>
+        <relative-convergence-measure data="hu_SWE"    mesh="Solver1_Mesh" limit="1e-2"/>
+        <relative-convergence-measure data="hv_SWE"    mesh="Solver1_Mesh" limit="1e-2"/> -->
 
-        <exchange data="heightGrad" mesh="Solver2_Mesh" from="Solver2" to="Solver1" initialize="false"/>
-        <exchange data="huGrad" mesh="Solver2_Mesh" from="Solver2" to="Solver1" initialize="false"/>
-        <exchange data="hvGrad" mesh="Solver2_Mesh" from="Solver2" to="Solver1" initialize="false"/>
-        <!-- <relative-convergence-measure data="heightGrad" mesh="Solver2_Mesh" limit="1e-2"/>
-        <relative-convergence-measure data="huGrad" mesh="Solver2_Mesh" limit="1e-2"/>
-        <relative-convergence-measure data="hvGrad" mesh="Solver2_Mesh" limit="1e-2"/> -->
+        <exchange data="heightGrad_SWE" mesh="Solver2_Mesh" from="Solver2" to="Solver1" initialize="false"/>
+        <exchange data="huGrad_SWE" mesh="Solver2_Mesh" from="Solver2" to="Solver1" initialize="false"/>
+        <exchange data="hvGrad_SWE" mesh="Solver2_Mesh" from="Solver2" to="Solver1" initialize="false"/>
+        <!-- <relative-convergence-measure data="heightGrad_SWE" mesh="Solver2_Mesh" limit="1e-2"/>
+        <relative-convergence-measure data="huGrad_SWE" mesh="Solver2_Mesh" limit="1e-2"/>
+        <relative-convergence-measure data="hvGrad_SWE" mesh="Solver2_Mesh" limit="1e-2"/> -->
 
         <!-- <extrapolation-order value="2"/> -->
 
         <!-- <acceleration:aitken>
-          <data name="heightGrad" mesh="Solver2_Mesh"/>
+          <data name="heightGrad_SWE" mesh="Solver2_Mesh"/>
           <initial-relaxation value="0.1"/>
         </acceleration:aitken>
 

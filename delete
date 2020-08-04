@@ -1,6 +1,0 @@
-#!/bin/bash
-
-cd ~/thesis/SWE
-scons -c
-rm build/build_SWE_gnu_* build/precice-run/ -rf
-rm build/SWE_gnu_* build/precice-Solver* reference.xml build/output/*

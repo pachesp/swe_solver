@@ -594,8 +594,8 @@ void SWE_Block::setBoundaryConditions() {
     {
       for(int j=1; j<=ny; j++) {
         h[nx+1][j] = h[nx][j] + hGrad[j];
-        hu[nx+1][j] = hu[nx][j] + huGrad[j];
-        hv[nx+1][j] = hv[nx][j] + hvGrad[j];
+        hu[nx+1][j] = hu[nx][j] + huGrad_SWE[j];
+        hv[nx+1][j] = hv[nx][j] + hvGrad_SWE[j];
       };
       break;
     }
@@ -715,12 +715,12 @@ void SWE_Block::calculateGradient(SWE_Block1D* ghostlayer){
 
 	for (int i = 0; i < nx; i++) {
 		hGrad[i] = h[1][i] - ghostlayer->h[i];
-		huGrad[i] = hu[1][i] - ghostlayer->hu[i];
-		hvGrad[i] = hv[1][i] - ghostlayer->hv[i];
+		huGrad_SWE[i] = hu[1][i] - ghostlayer->hu[i];
+		hvGrad_SWE[i] = hv[1][i] - ghostlayer->hv[i];
 
 		// hGrad[i] = 0.f;
-		// huGrad[i] = 0.f;
-		// hvGrad[i] = 0.f;
+		// huGrad_SWE[i] = 0.f;
+		// hvGrad_SWE[i] = 0.f;
 	}
 }
 

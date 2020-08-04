@@ -111,21 +111,20 @@ int main( int argc, char** argv ) {
 
   //***************preCICE**************************
   //*
-  std::string configFileName("../../precice-config.xml");
+  std::string configFileName("precice-config.xml");
   std::string solverName = "SWE_solver";
   SolverInterface interface(solverName, configFileName, 0, 1);
   int dimensions = interface.getDimensions();
-  int meshID = interface.getMeshID("SWE_solver_Mesh");
-  int heightS1Id = interface.getDataID("heightS1", meshID);
-  int huS1Id = interface.getDataID("huS1", meshID);
-  int hvS1Id = interface.getDataID("hvS1", meshID);
-  int heightGradId = interface.getDataID("heightGrad", meshID);
-  int huGradId = interface.getDataID("huGrad", meshID);
-  int hvGradId = interface.getDataID("hvGrad", meshID);
-  int* vertexIDs;
-  vertexIDs = new int[(l_nY + 2)];
-  double* grid;
-  grid = new double[dimensions * (l_nY + 2)];
+  int meshID = interface.getMeshID("SWE_solver-Mesh");
+
+  int height_SWEId = interface.getDataID("height_SWE", meshID);
+  int hu_SWEId = interface.getDataID("hu_SWE", meshID);
+  int hv_SWEId = interface.getDataID("hv_SWE", meshID);
+
+  // int prghId = interface.getDataID("Prgh", meshID);
+
+  int* vertexIDs = new int[(l_nY + 2)];
+  double* grid = new double[dimensions * (l_nY + 2)];
   int count=0;
   for (int j=0; j <= l_nY + 1 ; j++){
       grid[count++] = 0;
@@ -135,19 +134,23 @@ int main( int argc, char** argv ) {
   cout << "Initialize preCICE..." << endl;
   float precice_dt = interface.initialize();
 
-  double* heightS1_db = new double[l_nX + 2];
-  double* huS1_db = new double[l_nX + 2];
-  double* hvS1_db = new double[l_nX + 2];
+  double* height_SWE_db = new double[l_nX + 2];
+  double* hu_SWE_db = new double[l_nX + 2];
+  double* hv_SWE_db = new double[l_nX + 2];
 
-  double* heightGrad_db = new double[l_nX + 2];
-  double* huGrad_db = new double[l_nX + 2];
-  double* hvGrad_db = new double[l_nX + 2];
+  // double* heightGrad_SWE_db = new double[l_nX + 2];
+  // double* huGrad_SWE_db = new double[l_nX + 2];
+  // double* hvGrad_SWE_db = new double[l_nX + 2];
 
   float time_CP;
 
-  PreciceData preciceData{heightS1Id, huS1Id, hvS1Id, heightS1_db, huS1_db, hvS1_db,
-                          heightGradId, huGradId, hvGradId, heightGrad_db, huGrad_db, hvGrad_db,
+  PreciceData preciceData{height_SWEId, hu_SWEId, hv_SWEId, height_SWE_db, hu_SWE_db, hv_SWE_db,
                           vertexIDs};
+
+  // PreciceData preciceData{height_SWEId, hu_SWEId, hv_SWEId, height_SWE_db, hu_SWE_db, hv_SWE_db,
+  //                         heightGrad_SWEId, huGrad_SWEId, hvGrad_SWEId, heightGrad_SWE_db, huGrad_SWE_db, hvGrad_SWE_db,
+  //                         vertexIDs};
+
   // *
   //***************preCICE**************************
 
@@ -201,23 +204,23 @@ int main( int argc, char** argv ) {
   tools::Logger::logger.printStartMessage();
   tools::Logger::logger.initWallClockTime(time(NULL));
 
-  l_wavePropgationBlock.setBoundaryType(BND_RIGHT, OUTFLOW_COUPLE);
+  // l_wavePropgationBlock.setBoundaryType(BND_RIGHT, OUTFLOW_COUPLE);
+  l_wavePropgationBlock.setBoundaryType(BND_RIGHT, OUTFLOW);
 
 
-  //this apparently comes from the config file
-    if (interface.isActionRequired(actionWriteInitialData())) {
-      std::cout << "SWE_solver action write initial data" << '\n';
-      write_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, l_nY);
-      interface.markActionFulfilled(actionWriteInitialData());
-    }
+    // if (interface.isActionRequired(actionWriteInitialData())) {
+    //   std::cout << "SWE_solver action write initial data" << '\n';
+    //   write_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, l_nY);
+    //   interface.markActionFulfilled(actionWriteInitialData());
+    // }
 
   interface.initializeData();
 
-  if (interface.isReadDataAvailable()) {
-    std::cout << "SWE_solver Read Data Available" << '\n';
-    readGradient_preCICE(interface, l_wavePropgationBlock,
-        &preciceData,  l_nX +2);
-  }
+  // if (interface.isReadDataAvailable()) {
+  //   std::cout << "SWE_solver Read Data Available" << '\n';
+  //   readGradient_preCICE(interface, l_wavePropgationBlock,
+  //       &preciceData,  l_nX +2);
+  // }
 
   //! simulation time.
   float l_t = 0.0;
@@ -259,8 +262,8 @@ int main( int argc, char** argv ) {
 
       precice_dt = interface.advance(l_maxTimeStepWidth);
 
-      readGradient_preCICE(interface, l_wavePropgationBlock,
-          &preciceData, l_nX+2);
+      // readGradient_preCICE(interface, l_wavePropgationBlock,
+      //     &preciceData, l_nX+2);
 
       // update the cpu time in the logger
       tools::Logger::logger.updateTime("Cpu");
@@ -323,5 +326,5 @@ int main( int argc, char** argv ) {
 //
 //  std::cout << "output 2" << '\n';
 //  for(int i = 0; i < l_nY +2; i++){
-//    std::cout << heightS1_db[i] << '\n';
+//    std::cout << height_SWE_db[i] << '\n';
 //  }

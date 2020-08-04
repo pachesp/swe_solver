@@ -1,0 +1,5 @@
+#!/bin/bash
+
+scons -c
+rm -fv build/build_SWE_gnu_* build/precice-run/
+rm -fv build/SWE_gnu_* build/precice-Solver* reference.xml build/output/*

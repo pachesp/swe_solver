@@ -1,5 +1,7 @@
 #!/bin/bash
-
+cd SWE_solver
 rm  build/precice-Solver* build/reference.xml build/output*
+./compile
+cd ..
 size=50
-.build/SWE_gnu_debug_none_fwave_1 -x $size -y $size -o output/$domain1
+./SWE_solver/build/SWE_gnu_debug_none_fwave_1 -x $size -y $size -o output/$domain1
