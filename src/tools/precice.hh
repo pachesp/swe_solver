@@ -48,6 +48,11 @@ void writeCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float t
 
 void restoreCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float &time, float time_CP, int size, int columNr);
 
+//-----------------------To interfoam-----------------------------------------------------
+
+void write2Interfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+                  int size, int columNr);
+
 // void storeData_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
 //                      int columNr, int size);
 //

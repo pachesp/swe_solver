@@ -13,19 +13,19 @@ void write_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, 
     interface.writeBlockScalarData(data->snd_hvId, size, data->vertexIDs, data->snd_hv_db);
 }
 
-void writeGradient_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data, int size, int columNr){
-
-    for(int i = 0; i < size ; i++){ //Data stored column-wise
-
-      data->snd_height_db[i] = (double)wavePropagationBlock.hGrad[i];
-      data->snd_hu_db[i] = (double)wavePropagationBlock.huGrad_SWE[i];
-      data->snd_hv_db[i] = (double)wavePropagationBlock.hvGrad_SWE[i];
-    }
-
-    interface.writeBlockScalarData(data->snd_heightId, size, data->vertexIDs, data->snd_height_db);
-    interface.writeBlockScalarData(data->snd_huId, size, data->vertexIDs, data->snd_hu_db);
-    interface.writeBlockScalarData(data->snd_hvId, size, data->vertexIDs, data->snd_hv_db);
-}
+// void writeGradient_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data, int size, int columNr){
+//
+//     for(int i = 0; i < size ; i++){ //Data stored column-wise
+//
+//       data->snd_height_db[i] = (double)wavePropagationBlock.hGrad[i];
+//       data->snd_hu_db[i] = (double)wavePropagationBlock.huGrad_SWE[i];
+//       data->snd_hv_db[i] = (double)wavePropagationBlock.hvGrad_SWE[i];
+//     }
+//
+//     interface.writeBlockScalarData(data->snd_heightId, size, data->vertexIDs, data->snd_height_db);
+//     interface.writeBlockScalarData(data->snd_huId, size, data->vertexIDs, data->snd_hu_db);
+//     interface.writeBlockScalarData(data->snd_hvId, size, data->vertexIDs, data->snd_hv_db);
+// }
 
 // void read_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock,
 //                   SWE_Block1D* ghoshtBlock, PreciceData *data, int size, int columNr){
@@ -89,6 +89,25 @@ void restoreCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float
             wavePropagationBlock.getDischarge_hv()[i][j] =  (*(data->CP_hv_f2d))[i][j];
         }
     }
+}
+
+//---------------------------To interfoam--------------------------
+
+void write2Interfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+                  int size, int columNr)
+{
+
+    for(int i = 0; i < size ; i++){ //Data stored column-wise
+      data->snd_height_db[i] = (double)wavePropagationBlock.getWaterHeight()[columNr][i];
+      // divide hu and hv by h for sending the velocities to interfoam
+      data->snd_hu_db[i] = (double)wavePropagationBlock.getDischarge_hu()[columNr][i] / data->snd_height_db[i];
+      data->snd_hv_db[i] = (double)wavePropagationBlock.getDischarge_hv()[columNr][i] / data->snd_height_db[i];
+    }
+
+    interface.writeBlockScalarData(data->snd_heightId, size, data->vertexIDs, data->snd_height_db);
+    interface.writeBlockScalarData(data->snd_huId, size, data->vertexIDs, data->snd_hu_db);
+    interface.writeBlockScalarData(data->snd_hvId, size, data->vertexIDs, data->snd_hv_db);
+
 }
 
 // void storeData_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data, int columNr, int size){

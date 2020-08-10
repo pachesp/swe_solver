@@ -256,7 +256,7 @@ int main( int argc, char** argv ) {
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
 
-      write_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, l_nY);
+      write2Interfoam_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, l_nY);
 
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt);
 
