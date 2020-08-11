@@ -63,9 +63,9 @@ class SWE_Scenario {
     virtual float waterHeightAtRest() { return 10.0f; };
 
     // virtual float endSimulation() { return 0.1f; };
-    virtual float endSimulation() { return 20.f; };
+    virtual float endSimulation() { return 2.f; };
 
-    virtual int setNumberCheckpoints() { return 50; };
+    virtual int setNumberCheckpoints() { return 20; };
 
     virtual BoundaryType getBoundaryType(BoundaryEdge edge) { return WALL; };
     virtual float getBoundaryPos(BoundaryEdge edge) {
@@ -78,7 +78,7 @@ class SWE_Scenario {
     virtual ~SWE_Scenario() {};
 
   protected:
-    float side = 1000.f;
+    float side = 10.f;
 
 };
 

@@ -11,11 +11,11 @@ using namespace precice::constants;
 struct PreciceData{
 
   int  snd_heightId;
-  int  snd_huId;
-  int  snd_hvId;
+  int  snd_UId;
+  // int  snd_hvId;
   double* snd_height_db;
-  double* snd_hu_db;
-  double* snd_hv_db;
+  double* snd_U_db;
+  // double* snd_hv_db;
 
   // int recv_prghId;
   // int recv_huId;

@@ -118,25 +118,27 @@ int main( int argc, char** argv ) {
   int meshID = interface.getMeshID("SWE_solver-Mesh");
 
   int height_SWEId = interface.getDataID("height_SWE", meshID);
-  int hu_SWEId = interface.getDataID("hu_SWE", meshID);
-  int hv_SWEId = interface.getDataID("hv_SWE", meshID);
+  int HU_SWEId = interface.getDataID("HU_SWE", meshID);
+  // int hv_SWEId = interface.getDataID("hv_SWE", meshID);
 
   // int prghId = interface.getDataID("Prgh", meshID);
 
-  int* vertexIDs = new int[(l_nY + 2)];
-  double* grid = new double[dimensions * (l_nY + 2)];
+  int* vertexIDs = new int[l_nY];
+  //setting grid coordinates on face centres, as in interfoam
+  double* grid = new double[dimensions * l_nY];
   int count=0;
-  for (int j=0; j <= l_nY + 1 ; j++){
-      grid[count++] = 0;
-      grid[count++] = j;
+  double xEnd = 10.0; double yMid = 5.0;
+  for (int j=1; j <= l_nY; j++){
+      grid[count++] = xEnd;                             // x
+      grid[count++] = yMid;                             // y
+      grid[count++] = l_originX + (j - 0.5) * l_dY;    // z
     }
-  interface.setMeshVertices(meshID, (l_nY+2) , grid, vertexIDs);
+  interface.setMeshVertices(meshID, (l_nY) , grid, vertexIDs);
   cout << "Initialize preCICE..." << endl;
   float precice_dt = interface.initialize();
 
-  double* height_SWE_db = new double[l_nX + 2];
-  double* hu_SWE_db = new double[l_nX + 2];
-  double* hv_SWE_db = new double[l_nX + 2];
+  double* height_SWE_db = new double[l_nY];
+  double* HU_SWE_db = new double[dimensions * l_nY];
 
   // double* heightGrad_SWE_db = new double[l_nX + 2];
   // double* huGrad_SWE_db = new double[l_nX + 2];
@@ -144,8 +146,8 @@ int main( int argc, char** argv ) {
 
   float time_CP;
 
-  PreciceData preciceData{height_SWEId, hu_SWEId, hv_SWEId, height_SWE_db, hu_SWE_db, hv_SWE_db,
-                          vertexIDs};
+  PreciceData preciceData{height_SWEId, HU_SWEId, height_SWE_db, HU_SWE_db,
+                    vertexIDs};
 
   // PreciceData preciceData{height_SWEId, hu_SWEId, hv_SWEId, height_SWE_db, hu_SWE_db, hv_SWE_db,
   //                         heightGrad_SWEId, huGrad_SWEId, hvGrad_SWEId, heightGrad_SWE_db, huGrad_SWE_db, hvGrad_SWE_db,
@@ -159,7 +161,6 @@ int main( int argc, char** argv ) {
 
   //! time when the simulation ends.
   float l_endSimulation = l_scenario.endSimulation();
-  // float l_endSimulation = 200.0;
 
   //! checkpoints when output files are written.
   float* l_checkPoints = new float[l_numberOfCheckPoints+1];
@@ -251,12 +252,13 @@ int main( int argc, char** argv ) {
 
       //! maximum allowed time step width.
       // float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
-      float l_maxTimeStepWidth = 0.125;
+      float l_maxTimeStepWidth = 0.0009765625;
+      // float l_maxTimeStepWidth = 0.125;
 
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
 
-      write2Interfoam_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, l_nY);
+      write2Interfoam_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX, l_nY);
 
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt);
 

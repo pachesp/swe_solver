@@ -1,17 +1,17 @@
 #include "tools/precice.hh"
 
-void write_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data, int size, int columNr){
-
-    for(int i = 0; i < size ; i++){ //Data stored column-wise
-      data->snd_height_db[i] = (double)wavePropagationBlock.getWaterHeight()[columNr][i];
-      data->snd_hu_db[i] = (double)wavePropagationBlock.getDischarge_hu()[columNr][i];
-      data->snd_hv_db[i] = (double)wavePropagationBlock.getDischarge_hv()[columNr][i];
-    }
-
-    interface.writeBlockScalarData(data->snd_heightId, size, data->vertexIDs, data->snd_height_db);
-    interface.writeBlockScalarData(data->snd_huId, size, data->vertexIDs, data->snd_hu_db);
-    interface.writeBlockScalarData(data->snd_hvId, size, data->vertexIDs, data->snd_hv_db);
-}
+// void write_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data, int size, int columNr){
+//
+//     for(int i = 0; i < size ; i++){ //Data stored column-wise
+//       data->snd_height_db[i] = (double)wavePropagationBlock.getWaterHeight()[columNr][i];
+//       data->snd_hu_db[i] = (double)wavePropagationBlock.getDischarge_hu()[columNr][i];
+//       data->snd_hv_db[i] = (double)wavePropagationBlock.getDischarge_hv()[columNr][i];
+//     }
+//
+//     interface.writeBlockScalarData(data->snd_heightId, size, data->vertexIDs, data->snd_height_db);
+//     interface.writeBlockScalarData(data->snd_huId, size, data->vertexIDs, data->snd_hu_db);
+//     interface.writeBlockScalarData(data->snd_hvId, size, data->vertexIDs, data->snd_hv_db);
+// }
 
 // void writeGradient_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data, int size, int columNr){
 //
@@ -96,17 +96,19 @@ void restoreCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float
 void write2Interfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
                   int size, int columNr)
 {
+    int count = 0;
 
-    for(int i = 0; i < size ; i++){ //Data stored column-wise
+    for(int i = 1; i < size ; i++){ //Data stored column-wise
       data->snd_height_db[i] = (double)wavePropagationBlock.getWaterHeight()[columNr][i];
+
       // divide hu and hv by h for sending the velocities to interfoam
-      data->snd_hu_db[i] = (double)wavePropagationBlock.getDischarge_hu()[columNr][i] / data->snd_height_db[i];
-      data->snd_hv_db[i] = (double)wavePropagationBlock.getDischarge_hv()[columNr][i] / data->snd_height_db[i];
+      data->snd_U_db[count++] = (double)(wavePropagationBlock.getDischarge_hu()[columNr][i] / data->snd_height_db[i]);
+      data->snd_U_db[count++] = (double)(wavePropagationBlock.getDischarge_hv()[columNr][i] / data->snd_height_db[i]);
+      data->snd_U_db[count++] = 0.0;
     }
 
     interface.writeBlockScalarData(data->snd_heightId, size, data->vertexIDs, data->snd_height_db);
-    interface.writeBlockScalarData(data->snd_huId, size, data->vertexIDs, data->snd_hu_db);
-    interface.writeBlockScalarData(data->snd_hvId, size, data->vertexIDs, data->snd_hv_db);
+    interface.writeBlockVectorData(data->snd_UId, size, data->vertexIDs, data->snd_U_db);
 
 }
 
