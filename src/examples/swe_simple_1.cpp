@@ -131,7 +131,7 @@ int main( int argc, char** argv ) {
   for (int j=1; j <= l_nY; j++){
       grid[count++] = xEnd;                             // x
       grid[count++] = yMid;                             // y
-      grid[count++] = l_originX + (j - 0.5) * l_dY;    // z
+      grid[count++] = l_originY + (j - 0.5) * l_dY;     // z
     }
   interface.setMeshVertices(meshID, (l_nY) , grid, vertexIDs);
   cout << "Initialize preCICE..." << endl;
@@ -148,10 +148,6 @@ int main( int argc, char** argv ) {
 
   PreciceData preciceData{height_SWEId, HU_SWEId, height_SWE_db, HU_SWE_db,
                     vertexIDs};
-
-  // PreciceData preciceData{height_SWEId, hu_SWEId, hv_SWEId, height_SWE_db, hu_SWE_db, hv_SWE_db,
-  //                         heightGrad_SWEId, huGrad_SWEId, hvGrad_SWEId, heightGrad_SWE_db, huGrad_SWE_db, hvGrad_SWE_db,
-  //                         vertexIDs};
 
   // *
   //***************preCICE**************************
@@ -258,7 +254,7 @@ int main( int argc, char** argv ) {
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
 
-      write2Interfoam_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX, l_nY);
+      write2Interfoam_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, l_nY);
 
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt);
 

@@ -100,6 +100,7 @@ void write2Interfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagat
 
     for(int i = 1; i < size ; i++){ //Data stored column-wise
       data->snd_height_db[i] = (double)wavePropagationBlock.getWaterHeight()[columNr][i];
+      // std::cout << "SENDING THIS HEIGHT: " <<  data->snd_height_db[i] << '\n';
 
       // divide hu and hv by h for sending the velocities to interfoam
       data->snd_U_db[count++] = (double)(wavePropagationBlock.getDischarge_hu()[columNr][i] / data->snd_height_db[i]);

@@ -89,7 +89,7 @@ class SWE_FranciscoScenario : public SWE_RadialDamBreakScenario {
 
         bool circ = sqrt(a * a + b * b) < (side * 0.1);
 
-       return circ ? 15.f: 10.0f;
+       return circ ? 10.f: 5.0f;
     };
 
 };
