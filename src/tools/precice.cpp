@@ -69,7 +69,6 @@ void writeCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float t
     if(data->CP_hu_f2d) delete data->CP_hu_f2d;
     if(data->CP_hv_f2d) delete data->CP_hv_f2d;
 
-
     time_CP = time;
 
     data->CP_height_f2d = new Float2D(wavePropagationBlock.getWaterHeight(), false);
@@ -94,22 +93,74 @@ void restoreCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float
 //---------------------------To interfoam--------------------------
 
 void write2Interfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
-                  int size, int columNr)
+                  int columNr)
 {
+    int nY = data->l_nY; //resolution
+    double dY = data->l_dY; //cell size in y-direction
+    int dim = 3; //3-dimension
     int count = 0;
 
-    for(int i = 1; i < size ; i++){ //Data stored column-wise
-      data->snd_height_db[i] = (double)wavePropagationBlock.getWaterHeight()[columNr][i];
-      // std::cout << "SENDING THIS HEIGHT: " <<  data->snd_height_db[i] << '\n';
-
-      // divide hu and hv by h for sending the velocities to interfoam
-      data->snd_U_db[count++] = (double)(wavePropagationBlock.getDischarge_hu()[columNr][i] / data->snd_height_db[i]);
-      data->snd_U_db[count++] = (double)(wavePropagationBlock.getDischarge_hv()[columNr][i] / data->snd_height_db[i]);
-      data->snd_U_db[count++] = 0.0;
+    // Writing Alpha to OF - Begin
+    double* alpha = new double[nY * nY]; //scalar alpha holder for sending it to IF
+    for (int i = 0; i < nY; i++) {
+        double height = (double)wavePropagationBlock.getWaterHeight()[columNr][i];
+        for (int j = 0; j < nY; j++) {
+            double yCoord = data->grid3D[count * dim + 1];      // y-coor of the IF mesh
+            if(height < yCoord - 0.5 * dY ){
+                alpha[count] = 0.0;
+            } else if(height > yCoord + 0.5 * dY){
+                alpha[count] = 1.0;
+            } else{
+                alpha[count] = 0.5 + (height - yCoord) / dY;	// Interpolate
+            }
+            count++;
+        }
     }
+    // Writing Alpha to OF - End
 
-    interface.writeBlockScalarData(data->snd_heightId, size, data->vertexIDs, data->snd_height_db);
-    interface.writeBlockVectorData(data->snd_UId, size, data->vertexIDs, data->snd_U_db);
+
+    // Writing prgh to OF - Begin
+    double rho_water = 1000.0;
+    double rho_air = 1.0;
+    double g = 9.81;
+
+    double* p_rgh = new double[nY * nY];
+    count = 0;
+    for (int i = 0; i < nY; i++) {
+        double rho_mixed = rho_water * alpha[i] + rho_air * (1 - alpha[i]);
+        for (int j = 0; j < nY; j++) {
+            double yCoord = data->grid3D[count * dim + 1];   // y-coord of the IF mesh
+            p_rgh[count] = rho_mixed * g * yCoord;           // Set p_rgh  eq 5.16 mintgen
+            count++;
+        }
+    }
+    // Writing prgh to OF - End
+
+    // Writing Velocity to OF - Begin
+    double* U = new double[dim * nY * nY]; //3D velocity holder for sending it to IF
+    count = 0;
+    for(int i = 1; i < nY ; i++){
+        double hu = (double)(wavePropagationBlock.getDischarge_hu()[columNr][i]);
+        double hv = (double)(wavePropagationBlock.getDischarge_hv()[columNr][i]);
+        for (int j = 0; j < nY; j++) {
+            double yCoord = data->grid3D[count * dim + 1]; // y-coord of the IF mesh
+            // divide hu and hv by h for sending the velocities to interfoam
+            U[count * dim + 0] = hu / yCoord;
+            U[count * dim + 1] = hv / yCoord;
+            U[count * dim + 2] = 0.0;
+            count++;
+        }
+    }
+    // Writing Velocity to OF - End
+
+    // Exchange data
+    interface.writeBlockScalarData(data->snd_alphaId, nY * nY, data->vertexIDs, alpha);
+    interface.writeBlockScalarData(data->snd_prghId, nY * nY, data->vertexIDs, p_rgh);
+    interface.writeBlockVectorData(data->snd_VelocityId, nY * nY, data->vertexIDs, U);
+
+    delete [] alpha;
+    delete [] p_rgh;
+    delete [] U;
 
 }
 

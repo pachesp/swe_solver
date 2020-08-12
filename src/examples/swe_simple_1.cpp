@@ -90,7 +90,9 @@ int main( int argc, char** argv ) {
 
   //! number of checkpoints for visualization (at each checkpoint in time, an output file is written).
   // int l_numberOfCheckPoints = 50;
-  int l_numberOfCheckPoints = l_scenario.setNumberCheckpoints();
+  // int l_numberOfCheckPoints = l_scenario.setNumberCheckpoints();
+  int l_numberOfCheckPoints = 40;
+
 
   //! size of a single cell in x- and y-direction
   float l_dX, l_dY;
@@ -109,54 +111,42 @@ int main( int argc, char** argv ) {
   l_originX = l_scenario.getBoundaryPos(BND_LEFT);
   l_originY = l_scenario.getBoundaryPos(BND_BOTTOM);
 
-  //***************preCICE**************************
-  //*
+  // +++ preCICE config - BEGIN +++
   std::string configFileName("precice-config.xml");
   std::string solverName = "SWE_solver";
   SolverInterface interface(solverName, configFileName, 0, 1);
   int dimensions = interface.getDimensions();
   int meshID = interface.getMeshID("SWE_solver-Mesh");
+  int alphaId = interface.getDataID("Alpha", meshID);
+  int prghId = interface.getDataID("Prgh", meshID);
+  int velocityId = interface.getDataID("Velocity", meshID);
 
-  int height_SWEId = interface.getDataID("height_SWE", meshID);
-  int HU_SWEId = interface.getDataID("HU_SWE", meshID);
-  // int hv_SWEId = interface.getDataID("hv_SWE", meshID);
-
-  // int prghId = interface.getDataID("Prgh", meshID);
-
-  int* vertexIDs = new int[l_nY];
-  //setting grid coordinates on face centres, as in interfoam
-  double* grid = new double[dimensions * l_nY];
+  //set coordinates on face centres of the interfoam left boundary
+  int* vertexIDs = new int[l_nY * l_nY];         // vetrices container
+  double* grid3D = new double[dimensions * l_nY * l_nY];   // coordinates of the vertices TODO free
+  double xEnd = 10.0; //end x coord of SWE , start of x coord of IF
   int count=0;
-  double xEnd = 10.0; double yMid = 5.0;
-  for (int j=1; j <= l_nY; j++){
-      grid[count++] = xEnd;                             // x
-      grid[count++] = yMid;                             // y
-      grid[count++] = l_originY + (j - 0.5) * l_dY;     // z
+  for (int i = 1; i <= l_nY; i++){
+    for (int j = 1; j <= l_nY; j++){
+      grid3D[count++] = xEnd;                       // x
+      grid3D[count++] = 0 + (i - 0.5) * l_dY;       // y
+      grid3D[count++] = 0 + (j - 0.5) * l_dY;       // z
     }
-  interface.setMeshVertices(meshID, (l_nY) , grid, vertexIDs);
-  cout << "Initialize preCICE..." << endl;
+  }
+  interface.setMeshVertices(meshID, l_nY * l_nY , grid3D, vertexIDs);
   float precice_dt = interface.initialize();
+  PreciceData preciceData{alphaId, prghId, velocityId, grid3D, l_nY, (double)l_dY, vertexIDs};
+ // +++ preCICE config - END +++
 
-  double* height_SWE_db = new double[l_nY];
-  double* HU_SWE_db = new double[dimensions * l_nY];
-
-  // double* heightGrad_SWE_db = new double[l_nX + 2];
-  // double* huGrad_SWE_db = new double[l_nX + 2];
-  // double* hvGrad_SWE_db = new double[l_nX + 2];
-
+  // holds time at checkpoints
   float time_CP;
-
-  PreciceData preciceData{height_SWEId, HU_SWEId, height_SWE_db, HU_SWE_db,
-                    vertexIDs};
-
-  // *
-  //***************preCICE**************************
 
   // initialize the wave propagation block
   l_wavePropgationBlock.initScenario(l_originX, l_originY, l_scenario);
 
   //! time when the simulation ends.
-  float l_endSimulation = l_scenario.endSimulation();
+  // float l_endSimulation = l_scenario.endSimulation();
+  float l_endSimulation = 5.f;
 
   //! checkpoints when output files are written.
   float* l_checkPoints = new float[l_numberOfCheckPoints+1];
@@ -254,7 +244,7 @@ int main( int argc, char** argv ) {
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
 
-      write2Interfoam_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, l_nY);
+      write2Interfoam_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY);
 
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt);
 
