@@ -3,6 +3,6 @@ cd SWE_solver
 rm  build/precice-Solver* build/reference.xml build/output*
 ./compile
 cd ..
-size=30
+size=20
 domain1="swe_solver"
 ./SWE_solver/build/SWE_gnu_debug_none_fwave_1 -x $size -y $size -o SWE_solver/build/output/$domain1

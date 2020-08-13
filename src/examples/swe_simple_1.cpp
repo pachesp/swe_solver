@@ -89,10 +89,8 @@ int main( int argc, char** argv ) {
   SWE_FranciscoScenario l_scenario;
 
   //! number of checkpoints for visualization (at each checkpoint in time, an output file is written).
-  // int l_numberOfCheckPoints = 50;
   // int l_numberOfCheckPoints = l_scenario.setNumberCheckpoints();
-  int l_numberOfCheckPoints = 40;
-
+  int l_numberOfCheckPoints = 30;
 
   //! size of a single cell in x- and y-direction
   float l_dX, l_dY;
@@ -146,7 +144,7 @@ int main( int argc, char** argv ) {
 
   //! time when the simulation ends.
   // float l_endSimulation = l_scenario.endSimulation();
-  float l_endSimulation = 5.f;
+  float l_endSimulation = 3.f;
 
   //! checkpoints when output files are written.
   float* l_checkPoints = new float[l_numberOfCheckPoints+1];

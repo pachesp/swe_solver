@@ -1,4 +1,5 @@
 #include "tools/precice.hh"
+#include <iomanip>      // std::setprecision
 
 // void write_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data, int size, int columNr){
 //
@@ -100,22 +101,57 @@ void write2Interfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagat
     int dim = 3; //3-dimension
     int count = 0;
 
+
     // Writing Alpha to OF - Begin
     double* alpha = new double[nY * nY]; //scalar alpha holder for sending it to IF
+    count = 0;
     for (int i = 0; i < nY; i++) {
         double height = (double)wavePropagationBlock.getWaterHeight()[columNr][i];
         for (int j = 0; j < nY; j++) {
-            double yCoord = data->grid3D[count * dim + 1];      // y-coor of the IF mesh
-            if(height < yCoord - 0.5 * dY ){
-                alpha[count] = 0.0;
-            } else if(height > yCoord + 0.5 * dY){
-                alpha[count] = 1.0;
+            double yCoord = data->grid3D[(i + j*nY) * dim + 1];      // y-coor of the IF mesh
+            // if(height <= yCoord - 0.5 * dY ){
+            //     alpha[count] = 0.0;
+            // } else if(height >= yCoord + 0.5 * dY){
+            //     alpha[count] = 1.0;
+            // } else{
+            //     alpha[count] = 0.5 + (height - yCoord) / dY;	// Interpolate
+            // }
+            // std::cout << "comparing yCoord: " << yCoord << " and Waterheight: " << height;
+            if(height <= yCoord){
+                alpha[i + j*nY] = 0.0;
             } else{
-                alpha[count] = 0.5 + (height - yCoord) / dY;	// Interpolate
+                alpha[i + j*nY] = 1.0;
             }
-            count++;
+            // std::cout << " alpha is: " << alpha[i + j*nY] << '\n';
         }
     }
+
+    // std::cout << "\n\nCOORDINATES " << "\n";
+    // count = 0;
+    //     for (int i = 0; i <= nY-1 ; i++) {
+    //         for (int j = 0; j <= nY-1; j++) {
+    //             std::cout << std::fixed << std::setprecision(2)<< data->grid3D[count * dim + 1] << ", ";
+    //             count++;
+    //         }
+    //         std::cout << '\n';
+    //     }
+    //
+    // std::cout << "\n\nWaterHeight" << "\n";
+    //     for (int i = 1; i <= nY ; i++) {
+    //             std::cout << std::fixed << std::setprecision(2)
+    //             << (double)wavePropagationBlock.getWaterHeight()[columNr][i] << ", ";
+    //             count++;
+    //         }
+    // std::cout <<  '\n';
+    //
+    // std::cout << "\n\nALPHA" << "\n";
+    // for (int i = 0; i <= nY-1; i++) {
+    //     for (int j = 0; j <= nY-1; j++) {
+    //         std::cout << std::fixed << std::setprecision(2)<< alpha[i*nY + j] << ", ";
+    //     }
+    //     std::cout << '\n';
+    // }
+
     // Writing Alpha to OF - End
 
 
@@ -126,9 +162,9 @@ void write2Interfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagat
 
     double* p_rgh = new double[nY * nY];
     count = 0;
-    for (int i = 0; i < nY; i++) {
+    for (int i = 1; i <= nY; i++) {
         double rho_mixed = rho_water * alpha[i] + rho_air * (1 - alpha[i]);
-        for (int j = 0; j < nY; j++) {
+        for (int j = 1; j <= nY; j++) {
             double yCoord = data->grid3D[count * dim + 1];   // y-coord of the IF mesh
             p_rgh[count] = rho_mixed * g * yCoord;           // Set p_rgh  eq 5.16 mintgen
             count++;
@@ -139,10 +175,10 @@ void write2Interfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagat
     // Writing Velocity to OF - Begin
     double* U = new double[dim * nY * nY]; //3D velocity holder for sending it to IF
     count = 0;
-    for(int i = 1; i < nY ; i++){
+    for(int i = 1; i <= nY ; i++){
         double hu = (double)(wavePropagationBlock.getDischarge_hu()[columNr][i]);
         double hv = (double)(wavePropagationBlock.getDischarge_hv()[columNr][i]);
-        for (int j = 0; j < nY; j++) {
+        for (int j = 1; j <= nY; j++) {
             double yCoord = data->grid3D[count * dim + 1]; // y-coord of the IF mesh
             // divide hu and hv by h for sending the velocities to interfoam
             U[count * dim + 0] = hu / yCoord;
