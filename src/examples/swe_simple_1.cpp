@@ -60,6 +60,7 @@ int main( int argc, char** argv ) {
 
   args.addOption("grid-size-x", 'x', "Number of cells in x direction");
   args.addOption("grid-size-y", 'y', "Number of cells in y direction");
+  args.addOption("leftOrRight", 't', "is SWE left or right domain? (0 or 1 resp.)");
   args.addOption("output-basepath", 'o', "Output base file name");
 
   tools::Args::Result ret = args.parse(argc, argv);
@@ -77,27 +78,37 @@ int main( int argc, char** argv ) {
   //! number of grid cells in x- and y-direction.
   int l_nX, l_nY;
 
+  //wheather simulation is swe-of (0) or of-swe(1)
+  bool type;
+
   //! l_baseName of the plots.
   std::string l_baseName;
 
   // read command line parameters
   l_nX = args.getArgument<int>("grid-size-x");
   l_nY = args.getArgument<int>("grid-size-y");
+  type = args.getArgument<bool>("leftOrRight");
   l_baseName = args.getArgument<std::string>("output-basepath");
 
   // create a simple artificial scenario
-  SWE_FranciscoScenario l_scenario;
+  SWE_Scenario* l_scenario = nullptr;
+
+    if(!type){
+        l_scenario = new SWE_SweOf_Scenario();
+    }else{
+        l_scenario = new SWE_OfSwe_Scenario();
+    }
 
   //! number of checkpoints for visualization (at each checkpoint in time, an output file is written).
-  // int l_numberOfCheckPoints = l_scenario.setNumberCheckpoints();
+  // int l_numberOfCheckPoints = l_scenario->setNumberCheckpoints();
   int l_numberOfCheckPoints = 30;
 
   //! size of a single cell in x- and y-direction
   float l_dX, l_dY;
 
   // compute the size of a single cell
-  l_dX = (l_scenario.getBoundaryPos(BND_RIGHT) - l_scenario.getBoundaryPos(BND_LEFT) )/l_nX;
-  l_dY = (l_scenario.getBoundaryPos(BND_TOP) - l_scenario.getBoundaryPos(BND_BOTTOM) )/l_nY;
+  l_dX = (l_scenario->getBoundaryPos(BND_RIGHT) - l_scenario->getBoundaryPos(BND_LEFT) )/l_nX;
+  l_dY = (l_scenario->getBoundaryPos(BND_TOP) - l_scenario->getBoundaryPos(BND_BOTTOM) )/l_nY;
 
   // create a single wave propagation block
   SWE_WavePropagationBlock l_wavePropgationBlock(l_nX,l_nY,l_dX,l_dY);
@@ -106,10 +117,10 @@ int main( int argc, char** argv ) {
   float l_originX, l_originY;
 
   // get the origin from the scenario
-  l_originX = l_scenario.getBoundaryPos(BND_LEFT);
-  l_originY = l_scenario.getBoundaryPos(BND_BOTTOM);
+  l_originX = l_scenario->getBoundaryPos(BND_LEFT);
+  l_originY = l_scenario->getBoundaryPos(BND_BOTTOM);
 
-  // +++ preCICE config - BEGIN +++
+  // +++++++++++++++++ preCICE config - BEGIN +++++++++++++++++
   std::string configFileName("precice-config.xml");
   std::string solverName = "SWE_solver";
   SolverInterface interface(solverName, configFileName, 0, 1);
@@ -120,21 +131,23 @@ int main( int argc, char** argv ) {
   int velocityId = interface.getDataID("Velocity", meshID);
 
   //set coordinates on face centres of the interfoam left boundary
-  int* vertexIDs = new int[l_nY * l_nY];         // vetrices container
-  double* grid3D = new double[dimensions * l_nY * l_nY];   // coordinates of the vertices TODO free
-  double xEnd = 10.0; //end x coord of SWE , start of x coord of IF
+  int vertexIDs[l_nY * l_nY]{};
+  double grid3D[dimensions * l_nY * l_nY]{};
   int count=0;
+  double xBoundary = (!type ? 10 + l_dX : 10.0 - l_dX); //start or end of x coord in SWE, end of start of x coord in interFoam
   for (int i = 1; i <= l_nY; i++){
     for (int j = 1; j <= l_nY; j++){
-      grid3D[count++] = xEnd;                       // x
+      grid3D[count++] = xBoundary;                  // x
       grid3D[count++] = 0 + (i - 0.5) * l_dY;       // y
       grid3D[count++] = 0 + (j - 0.5) * l_dY;       // z
     }
   }
   interface.setMeshVertices(meshID, l_nY * l_nY , grid3D, vertexIDs);
+
+  //initilize preCICE
   float precice_dt = interface.initialize();
   PreciceData preciceData{alphaId, prghId, velocityId, grid3D, l_nY, (double)l_dY, vertexIDs};
- // +++ preCICE config - END +++
+ // +++++++++++++++++ preCICE config - END +++++++++++++++++
 
   // holds time at checkpoints
   float time_CP;
@@ -143,8 +156,8 @@ int main( int argc, char** argv ) {
   l_wavePropgationBlock.initScenario(l_originX, l_originY, l_scenario);
 
   //! time when the simulation ends.
-  // float l_endSimulation = l_scenario.endSimulation();
-  float l_endSimulation = 3.f;
+  // float l_endSimulation = l_scenario->endSimulation();
+  float l_endSimulation = 5.f;
 
   //! checkpoints when output files are written.
   float* l_checkPoints = new float[l_numberOfCheckPoints+1];
@@ -154,7 +167,7 @@ int main( int argc, char** argv ) {
      l_checkPoints[cp] = cp*(l_endSimulation/l_numberOfCheckPoints);
   }
 
-  // SWE_Block1D* l_rightGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_RIGHT);
+  SWE_Block1D* l_leftGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_LEFT);
 
   // Init fancy progressbar
   tools::ProgressBar progressBar(l_endSimulation);
@@ -172,7 +185,8 @@ int main( int argc, char** argv ) {
 		  l_wavePropgationBlock.getBathymetry(),
 		  l_boundarySize,
 		  l_nX, l_nY,
-		  l_dX, l_dY );
+		  l_dX, l_dY,
+          l_originX, l_originY);
 
 
   // Write zero time step
@@ -190,7 +204,7 @@ int main( int argc, char** argv ) {
   tools::Logger::logger.initWallClockTime(time(NULL));
 
   // l_wavePropgationBlock.setBoundaryType(BND_RIGHT, OUTFLOW_COUPLE);
-  l_wavePropgationBlock.setBoundaryType(BND_RIGHT, OUTFLOW);
+  l_wavePropgationBlock.setBoundaryType(BND_LEFT, OUTFLOW); // for counteacting line 172
 
 
     // if (interface.isActionRequired(actionWriteInitialData())) {
@@ -219,9 +233,13 @@ int main( int argc, char** argv ) {
         interface.markActionFulfilled(actionWriteIterationCheckpoint());
       }
 
+      if(type){ //execute if OF-SWE
+          readFromInterfoam_preCICE(interface, l_wavePropgationBlock, &preciceData, l_leftGhostCells ,l_nY);
+          l_wavePropgationBlock.setBoundaryType(BND_LEFT, INFLOW_COUPLE, l_leftGhostCells);
+      }
 
       // set values in ghost cells:
-      l_wavePropgationBlock.setGhostLayer();
+      l_wavePropgationBlock.setGhostLayer(); // TODO AQUI ME QUEDE
 
       // reset the cpu clock
       tools::Logger::logger.resetClockToCurrentTime("Cpu");
@@ -242,7 +260,9 @@ int main( int argc, char** argv ) {
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
 
-      write2Interfoam_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY);
+      if(!type){ // execute if SWE-OF
+          write2Interfoam_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY);
+      }
 
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt);
 

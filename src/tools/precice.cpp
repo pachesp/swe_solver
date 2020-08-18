@@ -102,7 +102,7 @@ void write2Interfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagat
     int count = 0;
 
     // Writing Alpha to OF - Begin
-    double* alpha = new double[nY * nY]; //scalar alpha holder for sending it to IF
+    double alpha[nY * nY] {};// = new double[nY * nY]; //scalar alpha holder for sending it to IF
     for (int i = 0; i < nY; i++) {
         double height = (double)wavePropagationBlock.getWaterHeight()[columNr][i];
         for (int j = 0; j < nY; j++) {
@@ -134,7 +134,7 @@ void write2Interfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagat
     // double rho_air = 1.0;
     // double g = 9.81;
     //
-    // double* p_rgh = new double[nY * nY];
+    // double p_rgh[nY * nY]{};
     // count = 0;
     // for (int i = 1; i <= nY; i++) {
     //     double rho_mixed = rho_water * alpha[i] + rho_air * (1 - alpha[i]);
@@ -147,13 +147,13 @@ void write2Interfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagat
     // // Writing prgh to OF - End
 
     // Writing Velocity to OF - Begin
-    double* U = new double[dim * nY * nY]; //3D velocity holder for sending it to IF
+    double U[dim * nY * nY] {}; //3D velocity holder for sending it to IF
     count = 0;
-    int count_alpha = 0;
+    int countAlpha = 0;
     double u, v;
     for(int i = 1; i <= nY ; i++){
-        // divide hu and hv by h for sending the velocities to interfoam if alpha < 0.001
-        if (alpha[count_alpha++] > 0.001){
+        // divide hu and hv by h for sending the velocities to interfoam if alpha > 0.001
+        if (alpha[countAlpha++] > 0.001){
             u = (double)(wavePropagationBlock.getDischarge_hu()[columNr][i] / wavePropagationBlock.getWaterHeight()[columNr][i]);
             v = (double)(wavePropagationBlock.getDischarge_hv()[columNr][i] / wavePropagationBlock.getWaterHeight()[columNr][i]);
         } else {
@@ -174,15 +174,48 @@ void write2Interfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagat
     // Writing Velocity to OF - End
 
     // Exchange data
-    interface.writeBlockScalarData(data->snd_alphaId, nY * nY, data->vertexIDs, alpha);
-    // interface.writeBlockScalarData(data->snd_prghId, nY * nY, data->vertexIDs, p_rgh);
-    interface.writeBlockVectorData(data->snd_VelocityId, nY * nY, data->vertexIDs, U);
-
-    delete [] alpha;
-    // delete [] p_rgh;
-    delete [] U;
+    interface.writeBlockScalarData(data->alphaID, nY * nY, data->vertexIDs, alpha);
+    // interface.writeBlockScalarData(data->prghID, nY * nY, data->vertexIDs, p_rgh);
+    interface.writeBlockVectorData(data->velocityID, nY * nY, data->vertexIDs, U);
 
 }
+
+
+void readFromInterfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+                  SWE_Block1D* ghoshtBlock, int columNr)
+{
+
+    int nY = data->l_nY; //resolution
+    double dY = data->l_dY; //cell size in y-direction
+    int dim = 3; //3-dimension
+
+    double alpha[nY * nY]{};
+    interface.readBlockScalarData(data->alphaID, nY * nY, data ->vertexIDs, alpha);
+    float h[nY] {};
+    for (int i = 0; i < nY; i++) {
+        for (int j = 0; j < nY; j++) {
+        h[j] += (float)(alpha[i*nY + j] * dY);
+        }
+    }
+
+    double U[dim * nY * nY]{};
+    interface.readBlockVectorData(data->velocityID, nY * nY, data ->vertexIDs, U);
+    float hu[nY] {};
+    float hv[nY] {};
+    for (int i = 0; i < nY; i++) {
+        for (int j = 0; j < nY; j++) {
+        hu[j] += (float)U[(i*nY + j) * dim + 0] * h[j];
+        hv[j] += (float)U[(i*nY + j) * dim + 1] * h[j];
+        }
+    }
+
+    SWE_Block1D* newBlock = new SWE_Block1D{h, hu, hv, 1};
+    ghoshtBlock->copyFrom(newBlock, nY);
+
+    delete newBlock;
+
+}
+
 
 // void storeData_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data, int columNr, int size){
 //     for(int i = 0; i < size ; i++){

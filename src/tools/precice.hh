@@ -10,9 +10,9 @@ using namespace precice::constants;
 
 struct PreciceData{
 
-  int  snd_alphaId;
-  int  snd_prghId;
-  int  snd_VelocityId;
+  int  alphaID;
+  int  prghID;
+  int  velocityID;
 
 
   double* grid3D;
@@ -60,7 +60,10 @@ void restoreCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float
 //-----------------------To interfoam-----------------------------------------------------
 
 void write2Interfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
-                  int columNr);
+                int columNr);
+
+void readFromInterfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+                SWE_Block1D* ghoshtBlock, int columNr);
 
 // void storeData_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
 //                      int columNr, int size);
