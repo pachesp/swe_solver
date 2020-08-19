@@ -561,13 +561,7 @@ void SWE_Block::setBoundaryConditions() {
     case CONNECT:
       break;
   	case INFLOW_COUPLE:
-	{
-		for(int j=0; j<=ny+1; j++) {
-          h[0][j] = neighbour[BND_LEFT]->h[j];
-          hu[0][j] = neighbour[BND_LEFT]->hu[j];
-          hv[0][j] = neighbour[BND_LEFT]->hv[j];
-         };
-	}
+		// do nothing because the assigment of the values is already done in precice read
     	break;
     case PASSIVE:
       break;

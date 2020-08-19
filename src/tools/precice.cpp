@@ -191,30 +191,34 @@ void readFromInterfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropag
 
     double alpha[nY * nY]{};
     interface.readBlockScalarData(data->alphaID, nY * nY, data->vertexIDs, alpha);
-    float h[nY] {};
+    float h[nY+2] {};
     for (int i = 0; i < nY; i++) {
-        for (int j = 0; j < nY; j++) {
-        h[j] += (float)alpha[i*nY + j] * dY;
+        for (int j = 1; j <= nY; j++) {
+            h[j] += (float)alpha[i*nY + (j-1)] * dY;
+            // std::cout << "alpha:" << alpha[i*nY + (j-1)] << " dY: " << dY << '\n';
+            // std::cout << "h[" << i << "][" << j << "]= " << h[j] << '\n';
         }
+        // std::cout  << '\n';
     }
 
-    // for (int j = 0; j < nY; j++) {
+    // //Debug
+    // for (int j = 0; j < nY + 2; j++) {
     //     std::cout << "H: " << h[j] << '\n';
     // }
 
     double U[dim * nY * nY]{};
     interface.readBlockVectorData(data->velocityID, nY * nY, data->vertexIDs, U);
-    float hu[nY] {};
-    float hv[nY] {};
-    for (int i = 0; i < nY; i++) {
+    float hu[nY+2] {};
+    float hv[nY+2] {};
+    for (int i = 1; i <= nY; i++) {
         for (int j = 0; j < nY; j++) {
-        hu[j] += (float)U[(i*nY + j) * dim + 0] * (float)alpha[i*nY + j] * h[j];
-        hv[j] += (float)U[(i*nY + j) * dim + 1] * (float)alpha[i*nY + j] * h[j];
+        hu[j] += (float)U[(i*nY + (j-1)) * dim + 0] * (float)alpha[i*nY + (j-1)] * dY;
+        hv[j] += (float)U[(i*nY + (j-1)) * dim + 1] * (float)alpha[i*nY + (j-1)] * dY;
         }
     }
 
     SWE_Block1D newBlock{h, hu, hv, 1};
-    ghoshtBlock->copyFrom(&newBlock, nY);
+    ghoshtBlock->copyFrom(&newBlock, nY+2);
 
 }
 

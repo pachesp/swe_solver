@@ -234,7 +234,7 @@ int main( int argc, char** argv ) {
       }
 
       if(type){ //execute if OF-SWE
-          readFromInterfoam_preCICE(interface, l_wavePropgationBlock, &preciceData, l_leftGhostCells ,l_nY);
+          readFromInterfoam_preCICE(interface, l_wavePropgationBlock, &preciceData, l_leftGhostCells, l_nY);
           l_wavePropgationBlock.setBoundaryType(BND_LEFT, INFLOW_COUPLE, l_leftGhostCells);
       }
 
