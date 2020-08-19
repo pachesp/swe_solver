@@ -204,7 +204,7 @@ int main( int argc, char** argv ) {
   tools::Logger::logger.initWallClockTime(time(NULL));
 
   // l_wavePropgationBlock.setBoundaryType(BND_RIGHT, OUTFLOW_COUPLE);
-  l_wavePropgationBlock.setBoundaryType(BND_LEFT, OUTFLOW); // for counteacting line 172
+  // l_wavePropgationBlock.setBoundaryType(BND_LEFT, INFLOW_COUPLE); // for counteacting line 172
 
 
     // if (interface.isActionRequired(actionWriteInitialData())) {

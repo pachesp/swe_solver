@@ -153,7 +153,7 @@ void write2Interfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagat
     double u, v;
     for(int i = 1; i <= nY ; i++){
         // divide hu and hv by h for sending the velocities to interfoam if alpha > 0.001
-        if (alpha[countAlpha++] > 0.001){
+        if (alpha[countAlpha++] > 0.001){ //TODO change to the Algorithm from mintgen
             u = (double)(wavePropagationBlock.getDischarge_hu()[columNr][i] / wavePropagationBlock.getWaterHeight()[columNr][i]);
             v = (double)(wavePropagationBlock.getDischarge_hv()[columNr][i] / wavePropagationBlock.getWaterHeight()[columNr][i]);
         } else {
@@ -190,29 +190,31 @@ void readFromInterfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropag
     int dim = 3; //3-dimension
 
     double alpha[nY * nY]{};
-    interface.readBlockScalarData(data->alphaID, nY * nY, data ->vertexIDs, alpha);
+    interface.readBlockScalarData(data->alphaID, nY * nY, data->vertexIDs, alpha);
     float h[nY] {};
     for (int i = 0; i < nY; i++) {
         for (int j = 0; j < nY; j++) {
-        h[j] += (float)(alpha[i*nY + j] * dY);
+        h[j] += (float)alpha[i*nY + j] * dY;
         }
     }
 
+    // for (int j = 0; j < nY; j++) {
+    //     std::cout << "H: " << h[j] << '\n';
+    // }
+
     double U[dim * nY * nY]{};
-    interface.readBlockVectorData(data->velocityID, nY * nY, data ->vertexIDs, U);
+    interface.readBlockVectorData(data->velocityID, nY * nY, data->vertexIDs, U);
     float hu[nY] {};
     float hv[nY] {};
     for (int i = 0; i < nY; i++) {
         for (int j = 0; j < nY; j++) {
-        hu[j] += (float)U[(i*nY + j) * dim + 0] * h[j];
-        hv[j] += (float)U[(i*nY + j) * dim + 1] * h[j];
+        hu[j] += (float)U[(i*nY + j) * dim + 0] * (float)alpha[i*nY + j] * h[j];
+        hv[j] += (float)U[(i*nY + j) * dim + 1] * (float)alpha[i*nY + j] * h[j];
         }
     }
 
-    SWE_Block1D* newBlock = new SWE_Block1D{h, hu, hv, 1};
-    ghoshtBlock->copyFrom(newBlock, nY);
-
-    delete newBlock;
+    SWE_Block1D newBlock{h, hu, hv, 1};
+    ghoshtBlock->copyFrom(&newBlock, nY);
 
 }
 

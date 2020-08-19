@@ -101,7 +101,7 @@ class SWE_OfSwe_Scenario : public SWE_RadialDamBreakScenario {
     virtual BoundaryType getBoundaryType(BoundaryEdge edge) {return OUTFLOW;};
 
     virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
-     return 10.0f;
+     return 5.0f;
     };
 
     virtual float getBoundaryPos(BoundaryEdge edge) {
