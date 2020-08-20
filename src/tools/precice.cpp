@@ -106,7 +106,7 @@ void write2Interfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagat
     for (int i = 0; i < nY; i++) {
         double height = (double)wavePropagationBlock.getWaterHeight()[columNr][i];
         for (int j = 0; j < nY; j++) {
-            double yCoord = data->grid3D[(i + j*nY) * dim + 1];      // y-coord of the IF mesh
+            double yCoord = data->grid3D[(i + j*nY) * dim + 1]; // y-coord of the IF mesh
             //Algorithm 1, Mintegen page 84
             if(height <= yCoord - 0.5 * dY ){
                 alpha[i + j*nY] = 0.0;
@@ -147,29 +147,136 @@ void write2Interfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagat
     // // Writing prgh to OF - End
 
     // Writing Velocity to OF - Begin
+
+    //normal Algorithm
+    // double U[dim * nY * nY] {}; //3D velocity holder for sending it to IF
+    // count = 0;
+    // int countAlpha = 0;
+    // double u, v;
+    // for(int i = 1; i <= nY ; i++){
+    //     // divide hu and hv by h for sending the velocities to interfoam if alpha > 0.001
+    //     if (alpha[countAlpha++] > 0.001){
+    //         u = (double)(wavePropagationBlock.getDischarge_hu()[columNr][i] / wavePropagationBlock.getWaterHeight()[columNr][i]);
+    //         v = (double)(wavePropagationBlock.getDischarge_hv()[columNr][i] / wavePropagationBlock.getWaterHeight()[columNr][i]);
+    //     } else {
+    //         u = 0.0;
+    //         v = 0.0;
+    //     }
+    //
+    //     for (int j = 0; j < nY; j++) {
+    //         U[count++] = u;
+    //         // std::cout << "Ux[" << i << "][" << j << "] " << U[count] << ',';
+    //         U[count++] = v;
+    //         // std::cout << "Uy[" << i << "][" << j << "] " << U[count] << ',';
+    //         U[count++] = 0.0;
+    //         // std::cout << "Uz[" << i << "][" << j << "] " << U[count];
+    //     }
+    //     // std::cout  << '\n';
+    // }
+
+    // Mintegens algorithm
     double U[dim * nY * nY] {}; //3D velocity holder for sending it to IF
+    double u, v, u_, v_, h, h_;
+    double rho_water = 1000.0; // water density
+    double du[(dim-1) * nY]{0.0}; // velocity gradient
+    double tau[(dim-1) * nY * nY]{0.0}; // wall shear stress
+    double ustar[(dim-1) * nY * nY]{0.0}; // modified velocity: sqrt(tau / rho)
+    double mu = 1e-06 * rho_water; // dynamic viscosity * density (water)
+
     count = 0;
-    int countAlpha = 0;
-    double u, v;
-    for(int i = 1; i <= nY ; i++){
-        // divide hu and hv by h for sending the velocities to interfoam if alpha > 0.001
-        if (alpha[countAlpha++] > 0.001){ //TODO change to the Algorithm from mintgen
-            u = (double)(wavePropagationBlock.getDischarge_hu()[columNr][i] / wavePropagationBlock.getWaterHeight()[columNr][i]);
-            v = (double)(wavePropagationBlock.getDischarge_hv()[columNr][i] / wavePropagationBlock.getWaterHeight()[columNr][i]);
-        } else {
-            u = 0.0;
-            v = 0.0;
-        }
+    for (int i = 0; i < nY; i++) {
+        h = (double)(wavePropagationBlock.getWaterHeight()[columNr][i]);
+        u = (double)(wavePropagationBlock.getDischarge_hu()[columNr][i]) / h;
+        v = (double)(wavePropagationBlock.getDischarge_hv()[columNr][i]) / h;
+
+        h_ = (double)(wavePropagationBlock.getWaterHeight()[columNr-1][i]);
+        u_ = (double)(wavePropagationBlock.getDischarge_hu()[columNr-1][i]) / h_;
+        v_ = (double)(wavePropagationBlock.getDischarge_hv()[columNr-1][i]) / h_;
+
+        du[i*dim + 0] = u - u_;
+        du[i*dim + 1] = v - v_;
 
         for (int j = 0; j < nY; j++) {
-            U[count++] = u;
-            // std::cout << "Ux[" << i << "][" << j << "] " << U[count] << ',';
-            U[count++] = v;
-            // std::cout << "Uy[" << i << "][" << j << "] " << U[count] << ',';
+
+            double yCoord = data->grid3D[(i + j*nY) * dim + 1];
+
+            tau[(i + j*nY) * dim + 0] =abs(mu * du[i*dim + 0] / dY);
+            tau[(i + j*nY) * dim + 1] =abs(mu * du[i*dim + 1] / dY);
+
+            ustar[(i + j*nY) * dim + 0] = std::sqrt(tau[(i + j*nY) * dim + 0] / rho_water);
+            ustar[(i + j*nY) * dim + 1] = std::sqrt(tau[(i + j*nY) * dim + 1] / rho_water);
+
+            // std::cout << " Ustarx[" << i << "][" << j << "]: " << ustar[(i + j*nY) * dim + 0] << ",";
+            // std::cout << " Ustary[" << i << "][" << j << "]: " << ustar[(i + j*nY) * dim + 1] << "\n";
+
+            U[count++] = u + ustar[(i + j*nY) * dim + 0] / 0.41 * (1+std::log(yCoord/h));
+            U[count++] = v + ustar[(i + j*nY) * dim + 1] / 0.41 * (1+std::log(yCoord/h));
             U[count++] = 0.0;
-            // std::cout << "Uz[" << i << "][" << j << "] " << U[count];
         }
-        // std::cout  << '\n';
+    }
+
+    int dim2 = 2;
+    double q3d[dim2]{};
+    double q2d[dim2]{};
+    double beta[dim2]{};
+    for (int i = 0; i < nY; i++) {
+        q2d[0] = (double)(wavePropagationBlock.getDischarge_hu()[columNr][i]);
+        q2d[1] = (double)(wavePropagationBlock.getDischarge_hv()[columNr][i]);
+
+        for (int j = 0; j < nY; j++) {
+            double yCoord = data->grid3D[(i + j*nY) * dim + 1];      // y-coord of the IF mesh
+            q3d[0] += alpha[i + j*nY] * U[(i + j*nY) * dim + 0] * yCoord;
+            q3d[1] += alpha[i + j*nY] * U[(i + j*nY) * dim + 1] * yCoord;
+        }
+    }
+
+
+    for (int n = 0; n < dim2; n++) {
+        beta[n] = q2d[n] / q3d[n];
+        if (beta[n] > 1) {
+            while (beta[n] > 1 ) {
+                for (int i = 0; i < nY; i++) {
+                    q3d[n] = 0.0;
+                    for (int j = 0; j < nY; j++) {
+                        double yCoord = data->grid3D[(i + j*nY) * dim + 1];
+                        U[(i + j*nY) * dim + n] = U[(i + j*nY) * dim + n] * beta[n];
+                        q3d[n] += alpha[i + j*nY] * U[(i + j*nY) * dim + n] * yCoord;
+                    }
+                    beta[n] = q2d[n] / q3d[n];
+                }
+            }
+        }
+        // else if (beta[n] < 1) { //TODO missing to take care of this case, so far this breaks it all
+        //     std::cout << "beta[" << n << "]" << beta[n] << '\n';
+        //     while (beta[n] < 1 ) {
+        //         for (int i = 0; i < nY; i++) {
+        //             q3d[n] = 0.0;
+        //             for (int j = 0; j < nY; j++) {
+        //                 double yCoord = data->grid3D[(i + j*nY) * dim + 1];
+        //                 U[(i + j*nY) * dim + n] = U[(i + j*nY) * dim + n] / beta[n];
+        //                 q3d[n] += alpha[i + j*nY] * U[(i + j*nY) * dim + n] * yCoord;
+        //             }
+        //             beta[n] = q2d[n] / q3d[n];
+        //         }
+        //     }
+        // }
+    }
+
+    double umax[dim2]{};
+    for (int n = 0; n < dim2; n++) {
+        for (int i = 0; i < nY; i++) {
+            for (int j = 0; j < nY; j++) {
+                if (umax[n] < alpha[i*nY + j] * U[i*nY + j]) {
+                    umax[n] = alpha[i*nY + j] * U[i*nY + j];
+                }
+            }
+            for (int j = 0; j < nY; j++) {
+                if (alpha[i*nY + j] < 0.001) {
+                    U[i*nY + j] = umax[n];
+                }
+            }
+
+        }
     }
     // Writing Velocity to OF - End
 
