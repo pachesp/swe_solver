@@ -60,7 +60,7 @@ int main( int argc, char** argv ) {
 
   args.addOption("grid-size-x", 'x', "Number of cells in x direction");
   args.addOption("grid-size-y", 'y', "Number of cells in y direction");
-  args.addOption("leftOrRight", 't', "is SWE left or right domain? (0 or 1 resp.)");
+  args.addOption("simType", 't', "twoDthreeDdsup = 2 \n twoDthreeDdsub = 3 \n threeDtwoDdsup = 4 \n threeDtwoDdsub =5");
   args.addOption("output-basepath", 'o', "Output base file name");
 
   tools::Args::Result ret = args.parse(argc, argv);
@@ -79,7 +79,7 @@ int main( int argc, char** argv ) {
   int l_nX, l_nY;
 
   //wheather simulation is swe-of (0) or of-swe(1)
-  bool type;
+  size_t simType;
 
   //! l_baseName of the plots.
   std::string l_baseName;
@@ -87,16 +87,18 @@ int main( int argc, char** argv ) {
   // read command line parameters
   l_nX = args.getArgument<int>("grid-size-x");
   l_nY = args.getArgument<int>("grid-size-y");
-  type = args.getArgument<bool>("leftOrRight");
+  simType = args.getArgument<size_t>("simType");
   l_baseName = args.getArgument<std::string>("output-basepath");
 
   // create a simple artificial scenario
   SWE_Scenario* l_scenario = nullptr;
 
-    if(!type){
+    if(simType == twoDthreeDdsup || simType == twoDthreeDdsub){ // if 2d to 3d
         l_scenario = new SWE_SweOf_Scenario();
-    }else{
+    }else if(simType == threeDtwoDdsup || simType == threeDtwoDdsub){ // if 3d to 2d
         l_scenario = new SWE_OfSwe_Scenario();
+    } else{
+        assert(false);
     }
 
   //! number of checkpoints for visualization (at each checkpoint in time, an output file is written).
@@ -129,12 +131,21 @@ int main( int argc, char** argv ) {
   int alphaId = interface.getDataID("Alpha", meshID);
   int prghId = interface.getDataID("Prgh", meshID);
   int velocityId = interface.getDataID("Velocity", meshID);
+  int tempVelocity3dId = interface.getDataID("TempVelocity3d", meshID);
 
   //set coordinates on face centres of the interfoam left boundary
   int vertexIDs[l_nY * l_nY]{};
   double grid3D[dimensions * l_nY * l_nY]{};
   int count=0;
-  double xBoundary = (!type ? 10 + l_dX : 10.0 - l_dX); //start or end of x coord in SWE, end of start of x coord in interFoam
+  double xBoundary;
+  if (simType == twoDthreeDdsup || simType == twoDthreeDdsub) { //if 2d to 3d
+      xBoundary = 10 + l_dX;
+  } else if (simType == threeDtwoDdsup || simType == threeDtwoDdsub) { //if 3d to 2d
+      xBoundary = 10 - l_dX;
+  } else {
+      assert(false);
+  }
+
   for (int i = 1; i <= l_nY; i++){
     for (int j = 1; j <= l_nY; j++){
       grid3D[count++] = xBoundary;                  // x
@@ -146,7 +157,7 @@ int main( int argc, char** argv ) {
 
   //initilize preCICE
   float precice_dt = interface.initialize();
-  PreciceData preciceData{alphaId, prghId, velocityId, grid3D, l_nY, (double)l_dY, vertexIDs};
+  PreciceData preciceData{alphaId, prghId, velocityId, tempVelocity3dId, grid3D, l_nY, (double)l_dY, vertexIDs};
  // +++++++++++++++++ preCICE config - END +++++++++++++++++
 
   // holds time at checkpoints
@@ -214,11 +225,23 @@ int main( int argc, char** argv ) {
     // }
 
   interface.initializeData();
+  double tempVelocity3d[dimensions * l_nY * l_nY];
 
   // if (interface.isReadDataAvailable()) {
-  //   std::cout << "SWE_solver Read Data Available" << '\n';
-  //   readGradient_preCICE(interface, l_wavePropgationBlock,
-  //       &preciceData,  l_nX +2);
+  //     interface.readBlockVectorData(tempVelocity3dId, l_nY * l_nY, vertexIDs, tempVelocity3d);
+  //     std::cout << "read before loop" << '\n';
+  //
+  //     for (int i = 0; i < l_nY; i++) {
+  //         for (int j = 0; j < l_nY; j++) {
+  //             for (int n = 0; n < 3; n++) {
+  //                 std::cout << tempVelocity3d[i*l_nY + j + n] << ' ';
+  //             }
+  //             std::cout  << ",\t";
+  //         }
+  //         std::cout << '\n';
+  //     }
+  //
+  //     std::cin.get();
   // }
 
   //! simulation time.
@@ -233,13 +256,18 @@ int main( int argc, char** argv ) {
         interface.markActionFulfilled(actionWriteIterationCheckpoint());
       }
 
-      if(type){ //execute if OF-SWE
-          readFromInterfoam_preCICE(interface, l_wavePropgationBlock, &preciceData, l_leftGhostCells, l_nY);
+      if(simType == threeDtwoDdsup){ //execute if 3d to 2d supercritical 4
+          std::cout << "executing 3d to 2d supercritical" << '\n';
+          readFromInterfoam_supercritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_leftGhostCells, l_nY);
           l_wavePropgationBlock.setBoundaryType(BND_LEFT, INFLOW_COUPLE, l_leftGhostCells);
+      }else if (simType == threeDtwoDdsub) { // execute if 3d to 2d subcritical 5
+          std::cout << "executing 3d to 2d subcritical" << '\n';
+          readFromInterfoam_subcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_leftGhostCells, l_nY);
+           l_wavePropgationBlock.setBoundaryType(BND_LEFT, INFLOW_COUPLE, l_leftGhostCells);
       }
 
       // set values in ghost cells:
-      l_wavePropgationBlock.setGhostLayer(); // TODO AQUI ME QUEDE
+      l_wavePropgationBlock.setGhostLayer();
 
       // reset the cpu clock
       tools::Logger::logger.resetClockToCurrentTime("Cpu");
@@ -260,8 +288,12 @@ int main( int argc, char** argv ) {
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
 
-      if(!type){ // execute if SWE-OF
-          write2Interfoam_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY);
+      if(simType == twoDthreeDdsup){ //execute if 2d to 3d supercritical 2
+          std::cout << "executing 2d to 3d supercritical" << '\n';
+          write2Interfoam_supercritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, tempVelocity3d);
+      } else if (simType == twoDthreeDdsub) { //execute if 2d to 3d subcritical 3
+          std::cout << "executing 2d to 3d supercritical" << '\n';
+          write2Interfoam_subcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, tempVelocity3d);
       }
 
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt);

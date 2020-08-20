@@ -8,11 +8,19 @@ using namespace precice::constants;
 #include "blocks/SWE_WavePropagationBlock.hh"
 #include "tools/help.hh"
 
+enum type{
+    twoDthreeDdsup=2,
+    twoDthreeDdsub,
+    threeDtwoDdsup,
+    threeDtwoDdsub
+};
+
 struct PreciceData{
 
-  int  alphaID;
-  int  prghID;
-  int  velocityID;
+  int  alphaId;
+  int  prghId;
+  int  velocityId;
+  int  tempVelocity3dId;
 
 
   double* grid3D;
@@ -59,10 +67,16 @@ void restoreCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float
 
 //-----------------------To interfoam-----------------------------------------------------
 
-void write2Interfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
-                int columNr);
+void write2Interfoam_supercritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+                int columNr, double* tempVelocity3d);
 
-void readFromInterfoam_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+void write2Interfoam_subcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+                int columNr, double* tempVelocity3d);
+
+void readFromInterfoam_supercritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+                SWE_Block1D* ghoshtBlock, int columNr);
+
+void readFromInterfoam_subcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
                 SWE_Block1D* ghoshtBlock, int columNr);
 
 // void storeData_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
