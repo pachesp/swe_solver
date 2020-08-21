@@ -186,9 +186,16 @@ int main( int argc, char** argv ) {
      l_checkPoints[cp] = cp*(l_endSimulation/l_numberOfCheckPoints);
   }
 
-  SWE_Block1D* l_leftGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_LEFT);
+  SWE_Block1D* l_leftGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_LEFT); //TODO if any problems happen, check this line
   SWE_Block1D* l_rightGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_RIGHT);
 
+
+if (simType == 2) {
+     l_wavePropgationBlock.setBoundaryType(BND_RIGHT, OUTFLOW);
+ }
+
+  // l_wavePropgationBlock.setBoundaryType(BND_RIGHT, OUTFLOW);
+  l_wavePropgationBlock.setBoundaryType(BND_LEFT, OUTFLOW); // for counteacting line 172
 
   // Init fancy progressbar
   tools::ProgressBar progressBar(l_endSimulation);
@@ -224,8 +231,7 @@ int main( int argc, char** argv ) {
   tools::Logger::logger.printStartMessage();
   tools::Logger::logger.initWallClockTime(time(NULL));
 
-  // l_wavePropgationBlock.setBoundaryType(BND_RIGHT, OUTFLOW_COUPLE);
-  l_wavePropgationBlock.setBoundaryType(BND_LEFT, INFLOW_COUPLE); // for counteacting line 172
+
 
 
     // if (interface.isActionRequired(actionWriteInitialData())) {
@@ -269,10 +275,12 @@ int main( int argc, char** argv ) {
       if(simType == twoDthreeDdsub){ //execute if 2d to 3d subcritical (3)
           std::cout << "executing 2d to 3d subcritical" << '\n';
           readFromInterfoam_subcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_rightGhostCells, l_nY);
+          // l_wavePropgationBlock.setBoundaryType(BND_RIGHT, INFLOW_COUPLE, l_rightGhostCells);
       }
       else if(simType == threeDtwoDdsup){ //execute if 3d to 2d supercritical (4)
           std::cout << "executing 3d to 2d supercritical" << '\n';
           readFromInterfoam_supercritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_leftGhostCells);
+          l_wavePropgationBlock.setBoundaryType(BND_LEFT, INFLOW_COUPLE, l_leftGhostCells);
       }
       else if (simType == threeDtwoDdsub) { // execute if 3d to 2d subcritical (5)
           std::cout << "executing 3d to 2d subcritical" << '\n';
