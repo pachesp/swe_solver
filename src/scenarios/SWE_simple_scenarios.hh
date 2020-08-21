@@ -38,9 +38,7 @@
  * elevated water in the center of the domain
  */
 class SWE_RadialDamBreakScenario : public SWE_Scenario {
-
   public:
-
     virtual float getBathymetry(float x, float y) {
        return 0.f;
     };
@@ -48,7 +46,6 @@ class SWE_RadialDamBreakScenario : public SWE_Scenario {
     virtual BoundaryType getBoundaryType(BoundaryEdge edge) {return OUTFLOW;};
 
     virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
-
        return ( sqrt( (x-((side * 0.5) + offsetX)) * (x-((side * 0.5) + offsetX)) +
                       (y-((side * 0.5) + offsetY)) * (y-((side * 0.5) + offsetY)) ) < side * 0.1 ) ? 15.f: 10.0f;
     };
@@ -61,45 +58,30 @@ class SWE_RadialDamBreakScenario : public SWE_Scenario {
      };
 };
 
-class SWE_RadialDamBreakScenario2 : public SWE_RadialDamBreakScenario {
 
+class SWE_OF_Supercritical_Scenario : public SWE_RadialDamBreakScenario {
   public:
-
-    virtual float getBoundaryPos(BoundaryEdge edge) {
-       if (edge==BND_LEFT || edge==BND_TOP)
-          return side;
-       else if(edge==BND_BOTTOM)
-          return 0;
-       else
-       return side * 2;
-    };
-};
-
-class SWE_SweOf_Scenario : public SWE_RadialDamBreakScenario {
-
-  public:
-
-    virtual BoundaryType getBoundaryType(BoundaryEdge edge) {return OUTFLOW;};
-
-
     virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
-
         float a = x - (side * 0.5) + offsetX;
         float b = y - (side * 0.5) + offsetY;
-
         bool circ = sqrt(a * a + b * b) < (side * 0.1);
-
        return circ ? 20.f: 5.0f;
     };
-
 };
 
-class SWE_OfSwe_Scenario : public SWE_RadialDamBreakScenario {
+class SWE_OF_Subcritical_Scenario : public SWE_RadialDamBreakScenario {
+  public: //TODO
+    virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
+       //  float a = x - (side * 0.5) + offsetX;
+       //  float b = y - (side * 0.5) + offsetY;
+       //  bool circ = sqrt(a * a + b * b) < (side * 0.1);
+       // return circ ? 20.f: 5.0f;
+       return 5.f; 
+    };
+};
 
+class OF_SWE_Supercritical_Scenario : public SWE_RadialDamBreakScenario {
   public:
-
-    virtual BoundaryType getBoundaryType(BoundaryEdge edge) {return OUTFLOW;};
-
     virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
      return 5.0f;
     };
@@ -113,6 +95,23 @@ class SWE_OfSwe_Scenario : public SWE_RadialDamBreakScenario {
        return side * 2;
     };
 };
+
+class OF_SWE_Subcritical_Scenario : public SWE_RadialDamBreakScenario {
+  public: //TODO
+    virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
+     return 5.0f;
+    };
+
+    virtual float getBoundaryPos(BoundaryEdge edge) {
+       if (edge==BND_LEFT || edge==BND_TOP)
+          return side;
+       else if(edge==BND_BOTTOM)
+          return 0;
+       else
+       return side * 2;
+    };
+};
+
 
 /**
  * Scenario "Bathymetry Dam Break":

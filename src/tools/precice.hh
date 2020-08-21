@@ -26,22 +26,8 @@ struct PreciceData{
   double* grid3D;
   int l_nY;
   double l_dY;
-
-
-
-  // int  snd_hvId;
-  // double* snd_height_db;
-  // double* snd_U_db;
-  // double* snd_hv_db;
-
-  // int recv_prghId;
-  // int recv_huId;
-  // int recv_hvId;
-  // double* recv_prgh_db;
-  // double* recv_hu_db;
-  // double* recv_hv_db;
-
   int* vertexIDs;
+  size_t simType;
 
   Float2D* CP_height_f2d;
   Float2D* CP_hu_f2d;
@@ -70,14 +56,14 @@ void restoreCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float
 void write2Interfoam_supercritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
                 int columNr, double* tempVelocity3d);
 
+void readFromInterfoam_supercritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+    SWE_Block1D* ghoshtBlock, int columNr = 0);
+
 void write2Interfoam_subcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
                 int columNr, double* tempVelocity3d);
 
-void readFromInterfoam_supercritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
-                SWE_Block1D* ghoshtBlock, int columNr);
-
 void readFromInterfoam_subcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
-                SWE_Block1D* ghoshtBlock, int columNr);
+                SWE_Block1D* ghoshtBlock, int columNr = 0);
 
 // void storeData_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
 //                      int columNr, int size);

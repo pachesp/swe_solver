@@ -93,17 +93,25 @@ int main( int argc, char** argv ) {
   // create a simple artificial scenario
   SWE_Scenario* l_scenario = nullptr;
 
-    if(simType == twoDthreeDdsup || simType == twoDthreeDdsub){ // if 2d to 3d
-        l_scenario = new SWE_SweOf_Scenario();
-    }else if(simType == threeDtwoDdsup || simType == threeDtwoDdsub){ // if 3d to 2d
-        l_scenario = new SWE_OfSwe_Scenario();
-    } else{
-        assert(false);
+    if(simType == twoDthreeDdsup){ // if 2d to 3d supercritical (2)
+        l_scenario = new SWE_OF_Supercritical_Scenario();
+    }
+    else if(simType == twoDthreeDdsub){ // if 2d to 3d subcritical (3)
+        l_scenario = new SWE_OF_Subcritical_Scenario();
+    }
+    else if(simType == threeDtwoDdsup){ // if 3d to 2d supercritical (4)
+        l_scenario = new OF_SWE_Supercritical_Scenario();
+    }
+    else if(simType == threeDtwoDdsub){ // if 3d to 2d subcritical (5)
+        l_scenario = new OF_SWE_Subcritical_Scenario();
+    }
+     else{
+        assert(false && "unidentified scenario");
     }
 
   //! number of checkpoints for visualization (at each checkpoint in time, an output file is written).
   // int l_numberOfCheckPoints = l_scenario->setNumberCheckpoints();
-  int l_numberOfCheckPoints = 30;
+  int l_numberOfCheckPoints = 50;
 
   //! size of a single cell in x- and y-direction
   float l_dX, l_dY;
@@ -157,7 +165,7 @@ int main( int argc, char** argv ) {
 
   //initilize preCICE
   float precice_dt = interface.initialize();
-  PreciceData preciceData{alphaId, prghId, velocityId, tempVelocity3dId, grid3D, l_nY, (double)l_dY, vertexIDs};
+  PreciceData preciceData{alphaId, prghId, velocityId, tempVelocity3dId, grid3D, l_nY, (double)l_dY, vertexIDs, simType};
  // +++++++++++++++++ preCICE config - END +++++++++++++++++
 
   // holds time at checkpoints
@@ -179,6 +187,8 @@ int main( int argc, char** argv ) {
   }
 
   SWE_Block1D* l_leftGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_LEFT);
+  SWE_Block1D* l_rightGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_RIGHT);
+
 
   // Init fancy progressbar
   tools::ProgressBar progressBar(l_endSimulation);
@@ -215,7 +225,7 @@ int main( int argc, char** argv ) {
   tools::Logger::logger.initWallClockTime(time(NULL));
 
   // l_wavePropgationBlock.setBoundaryType(BND_RIGHT, OUTFLOW_COUPLE);
-  // l_wavePropgationBlock.setBoundaryType(BND_LEFT, INFLOW_COUPLE); // for counteacting line 172
+  l_wavePropgationBlock.setBoundaryType(BND_LEFT, INFLOW_COUPLE); // for counteacting line 172
 
 
     // if (interface.isActionRequired(actionWriteInitialData())) {
@@ -256,14 +266,16 @@ int main( int argc, char** argv ) {
         interface.markActionFulfilled(actionWriteIterationCheckpoint());
       }
 
-      if(simType == threeDtwoDdsup){ //execute if 3d to 2d supercritical 4
+      if(simType == twoDthreeDdsub){ //execute if 2d to 3d subcritical (3)
+          std::cout << "executing 2d to 3d subcritical" << '\n';
+          readFromInterfoam_subcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_rightGhostCells, l_nY);
+      }
+      else if(simType == threeDtwoDdsup){ //execute if 3d to 2d supercritical (4)
           std::cout << "executing 3d to 2d supercritical" << '\n';
-          readFromInterfoam_supercritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_leftGhostCells, l_nY);
-          l_wavePropgationBlock.setBoundaryType(BND_LEFT, INFLOW_COUPLE, l_leftGhostCells);
-      }else if (simType == threeDtwoDdsub) { // execute if 3d to 2d subcritical 5
+          readFromInterfoam_supercritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_leftGhostCells);
+      }
+      else if (simType == threeDtwoDdsub) { // execute if 3d to 2d subcritical (5)
           std::cout << "executing 3d to 2d subcritical" << '\n';
-          readFromInterfoam_subcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_leftGhostCells, l_nY);
-           l_wavePropgationBlock.setBoundaryType(BND_LEFT, INFLOW_COUPLE, l_leftGhostCells);
       }
 
       // set values in ghost cells:
@@ -288,11 +300,11 @@ int main( int argc, char** argv ) {
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
 
-      if(simType == twoDthreeDdsup){ //execute if 2d to 3d supercritical 2
+      if(simType == twoDthreeDdsup){ //execute if 2d to 3d supercritical (2)
           std::cout << "executing 2d to 3d supercritical" << '\n';
           write2Interfoam_supercritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, tempVelocity3d);
-      } else if (simType == twoDthreeDdsub) { //execute if 2d to 3d subcritical 3
-          std::cout << "executing 2d to 3d supercritical" << '\n';
+      } else if (simType == twoDthreeDdsub) { //execute if 2d to 3d subcritical (3)
+          std::cout << "executing 2d to 3d subcritical" << '\n';
           write2Interfoam_subcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, tempVelocity3d);
       }
 
