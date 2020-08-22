@@ -186,16 +186,13 @@ int main( int argc, char** argv ) {
      l_checkPoints[cp] = cp*(l_endSimulation/l_numberOfCheckPoints);
   }
 
-  SWE_Block1D* l_leftGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_LEFT); //TODO if any problems happen, check this line
+  SWE_Block1D* l_leftGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_LEFT);
   SWE_Block1D* l_rightGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_RIGHT);
-
-
-if (simType == 2) {
-     l_wavePropgationBlock.setBoundaryType(BND_RIGHT, OUTFLOW);
- }
-
-  // l_wavePropgationBlock.setBoundaryType(BND_RIGHT, OUTFLOW);
-  l_wavePropgationBlock.setBoundaryType(BND_LEFT, OUTFLOW); // for counteacting line 172
+  // for counteracting previous lines
+  if (simType == twoDthreeDdsup){
+         l_wavePropgationBlock.setBoundaryType(BND_RIGHT, OUTFLOW);
+  }
+  l_wavePropgationBlock.setBoundaryType(BND_LEFT, OUTFLOW);
 
   // Init fancy progressbar
   tools::ProgressBar progressBar(l_endSimulation);
@@ -231,9 +228,6 @@ if (simType == 2) {
   tools::Logger::logger.printStartMessage();
   tools::Logger::logger.initWallClockTime(time(NULL));
 
-
-
-
     // if (interface.isActionRequired(actionWriteInitialData())) {
     //   std::cout << "SWE_solver action write initial data" << '\n';
     //   write_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, l_nY);
@@ -246,18 +240,6 @@ if (simType == 2) {
   // if (interface.isReadDataAvailable()) {
   //     interface.readBlockVectorData(tempVelocity3dId, l_nY * l_nY, vertexIDs, tempVelocity3d);
   //     std::cout << "read before loop" << '\n';
-  //
-  //     for (int i = 0; i < l_nY; i++) {
-  //         for (int j = 0; j < l_nY; j++) {
-  //             for (int n = 0; n < 3; n++) {
-  //                 std::cout << tempVelocity3d[i*l_nY + j + n] << ' ';
-  //             }
-  //             std::cout  << ",\t";
-  //         }
-  //         std::cout << '\n';
-  //     }
-  //
-  //     std::cin.get();
   // }
 
   //! simulation time.
@@ -274,16 +256,18 @@ if (simType == 2) {
 
       if(simType == twoDthreeDdsub){ //execute if 2d to 3d subcritical (3)
           std::cout << "executing 2d to 3d subcritical" << '\n';
-          readFromInterfoam_subcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_rightGhostCells, l_nY);
+          readFromInterfoam_2D3DSubcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_rightGhostCells, l_nY);
           // l_wavePropgationBlock.setBoundaryType(BND_RIGHT, INFLOW_COUPLE, l_rightGhostCells);
       }
       else if(simType == threeDtwoDdsup){ //execute if 3d to 2d supercritical (4)
           std::cout << "executing 3d to 2d supercritical" << '\n';
-          readFromInterfoam_supercritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_leftGhostCells);
-          l_wavePropgationBlock.setBoundaryType(BND_LEFT, INFLOW_COUPLE, l_leftGhostCells);
+          readFromInterfoam_3D2DSupercritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_leftGhostCells);
+          l_wavePropgationBlock.setBoundaryType(BND_LEFT, INFLOW_COUPLE, l_leftGhostCells); //TODO this might not be necessary
       }
       else if (simType == threeDtwoDdsub) { // execute if 3d to 2d subcritical (5)
           std::cout << "executing 3d to 2d subcritical" << '\n';
+          readFromInterfoam_3D2DSubcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_leftGhostCells);
+
       }
 
       // set values in ghost cells:
@@ -310,10 +294,15 @@ if (simType == 2) {
 
       if(simType == twoDthreeDdsup){ //execute if 2d to 3d supercritical (2)
           std::cout << "executing 2d to 3d supercritical" << '\n';
-          write2Interfoam_supercritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, tempVelocity3d);
-      } else if (simType == twoDthreeDdsub) { //execute if 2d to 3d subcritical (3)
+          write2Interfoam_2D3DSupercritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, tempVelocity3d);
+      }
+      else if (simType == twoDthreeDdsub) { //execute if 2d to 3d subcritical (3)
           std::cout << "executing 2d to 3d subcritical" << '\n';
-          write2Interfoam_subcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, tempVelocity3d);
+          write2Interfoam_2D3DSubcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, tempVelocity3d);
+      }
+      else if (simType == threeDtwoDdsub) { //execute if 2d to 3d subcritical (5)
+          std::cout << "executing 3d to 2d subcritical" << '\n';
+          write2Interfoam_3D2DSubcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, tempVelocity3d);
       }
 
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt);
