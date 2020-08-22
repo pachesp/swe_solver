@@ -16,13 +16,10 @@ enum type{
 };
 
 struct PreciceData{
-
   int  alphaId;
   int  prghId;
   int  velocityId;
   int  tempVelocity3dId;
-
-
   double* grid3D;
   int l_nY;
   double l_dY;
@@ -32,7 +29,6 @@ struct PreciceData{
   Float2D* CP_height_f2d;
   Float2D* CP_hu_f2d;
   Float2D* CP_hv_f2d;
-
 };
 
 void write_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
@@ -53,17 +49,24 @@ void restoreCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float
 
 //-----------------------To interfoam-----------------------------------------------------
 
-void write2Interfoam_supercritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+void write2Interfoam_2D3DSupercritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
                 int columNr, double* tempVelocity3d);
 
-void readFromInterfoam_supercritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+void readFromInterfoam_3D2DSupercritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
     SWE_Block1D* ghoshtBlock, int columNr = 0);
 
-void write2Interfoam_subcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+void write2Interfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
                 int columNr, double* tempVelocity3d);
 
-void readFromInterfoam_subcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+void readFromInterfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
                 SWE_Block1D* ghoshtBlock, int columNr = 0);
+
+
+void write2Interfoam_3D2DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+                  int columNr, double* tempVelocity3d, std::vector<double> alphav);
+
+std::vector<double> readFromInterfoam_3D2DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+    SWE_Block1D* ghoshtBlock, int columNr=0);
 
 // void storeData_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
 //                      int columNr, int size);

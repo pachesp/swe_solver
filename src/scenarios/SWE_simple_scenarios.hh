@@ -76,7 +76,7 @@ class SWE_OF_Subcritical_Scenario : public SWE_RadialDamBreakScenario {
        //  float b = y - (side * 0.5) + offsetY;
        //  bool circ = sqrt(a * a + b * b) < (side * 0.1);
        // return circ ? 20.f: 5.0f;
-       return 5.f; 
+       return 5.f;
     };
 };
 
@@ -97,10 +97,13 @@ class OF_SWE_Supercritical_Scenario : public SWE_RadialDamBreakScenario {
 };
 
 class OF_SWE_Subcritical_Scenario : public SWE_RadialDamBreakScenario {
-  public: //TODO
-    virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
-     return 5.0f;
-    };
+  public:
+      virtual float getWaterHeight(float x, float y, float offsetX=0, float offsetY=0) {
+        float a = x - ((side * 0.5) + offsetX);
+        float b = y - ((side * 0.5) + offsetY);
+        bool circ = sqrt(a * a + b * b) < (side * 0.1);
+        return circ ? 20.f: 5.0f;
+      };
 
     virtual float getBoundaryPos(BoundaryEdge edge) {
        if (edge==BND_LEFT || edge==BND_TOP)
