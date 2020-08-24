@@ -236,8 +236,10 @@ void readFromInterfoam_3D2DSupercritical_preCICE(SolverInterface &interface, SWE
     float hv[nY+2] {};
     for (int i = 0; i < nY; i++) {
         for (int j = 1; j <= nY; j++) {
-            hu[j] += (float)U[(i*nY + (j-1)) * dim + 0] * (float)alpha[i*nY + (j-1)] * dY;
-            hv[j] += (float)U[(i*nY + (j-1)) * dim + 1] * (float)alpha[i*nY + (j-1)] * dY;
+            if (alpha[i*nY + (j-1)] > 0.01) {
+                hu[j] += (float)U[(i*nY + (j-1)) * dim + 0] * (float)alpha[i*nY + (j-1)] * dY;
+                hv[j] += (float)U[(i*nY + (j-1)) * dim + 1] * (float)alpha[i*nY + (j-1)] * dY;
+            }
         }
     }
 
@@ -250,7 +252,6 @@ void write2Interfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_Blo
                   int columNr, double* tempVelocity3d)
 {
     std::cout << "executing 2d to 3d subcritical write" << '\n';
-
     write2Interfoam_2D3DSupercritical_preCICE(interface, wavePropagationBlock, data, columNr, tempVelocity3d);
 }
 
@@ -287,30 +288,29 @@ void readFromInterfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_B
 }
 
 void write2Interfoam_3D2DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
-                  int columNr, double* tempVelocity3d, std::vector<double> alphav)
+                  int columNr, double* tempVelocity3d)
 {
+    // double dY = data->l_dY;
+    // double rho_water = 1000.0;
+    // double rho_air = 1.0;
+    // double rho_mixed[nY * nY];
+    // double hh;
+    // int dim = 3;
+    // double p_rgh[nY * nY]{};
     std::cout << "executing 3d to 2d subcritical write" << '\n';
     int nY = data->l_nY; //resolution
-    // double dY = data->l_dY;
-    double rho_water = 1000.0;
-    double rho_air = 1.0;
-    double rho_mixed[nY * nY];
     double g = 9.81;
-    double h, hh;
-    int dim = 3;
-
-    double p_rgh[nY * nY]{};
+    double h;
+    double gh[nY * nY]{};
     for (int i = 0; i < nY; i++) {
         h = wavePropagationBlock.getWaterHeight()[columNr][i];
         // std::cout  <<fixed << setprecision(2) << "h[: " << i << "]: "<<  h  << '\n';
         for (int j = 0; j < nY; j++) {
             // double yCoord = data->grid3D[(i + j*nY) * dim + 1]; // y-coord of the IF mesh
-            rho_mixed[i + j*nY] = rho_water * alphav[i + j*nY] + rho_air * (1 - alphav[i + j*nY]);
-            // hh = h - yCoord;
-            // if(hh<0.0)
-            // { hh = 10-yCoord;}
+            // rho_mixed[i + j*nY] = rho_water * alphav[i + j*nY] + rho_air * (1 - alphav[i + j*nY]);
             // std::cout <<fixed << setprecision(2) << "alhpa[" << i << "]["<< j << "]: " << alphav[i + j*nY] << '\n';
-            p_rgh[i + j*nY] = rho_mixed[i + j*nY] * g * h;           // Set p_rgh  eq 5.16 mintgen
+            // p_rgh[i + j*nY] = rho_mixed[i + j*nY] * g * h;           // Set p_rgh  eq 5.16 mintgen
+            gh[i + j*nY] = g * h;           // Set p_rgh  eq 5.16 mintgen
         }
         // std::cout  << '\n';
     }
@@ -345,11 +345,10 @@ void write2Interfoam_3D2DSubcritical_preCICE(SolverInterface &interface, SWE_Blo
     // }
     // std::cout  << '\n';
     // // std::cin.get();
-
-    interface.writeBlockScalarData(data->prghId, nY * nY, data->vertexIDs, p_rgh);
+    interface.writeBlockScalarData(data->ghId, nY * nY, data->vertexIDs, gh);
 }
 
-std::vector<double> readFromInterfoam_3D2DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+void readFromInterfoam_3D2DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
     SWE_Block1D* ghoshtBlock, int columNr)
 {
     std::cout << "executing 3d to 2d subcritical read" << '\n';
@@ -360,10 +359,10 @@ std::vector<double> readFromInterfoam_3D2DSubcritical_preCICE(SolverInterface &i
     // read alpha
     double alpha[nY * nY]{};
     interface.readBlockScalarData(data->alphaId, nY * nY, data->vertexIDs, alpha);
-    std::vector<double> alphav;//(alpha, alpha+nY); //copy array to vector
-    for (int i = 0; i < nY * nY; i++) {
-        alphav.push_back(alpha[i]);
-    }
+    // std::vector<double> alphav;//(alpha, alpha+nY); //copy array to vector
+    // for (int i = 0; i < nY * nY; i++) {
+    //     alphav.push_back(alpha[i]);
+    // }
     // read velocity
     double U[dim * nY * nY]{};
     interface.readBlockVectorData(data->velocityId, nY * nY, data->vertexIDs, U);
@@ -371,8 +370,10 @@ std::vector<double> readFromInterfoam_3D2DSubcritical_preCICE(SolverInterface &i
     float hv[nY+2] {};
     for (int i = 0; i < nY; i++) {
         for (int j = 1; j <= nY; j++) {
-            hu[j] += (float)U[(i*nY + (j-1)) * dim + 0] * (float)alpha[i*nY + (j-1)] * dY;
-            hv[j] += (float)U[(i*nY + (j-1)) * dim + 1] * (float)alpha[i*nY + (j-1)] * dY;
+            if (alpha[i*nY + (j-1)] > 0.01) {
+                hu[j] += (float)U[(i*nY + (j-1)) * dim + 0] * (float)alpha[i*nY + (j-1)] * dY;
+                hv[j] += (float)U[(i*nY + (j-1)) * dim + 1] * (float)alpha[i*nY + (j-1)] * dY;
+            }
         }
     }
 
@@ -400,5 +401,5 @@ std::vector<double> readFromInterfoam_3D2DSubcritical_preCICE(SolverInterface &i
 
     SWE_Block1D newBlock{h, hu, hv, 1};
     ghoshtBlock->copyFrom(&newBlock, nY+2);
-    return alphav;
+    // return alphav;
 }

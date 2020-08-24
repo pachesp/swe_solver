@@ -48,6 +48,18 @@ using namespace precice::constants;
 
 #include "tools/precice.hh"
 
+//Add second drop fall. only for 2d 3d supercritical
+float secondDrop(float x, float y){
+    //TODO avoid parameters hardcoding
+    float side = 10.f;
+    float offsetX = 0.f;
+    float offsetY = 0.f;
+    float a = x - ((side * 0.5) + offsetX);
+    float b = y - ((side * 0.5) + offsetY);
+    bool circ = sqrt(a * a + b * b) < (side * 0.1);
+    return circ ? 20.f: 5.0f;
+}
+
 /**
  * Main program for the simulation on a single SWE_WavePropagationBlock.
  */
@@ -111,7 +123,12 @@ int main( int argc, char** argv ) {
 
   //! number of checkpoints for visualization (at each checkpoint in time, an output file is written).
   // int l_numberOfCheckPoints = l_scenario->setNumberCheckpoints();
-  int l_numberOfCheckPoints = 50;
+  int l_numberOfCheckPoints;
+  if (simType == twoDthreeDdsup) { // for better visualization of the second drop
+      l_numberOfCheckPoints = 100;
+  }else{
+      l_numberOfCheckPoints = 50;
+  }
 
   //! size of a single cell in x- and y-direction
   float l_dX, l_dY;
@@ -137,7 +154,7 @@ int main( int argc, char** argv ) {
   int dimensions = interface.getDimensions();
   int meshID = interface.getMeshID("SWE_solver-Mesh");
   int alphaId = interface.getDataID("Alpha", meshID);
-  int prghId = interface.getDataID("Prgh", meshID);
+  int ghId = interface.getDataID("Gh", meshID);
   int velocityId = interface.getDataID("Velocity", meshID);
   int tempVelocity3dId = interface.getDataID("TempVelocity3d", meshID);
 
@@ -165,7 +182,7 @@ int main( int argc, char** argv ) {
 
   //initilize preCICE
   float precice_dt = interface.initialize();
-  PreciceData preciceData{alphaId, prghId, velocityId, tempVelocity3dId, grid3D, l_nY, (double)l_dY, vertexIDs, simType};
+  PreciceData preciceData{alphaId, ghId, velocityId, tempVelocity3dId, grid3D, l_nY, (double)l_dY, vertexIDs, simType};
  // +++++++++++++++++ preCICE config - END +++++++++++++++++
 
   // holds time at checkpoints
@@ -255,7 +272,14 @@ int main( int argc, char** argv ) {
   progressBar.update(l_t);
   unsigned int l_iterations = 0;
   int chkpt=1;
+  bool setSecondDrop = true;
   while(interface.isCouplingOngoing()){
+
+      // add second droplet after 2 seconds. Only for 2D-3D supercritical
+      if (l_t > 2.0 && setSecondDrop && simType == twoDthreeDdsup) {
+          l_wavePropgationBlock.setWaterHeight(secondDrop);
+          setSecondDrop = false;
+     }
 
       if(interface.isActionRequired(actionWriteIterationCheckpoint())) {
         writeCheckpoint(&preciceData, l_wavePropgationBlock, l_t, time_CP, l_nX+2, l_nY);
@@ -272,7 +296,7 @@ int main( int argc, char** argv ) {
       }
       else if (simType == threeDtwoDdsub) { // execute if 3d to 2d subcritical (5)
           std::cout << "executing 3d to 2d subcritical" << '\n';
-          alphavect = readFromInterfoam_3D2DSubcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_leftGhostCells, 1);
+          readFromInterfoam_3D2DSubcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_leftGhostCells, 1);
       }
 
       // set values in ghost cells:
@@ -307,7 +331,7 @@ int main( int argc, char** argv ) {
       }
       else if (simType == threeDtwoDdsub) { //execute if 3d to 2d subcritical (5)
           std::cout << "executing 3d to 2d subcritical" << '\n';
-          write2Interfoam_3D2DSubcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, tempVelocity3d, alphavect);
+          write2Interfoam_3D2DSubcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, tempVelocity3d);
       }
 
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt);

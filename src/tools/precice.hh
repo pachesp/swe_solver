@@ -17,7 +17,7 @@ enum type{
 
 struct PreciceData{
   int  alphaId;
-  int  prghId;
+  int  ghId;
   int  velocityId;
   int  tempVelocity3dId;
   double* grid3D;
@@ -63,9 +63,9 @@ void readFromInterfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_B
 
 
 void write2Interfoam_3D2DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
-                  int columNr, double* tempVelocity3d, std::vector<double> alphav);
+                  int columNr, double* tempVelocity3d);
 
-std::vector<double> readFromInterfoam_3D2DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+void readFromInterfoam_3D2DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
     SWE_Block1D* ghoshtBlock, int columNr=0);
 
 // void storeData_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
