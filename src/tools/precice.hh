@@ -19,7 +19,7 @@ struct PreciceData{
   int  alphaId;
   int  ghId;
   int  velocityId;
-  int  tempVelocity3dId;
+  int  velocityGradientId;
   double* grid3D;
   int l_nY;
   double l_dY;
@@ -50,20 +50,20 @@ void restoreCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float
 //-----------------------To interfoam-----------------------------------------------------
 
 void write2Interfoam_2D3DSupercritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
-                int columNr, double* tempVelocity3d);
+                int columNr);
 
 void readFromInterfoam_3D2DSupercritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
     SWE_Block1D* ghoshtBlock, int columNr = 0);
 
 void write2Interfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
-                int columNr, double* tempVelocity3d);
+                int columNr);
 
 void readFromInterfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
                 SWE_Block1D* ghoshtBlock, int columNr = 0);
 
 
 void write2Interfoam_3D2DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
-                  int columNr, double* tempVelocity3d);
+                  int columNr);
 
 void readFromInterfoam_3D2DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
     SWE_Block1D* ghoshtBlock, int columNr=0);

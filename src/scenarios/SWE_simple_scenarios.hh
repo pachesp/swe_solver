@@ -72,11 +72,11 @@ class SWE_OF_Supercritical_Scenario : public SWE_RadialDamBreakScenario {
 class SWE_OF_Subcritical_Scenario : public SWE_RadialDamBreakScenario {
   public: //TODO
     virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
-       //  float a = x - (side * 0.5) + offsetX;
-       //  float b = y - (side * 0.5) + offsetY;
-       //  bool circ = sqrt(a * a + b * b) < (side * 0.1);
-       // return circ ? 20.f: 5.0f;
-       return 5.f;
+        // float a = x - (side * 0.5) + offsetX;
+        // float b = y - (side * 0.5) + offsetY;
+        // bool circ = sqrt(a * a + b * b) < (side * 0.1);
+        // return circ ? 10.f: 5.0f;
+        return 5.0f;
     };
 };
 
