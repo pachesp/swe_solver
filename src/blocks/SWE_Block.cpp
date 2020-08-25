@@ -387,7 +387,7 @@ SWE_Block1D* SWE_Block::registerCopyLayer(BoundaryEdge edge){
  */
 SWE_Block1D* SWE_Block::grabGhostLayer(BoundaryEdge edge){
 
-  boundary[edge] = PASSIVE;
+  // boundary[edge] = PASSIVE; //set since the beggining in initScenario
   switch (edge) {
     case BND_LEFT:
       return new SWE_Block1D( h.getColProxy(0), hu.getColProxy(0), hv.getColProxy(0) );

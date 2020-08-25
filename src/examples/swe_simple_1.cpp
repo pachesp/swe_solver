@@ -109,6 +109,7 @@ int main( int argc, char** argv ) {
         l_scenario = new SWE_OF_Supercritical_Scenario();
     }
     else if(simType == twoDthreeDdsub){ // if 2d to 3d subcritical (3)
+        std::cout << "Executing scenario 2d 3d subcritical" << '\n';
         l_scenario = new SWE_OF_Subcritical_Scenario();
     }
     else if(simType == threeDtwoDdsup){ // if 3d to 2d supercritical (4)
@@ -122,13 +123,10 @@ int main( int argc, char** argv ) {
     }
 
   //! number of checkpoints for visualization (at each checkpoint in time, an output file is written).
-  // int l_numberOfCheckPoints = l_scenario->setNumberCheckpoints();
-  int l_numberOfCheckPoints;
-  if (simType == twoDthreeDdsup) { // for better visualization of the second drop
-      l_numberOfCheckPoints = 100;
-  }else{
-      l_numberOfCheckPoints = 50;
-  }
+  int l_numberOfCheckPoints = l_scenario->numberOfCheckpoints();
+
+  //! time when the simulation ends.
+  float l_endSimulation = l_scenario->endSimulation();
 
   //! size of a single cell in x- and y-direction
   float l_dX, l_dY;
@@ -146,6 +144,57 @@ int main( int argc, char** argv ) {
   // get the origin from the scenario
   l_originX = l_scenario->getBoundaryPos(BND_LEFT);
   l_originY = l_scenario->getBoundaryPos(BND_BOTTOM);
+
+  // holds time at checkpoints
+  float time_CP;
+
+  // initialize the wave propagation block
+  l_wavePropgationBlock.initScenario(l_originX, l_originY, l_scenario);
+
+  //! checkpoints when output files are written.
+  float* l_checkPoints = new float[l_numberOfCheckPoints+1];
+
+  // compute the checkpoints in time
+  for(int cp = 0; cp <= l_numberOfCheckPoints; cp++) {
+     l_checkPoints[cp] = cp*(l_endSimulation/l_numberOfCheckPoints);
+  }
+
+  SWE_Block1D* l_leftGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_LEFT);
+  SWE_Block1D* l_rightGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_RIGHT);
+
+  // Init fancy progressbar
+  tools::ProgressBar progressBar(l_endSimulation);
+
+  // write the output at time zero
+  tools::Logger::logger.printOutputTime((float) 0.);
+  progressBar.update(0.);
+
+  std::string l_fileName = generateBaseFileName(l_baseName,0,0);
+  //boundary size of the ghost layers
+  io::BoundarySize l_boundarySize = {{1, 1, 1, 1}};
+
+  // consturct a VtkWriter
+  io::VtkWriter l_writer( l_fileName,
+		  l_wavePropgationBlock.getBathymetry(),
+		  l_boundarySize,
+		  l_nX, l_nY,
+		  l_dX, l_dY,
+          l_originX, l_originY);
+
+
+  // Write zero time step
+  l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
+                          l_wavePropgationBlock.getDischarge_hu(),
+                          l_wavePropgationBlock.getDischarge_hv(),
+                          (float) 0.);
+
+  /**
+   * Simulation.
+   */
+  // print the start message and reset the wall clock time
+  progressBar.clear();
+  tools::Logger::logger.printStartMessage();
+  tools::Logger::logger.initWallClockTime(time(NULL));
 
   // +++++++++++++++++ preCICE config - BEGIN +++++++++++++++++
   std::string configFileName("precice-config.xml");
@@ -185,72 +234,8 @@ int main( int argc, char** argv ) {
   PreciceData preciceData{alphaId, ghId, velocityId, velocityGradientId, grid3D, l_nY, (double)l_dY, vertexIDs, simType};
  // +++++++++++++++++ preCICE config - END +++++++++++++++++
 
-  // holds time at checkpoints
-  float time_CP;
-
-  // initialize the wave propagation block
-  l_wavePropgationBlock.initScenario(l_originX, l_originY, l_scenario);
-
-  //! time when the simulation ends.
-  // float l_endSimulation = l_scenario->endSimulation();
-  float l_endSimulation = 5.f;
-
-  //! checkpoints when output files are written.
-  float* l_checkPoints = new float[l_numberOfCheckPoints+1];
-
-  // compute the checkpoints in time
-  for(int cp = 0; cp <= l_numberOfCheckPoints; cp++) {
-     l_checkPoints[cp] = cp*(l_endSimulation/l_numberOfCheckPoints);
-  }
-
-  SWE_Block1D* l_leftGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_LEFT);
-  SWE_Block1D* l_rightGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_RIGHT);
-
-  if (simType != twoDthreeDdsub) { // (2,4,5)
-      l_wavePropgationBlock.setBoundaryType(BND_RIGHT, OUTFLOW);
-  }else{// (3)
-      l_wavePropgationBlock.setBoundaryType(BND_RIGHT, PASSIVE);
-  }
-
-  if(simType == twoDthreeDdsup || simType == twoDthreeDdsub){ // (2,3)
-      l_wavePropgationBlock.setBoundaryType(BND_LEFT, OUTFLOW);
-  }else{ // (4,5)
-      l_wavePropgationBlock.setBoundaryType(BND_LEFT, PASSIVE);
-  }
-
-  // Init fancy progressbar
-  tools::ProgressBar progressBar(l_endSimulation);
-
-  // write the output at time zero
-  tools::Logger::logger.printOutputTime((float) 0.);
-  progressBar.update(0.);
-
-  std::string l_fileName = generateBaseFileName(l_baseName,0,0);
-  //boundary size of the ghost layers
-  io::BoundarySize l_boundarySize = {{1, 1, 1, 1}};
-
-  // consturct a VtkWriter
-  io::VtkWriter l_writer( l_fileName,
-		  l_wavePropgationBlock.getBathymetry(),
-		  l_boundarySize,
-		  l_nX, l_nY,
-		  l_dX, l_dY,
-          l_originX, l_originY);
 
 
-  // Write zero time step
-  l_writer.writeTimeStep( l_wavePropgationBlock.getWaterHeight(),
-                          l_wavePropgationBlock.getDischarge_hu(),
-                          l_wavePropgationBlock.getDischarge_hv(),
-                          (float) 0.);
-
-  /**
-   * Simulation.
-   */
-  // print the start message and reset the wall clock time
-  progressBar.clear();
-  tools::Logger::logger.printStartMessage();
-  tools::Logger::logger.initWallClockTime(time(NULL));
 
     // if (interface.isActionRequired(actionWriteInitialData())) {
     //   std::cout << "SWE_solver action write initial data" << '\n';

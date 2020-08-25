@@ -4,6 +4,7 @@
 void writeCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float time, float &time_CP, int size, int columNr){}
 void restoreCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float &time, float time_CP, int size, int columNr){}
 
+//(2)
 void write2Interfoam_2D3DSupercritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
                   int columNr)
 {
@@ -27,15 +28,6 @@ void write2Interfoam_2D3DSupercritical_preCICE(SolverInterface &interface, SWE_B
             } else{ // Interpolate
                 alpha[i + j*nY] = 0.5 + (height - yCoord) / dY;
             }
-
-            //Algorithm 2
-            // if(height <= yCoord){
-            //     alpha[i + j*nY] = 0.0;
-            // } else{
-            //     alpha[i + j*nY] = 1.0;
-            // }
-            // std::cout << "comparing yCoord: " << yCoord << " and Waterheight: " << height;
-            // std::cout << " alpha is: " << alpha[i + j*nY] << '\n';
         }
     }
     // Writing Alpha to OF - End
@@ -47,11 +39,9 @@ void write2Interfoam_2D3DSupercritical_preCICE(SolverInterface &interface, SWE_B
         count = 0;
         double u, v, h;
         for(int i = 1; i <= nY ; i++){
-
             h = (double)(wavePropagationBlock.getWaterHeight()[columNr][i]);
             u = (double)(wavePropagationBlock.getDischarge_hu()[columNr][i]) / h;
             v = (double)(wavePropagationBlock.getDischarge_hv()[columNr][i]) / h;
-
             for (int j = 0; j < nY; j++) {
                 U[((i-1) + j*nY) * dim + 0] = u;
                 U[((i-1) + j*nY) * dim + 1] = v;
@@ -59,13 +49,12 @@ void write2Interfoam_2D3DSupercritical_preCICE(SolverInterface &interface, SWE_B
             }
         }
 
-        // Mintegens algorithm
+        // Mintgens algorithm
         int dim2 = 2;
         double rho_water = 1000.0; // water density
         double tau[dim2 * nY * nY]{0.0}; // wall shear stress
         double ustar[dim2 * nY * nY]{0.0}; // modified velocity: sqrt(tau / rho)
         double mu = 1e-06 * rho_water; // dynamic viscosity * density (water)
-
         double du[dim * nY * nY]{0.0}; // velocity gradient from OF
         interface.readBlockVectorData(data->velocityGradientId, nY * nY, data->vertexIDs, du);
         for (int i = 0; i < nY; i++) {
@@ -101,7 +90,7 @@ void write2Interfoam_2D3DSupercritical_preCICE(SolverInterface &interface, SWE_B
         }
 
         for (int n = 0; n < dim2; n++) {
-            beta[n] = q2d[n] / q3d[n];
+            beta[n] = abs(q2d[n] / q3d[n]);
             if (beta[n] > 1) {
                 while (beta[n] > 1 ) {
                     for (int i = 0; i < nY; i++) {
@@ -111,7 +100,7 @@ void write2Interfoam_2D3DSupercritical_preCICE(SolverInterface &interface, SWE_B
                             U[(i + j*nY) * dim + n] = U[(i + j*nY) * dim + n] * beta[n];
                             q3d[n] += alpha[i + j*nY] * U[(i + j*nY) * dim + n] * yCoord;
                         }
-                        beta[n] = q2d[n] / q3d[n];
+                        beta[n] = abs(q2d[n] / q3d[n]);
                     }
                 }
             }
@@ -149,12 +138,13 @@ void write2Interfoam_2D3DSupercritical_preCICE(SolverInterface &interface, SWE_B
     // Writing Velocity to OF - End
 
     // Exchange data
-    if (data->simType == twoDthreeDdsup) { // 2d to 3d supercritical
+    if (data->simType == twoDthreeDdsup) { // 2d to 3d supercritical TODO maybe remove this if
         interface.writeBlockScalarData(data->alphaId, nY * nY, data->vertexIDs, alpha);
     }
     interface.writeBlockVectorData(data->velocityId, nY * nY, data->vertexIDs, U);
 }
 
+//(4)
 void readFromInterfoam_3D2DSupercritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
     SWE_Block1D* ghoshtBlock, int columNr)
 {
@@ -190,9 +180,9 @@ void readFromInterfoam_3D2DSupercritical_preCICE(SolverInterface &interface, SWE
 
     SWE_Block1D newBlock{h, hu, hv, 1};
     ghoshtBlock->copyFrom(&newBlock, nY+2);
-
 }
 
+//(3)
 void write2Interfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
                   int columNr)
 {
@@ -211,6 +201,7 @@ void readFromInterfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_B
     // read alpha
     double alpha[nY * nY]{};
     interface.readBlockScalarData(data->alphaId, nY * nY, data->vertexIDs, alpha);
+
     float h[nY+2] {};
     for (int i = 0; i < nY; i++) {
         for (int j = 1; j <= nY; j++) {
@@ -223,15 +214,17 @@ void readFromInterfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_B
     float hu[nY+2] {};
     float hv[nY+2] {};
     for (int i = 0; i < nY+2; i++) {
-            hu[i] = wavePropagationBlock.getDischarge_hu()[columNr][i];
+            hu[i] = wavePropagationBlock.getDischarge_hu()[columNr][i]; // TODO hardcode the column
             hv[i] = wavePropagationBlock.getDischarge_hv()[columNr][i];
     }
 
     SWE_Block1D newBlock{h, hu, hv, 1};
     ghoshtBlock->copyFrom(&newBlock, nY+2);
 
+    return alphav;
 }
 
+//(5)
 void write2Interfoam_3D2DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
                   int columNr)
 {
@@ -293,6 +286,7 @@ void write2Interfoam_3D2DSubcritical_preCICE(SolverInterface &interface, SWE_Blo
     interface.writeBlockScalarData(data->ghId, nY * nY, data->vertexIDs, gh);
 }
 
+//(5)
 void readFromInterfoam_3D2DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
     SWE_Block1D* ghoshtBlock, int columNr)
 {
