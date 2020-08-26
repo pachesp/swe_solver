@@ -618,7 +618,6 @@ void SWE_Block::setBoundaryConditions() {
   switch(boundary[BND_BOTTOM]) {
     case WALL:
     {
-			assert(false);
       for(int i=1; i<=nx; i++) {
         h[i][0] = h[i][1];
         hu[i][0] = hu[i][1];
@@ -647,7 +646,6 @@ void SWE_Block::setBoundaryConditions() {
   switch(boundary[BND_TOP]) {
     case WALL:
     {
-			assert(false);
       for(int i=1; i<=nx; i++) {
         h[i][ny+1] = h[i][ny];
         hu[i][ny+1] = hu[i][ny];

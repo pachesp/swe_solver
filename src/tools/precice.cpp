@@ -204,11 +204,9 @@ void write2Interfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_Blo
         v = (double)(wavePropagationBlock.getDischarge_hv()[columNr][i]) / h;
 
         for (int j = 0; j < nY; j++) {
-            if (alpha[(i-1) + j*nY] < 0.001) {
-                u = v = 0.0;
-            }
-            U[((i-1) + j*nY) * dim + 0] = u;
-            U[((i-1) + j*nY) * dim + 1] = v;
+            double alphatmp = alpha[(i-1) + j*nY];
+            U[((i-1) + j*nY) * dim + 0] = alphatmp * u;
+            U[((i-1) + j*nY) * dim + 1] = alphatmp * v;
             U[((i-1) + j*nY) * dim + 2] = 0.0;
         }
     }
