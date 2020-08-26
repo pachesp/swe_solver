@@ -56,9 +56,9 @@ void readFromInterfoam_3D2DSupercritical_preCICE(SolverInterface &interface, SWE
     SWE_Block1D* ghoshtBlock, int columNr = 0);
 
 void write2Interfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
-                int columNr);
+                int columNr, std::vector<double> alpha);
 
-void readFromInterfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+std::vector<double> readFromInterfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
                 SWE_Block1D* ghoshtBlock, int columNr = 0);
 
 

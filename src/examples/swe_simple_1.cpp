@@ -256,6 +256,7 @@ int main( int argc, char** argv ) {
   unsigned int l_iterations = 0;
   int chkpt=1;
   bool setSecondDrop = true;
+  std::vector<double> alphav;
   while(interface.isCouplingOngoing()){
 
       // add second droplet after 2 seconds. Only for 2D-3D supercritical
@@ -271,7 +272,7 @@ int main( int argc, char** argv ) {
 
       if(simType == twoDthreeDdsub){ //execute if 2d to 3d subcritical (3)
           std::cout << "executing 2d to 3d subcritical" << '\n';
-          readFromInterfoam_2D3DSubcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_rightGhostCells, l_nY);
+          alphav = readFromInterfoam_2D3DSubcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_rightGhostCells, l_nY);
       }
       else if(simType == threeDtwoDdsup){ //execute if 3d to 2d supercritical (4)
           std::cout << "executing 3d to 2d supercritical" << '\n';
@@ -310,7 +311,7 @@ int main( int argc, char** argv ) {
       }
       else if (simType == twoDthreeDdsub) { //execute if 2d to 3d subcritical (3)
           std::cout << "executing 2d to 3d subcritical" << '\n';
-          write2Interfoam_2D3DSubcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY);
+          write2Interfoam_2D3DSubcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, alphav);
       }
       else if (simType == threeDtwoDdsub) { //execute if 3d to 2d subcritical (5)
           std::cout << "executing 3d to 2d subcritical" << '\n';

@@ -77,13 +77,47 @@ class SWE_OF_Supercritical_Scenario : public SWE_RadialDamBreakScenario{//(2)
 
 class SWE_OF_Subcritical_Scenario : public SWE_RadialDamBreakScenario {//(3)
   public: //TODO
-    virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
-        // float a = x - (side * 0.5) + offsetX;
-        // float b = y - (side * 0.5) + offsetY;
-        // bool circ = sqrt(a * a + b * b) < (side * 0.1);
-        // return circ ? 10.f: 5.0f;
-        return 5.0f;
+
+    virtual float getWaterHeight(float x, float y, float offsetX, float offsetY) {
+         // return ( x < 0.5  ? 15.f: 10.0f);
+         return 5.f;
     };
+
+    virtual float getVeloc_u(float x, float y){
+          // return ( x < 0.5  ? 1.f: 0.0f);
+          return 0.f;
+    };
+
+    virtual float getVeloc_v(float x, float y){
+          // return ( x < 0.5  ? 0.1f: 0.0f);
+          return 0.f;
+    };
+
+    virtual float endSimulation() { return 10.f; };
+
+    virtual int numberOfCheckpoints(){return 100; }; // to see second wave (TODO second drop setFieldsValue in OF)
+
+    virtual BoundaryType getBoundaryType(BoundaryEdge edge) {
+        if (edge == BND_RIGHT) {
+            return PASSIVE;
+        }
+        else if(edge == BND_LEFT){
+            return INFLOW;
+        }
+        else{
+            return OUTFLOW;
+        }
+        assert(false && "wrong boundary type in SWE_OF_Subcritical_Scenario");
+    };
+
+
+    // virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
+    //     float a = x - (side * 0.5) + offsetX;
+    //     float b = y - (side * 0.5) + offsetY;
+    //     bool circ = sqrt(a * a + b * b) < (side * 0.1);
+    //     return (circ ? 17.5f: 5.0f);
+    //     // return 5.0f;
+    // };
 };
 
 class OF_SWE_Supercritical_Scenario : public SWE_RadialDamBreakScenario { //(4)
@@ -118,12 +152,12 @@ class OF_SWE_Supercritical_Scenario : public SWE_RadialDamBreakScenario { //(4)
 
 class OF_SWE_Subcritical_Scenario : public SWE_RadialDamBreakScenario { //(5)
   public:
-      virtual float getWaterHeight(float x, float y, float offsetX=0, float offsetY=0) {
+    virtual float getWaterHeight(float x, float y, float offsetX, float offsetY) {
         float a = x - ((side * 0.5) + offsetX);
         float b = y - ((side * 0.5) + offsetY);
         bool circ = sqrt(a * a + b * b) < (side * 0.1);
         return circ ? 20.f: 5.0f;
-      };
+    };
 
     virtual float getBoundaryPos(BoundaryEdge edge) {
        if (edge==BND_LEFT || edge==BND_TOP)
@@ -133,6 +167,20 @@ class OF_SWE_Subcritical_Scenario : public SWE_RadialDamBreakScenario { //(5)
        else
        return side * 2;
     };
+
+    virtual float endSimulation() { return 5.f; };
+
+    virtual int numberOfCheckpoints(){return 50; };
+
+    virtual BoundaryType getBoundaryType(BoundaryEdge edge) {
+        if (edge == BND_LEFT) {
+            return PASSIVE;
+        }else{
+            return OUTFLOW;
+        }
+        assert(false && "wrong boundary type in OF_SWE_Subcritical_Scenario");
+    };
+
 };
 
 
