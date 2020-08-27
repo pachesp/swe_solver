@@ -315,7 +315,7 @@ int main( int argc, char** argv ) {
       }
       else if (simType == threeDtwoDdsub) { //execute if 3d to 2d subcritical (5)
           std::cout << "executing 3d to 2d subcritical" << '\n';
-          write2Interfoam_3D2DSubcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY);
+          write2Interfoam_3D2DSubcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, 1);
       }
 
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt);
