@@ -60,7 +60,7 @@ class SWE_RadialDamBreakScenario : public SWE_Scenario {
 
 class SWE_OF_Supercritical_Scenario : public SWE_RadialDamBreakScenario{//(2)
   public:
-    virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
+    virtual float getWaterHeight(float x, float y, float offsetX, float offsetY) {
         float a = x - (side * 0.5) + offsetX;
         float b = y - (side * 0.5) + offsetY;
         bool circ = sqrt(a * a + b * b) < (side * 0.1);
@@ -122,7 +122,7 @@ class SWE_OF_Subcritical_Scenario : public SWE_RadialDamBreakScenario {//(3)
 
 class OF_SWE_Supercritical_Scenario : public SWE_RadialDamBreakScenario { //(4)
   public:
-    virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
+    virtual float getWaterHeight(float x, float y, float offsetX, float offsetY) {
      return 5.0f;
     };
 
@@ -153,10 +153,36 @@ class OF_SWE_Supercritical_Scenario : public SWE_RadialDamBreakScenario { //(4)
 class OF_SWE_Subcritical_Scenario : public SWE_RadialDamBreakScenario { //(5)
   public:
     virtual float getWaterHeight(float x, float y, float offsetX, float offsetY) {
+        float side = 10.0f;
         float a = x - ((side * 0.5) + offsetX);
         float b = y - ((side * 0.5) + offsetY);
-        bool circ = sqrt(a * a + b * b) < (side * 0.1);
-        return circ ? 20.f: 5.0f;
+        bool circ = sqrt(a * a + b * b) < (2.f);
+        return circ ? 15.f: 5.0f;
+        // return 5.0f;
+    };
+
+    virtual float getVeloc_u(float x, float y, float offsetX, float offsetY){
+        float side = 10.0f;
+        float a = x - ((side * 0.5) + offsetX);
+        float b = y - ((side * 0.5) + offsetY);
+        bool circ = sqrt(a * a + b * b) < (2.f);
+        if (circ) {
+            return 1*(a/sqrt(a*a + b*b));
+        } else{
+            return 0;
+        }
+    };
+
+    virtual float getVeloc_v(float x, float y, float offsetX, float offsetY){
+        float side = 10.0f;
+        float a = x - ((side * 0.5) + offsetX);
+        float b = y - ((side * 0.5) + offsetY);
+        bool circ = sqrt(a * a + b * b) < (2.f);
+        if (circ) {
+            return 1*(b/sqrt(a*a + b*b));
+        } else{
+            return 0;
+        }
     };
 
     virtual float getBoundaryPos(BoundaryEdge edge) {
@@ -168,9 +194,9 @@ class OF_SWE_Subcritical_Scenario : public SWE_RadialDamBreakScenario { //(5)
        return side * 2;
     };
 
-    virtual float endSimulation() { return 5.f; };
+    virtual float endSimulation() { return 10.f; };
 
-    virtual int numberOfCheckpoints(){return 50; };
+    virtual int numberOfCheckpoints(){return 200; };
 
     virtual BoundaryType getBoundaryType(BoundaryEdge edge) {
         if (edge == BND_LEFT) {

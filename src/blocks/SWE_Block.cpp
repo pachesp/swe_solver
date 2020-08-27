@@ -101,8 +101,8 @@ void SWE_Block::initScenario( float _offsetX, float _offsetY,
       float x = offsetX + (i-0.5f)*dx;
       float y = offsetY + (j-0.5f)*dy;
       h[i][j] =  i_scenario->getWaterHeight(x,y, offsetX, offsetY);
-      hu[i][j] = i_scenario->getVeloc_u(x,y) * h[i][j];
-      hv[i][j] = i_scenario->getVeloc_v(x,y) * h[i][j];
+      hu[i][j] = i_scenario->getVeloc_u(x,y, offsetX, offsetY) * h[i][j];
+      hv[i][j] = i_scenario->getVeloc_v(x,y, offsetX, offsetY) * h[i][j];
     };
 
   // initialize bathymetry
@@ -580,7 +580,6 @@ void SWE_Block::setBoundaryConditions() {
   switch(boundary[BND_RIGHT]) {
     case WALL:
     {
-	  assert(false);
       for(int j=1; j<=ny; j++) {
         h[nx+1][j] = h[nx][j];
         hu[nx+1][j] = -hu[nx][j];

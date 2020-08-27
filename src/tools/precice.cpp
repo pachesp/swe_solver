@@ -436,10 +436,6 @@ void readFromInterfoam_3D2DSubcritical_preCICE(SolverInterface &interface, SWE_B
     // read alpha
     double alpha[nY * nY]{};
     interface.readBlockScalarData(data->alphaId, nY * nY, data->vertexIDs, alpha);
-    // std::vector<double> alphav;//(alpha, alpha+nY); //copy array to vector
-    // for (int i = 0; i < nY * nY; i++) {
-    //     alphav.push_back(alpha[i]);
-    // }
     // read velocity
     double U[dim * nY * nY]{};
     interface.readBlockVectorData(data->velocityId, nY * nY, data->vertexIDs, U);
@@ -447,28 +443,10 @@ void readFromInterfoam_3D2DSubcritical_preCICE(SolverInterface &interface, SWE_B
     float hv[nY+2] {};
     for (int i = 0; i < nY; i++) {
         for (int j = 1; j <= nY; j++) {
-            if (alpha[i*nY + (j-1)] > 0.01) {
                 hu[j] += (float)U[(i*nY + (j-1)) * dim + 0] * (float)alpha[i*nY + (j-1)] * dY;
                 hv[j] += (float)U[(i*nY + (j-1)) * dim + 1] * (float)alpha[i*nY + (j-1)] * dY;
-            }
         }
     }
-
-    // std::cout << "SENDING THIS alpha" << '\n';
-    // for (int i = 0; i < nY; i++) {
-    //     for (int j = 0; j < nY; j++) {
-    //         std::cout << alpha[i +j*nY]  <<", ";
-    //     }
-    //     std::cout  << '\n';
-    // }
-    //
-    // std::cout << "SENDING THIS alphaV" << '\n';
-    // for (int i = 0; i < nY; i++) {
-    //     for (int j = 0; j < nY; j++) {
-    //         std::cout << alphav[i +j*nY]  <<", ";
-    //     }
-    //     std::cout  << '\n';
-    // }
 
     //gradient 0 for h
     float h[nY+2] {};
@@ -478,5 +456,4 @@ void readFromInterfoam_3D2DSubcritical_preCICE(SolverInterface &interface, SWE_B
 
     SWE_Block1D newBlock{h, hu, hv, 1};
     ghoshtBlock->copyFrom(&newBlock, nY+2);
-    // return alphav;
 }
