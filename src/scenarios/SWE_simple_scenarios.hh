@@ -154,35 +154,37 @@ class OF_SWE_Subcritical_Scenario : public SWE_RadialDamBreakScenario { //(5)
   public:
     virtual float getWaterHeight(float x, float y, float offsetX, float offsetY) {
         float side = 10.0f;
-        float a = x - ((side * 0.5) + offsetX);
-        float b = y - ((side * 0.5) + offsetY);
-        bool circ = sqrt(a * a + b * b) < (2.f);
-        return circ ? 15.f: 5.0f;
+        // float a = x - ((side * 0.5) + offsetX);
+        // float b = y - ((side * 0.5) + offsetY);
+        // bool circ = sqrt(a * a + b * b) < (2.f);
+        return (x > side+4 && x < side + 6) ? 15.f: 5.0f;
         // return 5.0f;
     };
 
     virtual float getVeloc_u(float x, float y, float offsetX, float offsetY){
-        float side = 10.0f;
-        float a = x - ((side * 0.5) + offsetX);
-        float b = y - ((side * 0.5) + offsetY);
-        bool circ = sqrt(a * a + b * b) < (2.f);
-        if (circ) {
-            return 1*(a/sqrt(a*a + b*b));
-        } else{
-            return 0;
-        }
+        // float side = 10.0f;
+        // float a = x - ((side * 0.5) + offsetX);
+        // float b = y - ((side * 0.5) + offsetY);
+        // bool circ = sqrt(a * a + b * b) < (2.f);
+        // if (circ) {
+        //     return 1*(a/sqrt(a*a + b*b));
+        // } else{
+        //     return 0;
+        // }
+        return 0.f;
     };
 
     virtual float getVeloc_v(float x, float y, float offsetX, float offsetY){
-        float side = 10.0f;
-        float a = x - ((side * 0.5) + offsetX);
-        float b = y - ((side * 0.5) + offsetY);
-        bool circ = sqrt(a * a + b * b) < (2.f);
-        if (circ) {
-            return 1*(b/sqrt(a*a + b*b));
-        } else{
-            return 0;
-        }
+        // float side = 10.0f;
+        // float a = x - ((side * 0.5) + offsetX);
+        // float b = y - ((side * 0.5) + offsetY);
+        // bool circ = sqrt(a * a + b * b) < (2.f);
+        // if (circ) {
+        //     return 1*(b/sqrt(a*a + b*b));
+        // } else{
+        //     return 0;
+        // }
+        return 0.f;
     };
 
     virtual float getBoundaryPos(BoundaryEdge edge) {
