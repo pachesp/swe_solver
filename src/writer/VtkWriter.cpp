@@ -26,6 +26,8 @@
 #include <cassert>
 #include <fstream>
 #include "VtkWriter.hh"
+#include "tools/precice.hh"
+
 
 /**
  * Creates a vtk file for each time step.
@@ -78,7 +80,7 @@ void io::VtkWriter::writeTimeStep(
 
 	//Grid points
 	float zCoord;
-	if (simType != 5) {
+	if (simType != threeDtwoDdsub) { // different from OF_SWE_Subcritical_Scenario
 		zCoord = 5.0;
 	}else{
 		zCoord = 2.0;

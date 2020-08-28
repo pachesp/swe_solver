@@ -19,7 +19,7 @@ void write2Interfoam_2D3DSupercritical_preCICE(SolverInterface &interface, SWE_B
     for (int i = 0; i < nY; i++) {
         double height = (double)wavePropagationBlock.getWaterHeight()[columNr][i];
         for (int j = 0; j < nY; j++) {
-            double yCoord = data->grid3D[(i + j*nY) * dim + 1]; // y-coord of the IF mesh
+            double yCoord = data->grid[(i + j*nY) * dim + 1]; // y-coord of the IF mesh
             //Algorithm 1, Mintegen page 84
             if(height <= yCoord - 0.5 * dY ){
                 alpha[i + j*nY] = 0.0;
@@ -67,7 +67,7 @@ void write2Interfoam_2D3DSupercritical_preCICE(SolverInterface &interface, SWE_B
         count = 0;
         for (int i = 0; i < nY; i++) {
             for (int j = 0; j < nY; j++) {
-                double yCoord = data->grid3D[(i + j*nY) * dim + 1];
+                double yCoord = data->grid[(i + j*nY) * dim + 1];
                 ustar[(i + j*nY) * dim2 + 0] = std::sqrt(tau[(i + j*nY) * dim2 + 0] / rho_water);
                 ustar[(i + j*nY) * dim2 + 1] = std::sqrt(tau[(i + j*nY) * dim2 + 1] / rho_water);
                 U[count++] = u + ustar[(i + j*nY) * dim + 0] / 0.41 * (1+std::log(yCoord/h));
@@ -83,7 +83,7 @@ void write2Interfoam_2D3DSupercritical_preCICE(SolverInterface &interface, SWE_B
             q2d[0] = (double)(wavePropagationBlock.getDischarge_hu()[columNr][i]);
             q2d[1] = (double)(wavePropagationBlock.getDischarge_hv()[columNr][i]);
             for (int j = 0; j < nY; j++) {
-                double yCoord = data->grid3D[(i + j*nY) * dim + 1];      // y-coord of the IF mesh
+                double yCoord = data->grid[(i + j*nY) * dim + 1];      // y-coord of the IF mesh
                 q3d[0] += alpha[i + j*nY] * U[(i + j*nY) * dim + 0] * yCoord;
                 q3d[1] += alpha[i + j*nY] * U[(i + j*nY) * dim + 1] * yCoord;
             }
@@ -96,7 +96,7 @@ void write2Interfoam_2D3DSupercritical_preCICE(SolverInterface &interface, SWE_B
                     for (int i = 0; i < nY; i++) {
                         q3d[n] = 0.0;
                         for (int j = 0; j < nY; j++) {
-                            double yCoord = data->grid3D[(i + j*nY) * dim + 1];
+                            double yCoord = data->grid[(i + j*nY) * dim + 1];
                             U[(i + j*nY) * dim + n] = U[(i + j*nY) * dim + n] * beta[n];
                             q3d[n] += alpha[i + j*nY] * U[(i + j*nY) * dim + n] * yCoord;
                         }
@@ -110,7 +110,7 @@ void write2Interfoam_2D3DSupercritical_preCICE(SolverInterface &interface, SWE_B
             //         for (int i = 0; i < nY; i++) {
             //             q3d[n] = 0.0;
             //             for (int j = 0; j < nY; j++) {
-            //                 double yCoord = data->grid3D[(i + j*nY) * dim + 1];
+            //                 double yCoord = data->grid[(i + j*nY) * dim + 1];
             //                 U[(i + j*nY) * dim + n] = U[(i + j*nY) * dim + n] / beta[n];
             //                 q3d[n] += alpha[i + j*nY] * U[(i + j*nY) * dim + n] * yCoord;
             //             }
@@ -190,13 +190,10 @@ void write2Interfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_Blo
 
     // Writing Velocity to OF - Begin
     int nY = data->l_nY; //resolution
-    double dY = data->l_dY; //cell size in y-direction
     int dim = 3;
-    int count = 0;
 
     // Algorithm 1
     double U[dim * nY * nY] {}; //3D velocity holder for sending it to IF
-    count = 0;
     double u, v, h;
     for(int i = 1; i <= nY ; i++){
         h = (double)(wavePropagationBlock.getWaterHeight()[columNr][i]);
@@ -213,7 +210,8 @@ void write2Interfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_Blo
 
     // // Mintgens algorithm
     // double U[dim * nY * nY] {}; //3D velocity holder for sending it to IF
-    // count = 0;
+    // double dY = data->l_dY; //cell size in y-direction
+    // int count = 0;
     // double u, v, h;
     // for(int i = 1; i <= nY ; i++){
     //     h = (double)(wavePropagationBlock.getWaterHeight()[columNr][i]);
@@ -244,7 +242,7 @@ void write2Interfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_Blo
     // count = 0;
     // for (int i = 0; i < nY; i++) {
     //     for (int j = 0; j < nY; j++) {
-    //         double yCoord = data->grid3D[(i + j*nY) * dim + 1];
+    //         double yCoord = data->grid[(i + j*nY) * dim + 1];
     //         ustar[(i + j*nY) * dim2 + 0] = std::sqrt(tau[(i + j*nY) * dim2 + 0] / rho_water);
     //         ustar[(i + j*nY) * dim2 + 1] = std::sqrt(tau[(i + j*nY) * dim2 + 1] / rho_water);
     //         U[count++] = u + ustar[(i + j*nY) * dim + 0] / 0.41 * (1+std::log(yCoord/h));
@@ -260,7 +258,7 @@ void write2Interfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_Blo
     //     q2d[0] = (double)(wavePropagationBlock.getDischarge_hu()[columNr][i]);
     //     q2d[1] = (double)(wavePropagationBlock.getDischarge_hv()[columNr][i]);
     //     for (int j = 0; j < nY; j++) {
-    //         double yCoord = data->grid3D[(i + j*nY) * dim + 1];      // y-coord of the IF mesh
+    //         double yCoord = data->grid[(i + j*nY) * dim + 1];      // y-coord of the IF mesh
     //         q3d[0] += alpha[i + j*nY] * U[(i + j*nY) * dim + 0] * yCoord;
     //         q3d[1] += alpha[i + j*nY] * U[(i + j*nY) * dim + 1] * yCoord;
     //     }
@@ -273,7 +271,7 @@ void write2Interfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_Blo
     //             for (int i = 0; i < nY; i++) {
     //                 q3d[n] = 0.0;
     //                 for (int j = 0; j < nY; j++) {
-    //                     double yCoord = data->grid3D[(i + j*nY) * dim + 1];
+    //                     double yCoord = data->grid[(i + j*nY) * dim + 1];
     //                     U[(i + j*nY) * dim + n] = U[(i + j*nY) * dim + n] * beta[n];
     //                     q3d[n] += alpha[i + j*nY] * U[(i + j*nY) * dim + n] * yCoord;
     //                 }
@@ -287,7 +285,7 @@ void write2Interfoam_2D3DSubcritical_preCICE(SolverInterface &interface, SWE_Blo
     //     //         for (int i = 0; i < nY; i++) {
     //     //             q3d[n] = 0.0;
     //     //             for (int j = 0; j < nY; j++) {
-    //     //                 double yCoord = data->grid3D[(i + j*nY) * dim + 1];
+    //     //                 double yCoord = data->grid[(i + j*nY) * dim + 1];
     //     //                 U[(i + j*nY) * dim + n] = U[(i + j*nY) * dim + n] / beta[n];
     //     //                 q3d[n] += alpha[i + j*nY] * U[(i + j*nY) * dim + n] * yCoord;
     //     //             }
@@ -336,17 +334,10 @@ std::vector<double> readFromInterfoam_2D3DSubcritical_preCICE(SolverInterface &i
         }
     }
 
-    // std::cout << "h" << '\n';
-    // for (int i = 1; i <= nY; i++) {
-    //         std::cout << fixed << setprecision(2) << h[i] << ", ";
-    //     }
-    // std::cout  << '\n';
-
     std::vector<double> alphav;
     for (int i = 0; i < nY * nY; i++) {
         alphav.push_back(alpha[i]);
     }
-
 
     //gradient 0 for discharges hu and hv
     float hu[nY+2] {};
@@ -366,13 +357,6 @@ std::vector<double> readFromInterfoam_2D3DSubcritical_preCICE(SolverInterface &i
 void write2Interfoam_3D2DSubcritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
                   int columNr)
 {
-    // double dY = data->l_dY;
-    // double rho_water = 1000.0;
-    // double rho_air = 1.0;
-    // double rho_mixed[nY * nY];
-    // double hh;
-    // int dim = 3;
-    // double p_rgh[nY * nY]{};
     std::cout << "executing 3d to 2d subcritical write" << '\n';
     int nY = data->l_nY; //resolution
     double g = 9.81;
@@ -380,47 +364,11 @@ void write2Interfoam_3D2DSubcritical_preCICE(SolverInterface &interface, SWE_Blo
     double gh[nY * nY]{};
     for (int i = 0; i < nY; i++) {
         h = wavePropagationBlock.getWaterHeight()[columNr][i];
-        // std::cout  <<fixed << setprecision(2) << "h[: " << i << "]: "<<  h  << '\n';
         for (int j = 0; j < nY; j++) {
-            // double yCoord = data->grid3D[(i + j*nY) * dim + 1]; // y-coord of the IF mesh
-            // rho_mixed[i + j*nY] = rho_water * alphav[i + j*nY] + rho_air * (1 - alphav[i + j*nY]);
-            // std::cout <<fixed << setprecision(2) << "alhpa[" << i << "]["<< j << "]: " << alphav[i + j*nY] << '\n';
-            // p_rgh[i + j*nY] = rho_mixed[i + j*nY] * g * h;           // Set p_rgh  eq 5.16 mintgen
             gh[i + j*nY] = g * h;           // Set p_rgh  eq 5.16 mintgen
         }
-        // std::cout  << '\n';
     }
-    // std::cout << "\nh" << '\n';
-    // for (int i = 0; i < nY; i++) {
-    //     std::cout <<fixed << setprecision(1) << h << ", ";
-    // }
-    // std::cout  << '\n';
-    //
-    // std::cout << "\nAlpha Vector" << '\n';
-    // for (int i = 0; i < nY; i++) {
-    //     for (int j = 0; j < nY; j++) {
-    //         std::cout <<fixed << setprecision(2)<< abs(alphav[i*nY + j])  <<", ";
-    //     }
-    //     std::cout  << '\n';
-    // }
-    //
-    // std::cout << "\nrhoMixed Vector" << '\n';
-    // for (int i = 0; i < nY; i++) {
-    //     for (int j = 0; j < nY; j++) {
-    //         std::cout <<fixed << setprecision(2)<< rho_mixed[i*nY + j]  <<", ";
-    //     }
-    //     std::cout  << '\n';
-    // }
-    //
-    // std::cout << "\nPressure" << '\n';
-    // for (int i = 0; i < nY; i++) {
-    //     for (int j = 0; j < nY; j++) {
-    //     std::cout <<fixed << setprecision(1) << p_rgh[i*nY + j] << ", ";
-    //     }
-    //     std::cout  << '\n';
-    // }
-    // std::cout  << '\n';
-    // // std::cin.get();
+
     interface.writeBlockScalarData(data->ghId, nY * nY, data->vertexIDs, gh);
 }
 

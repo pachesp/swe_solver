@@ -93,7 +93,7 @@ class SWE_OF_Subcritical_Scenario : public SWE_RadialDamBreakScenario {//(3)
           return 0.f;
     };
 
-    virtual float endSimulation() { return 20.f; };
+    virtual float endSimulation() { return 10.f; };
 
     virtual int numberOfCheckpoints(){return 100; }; // to see second wave (TODO second drop setFieldsValue in OF)
 

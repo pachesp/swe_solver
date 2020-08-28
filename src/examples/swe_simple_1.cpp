@@ -90,7 +90,7 @@ int main( int argc, char** argv ) {
   //! number of grid cells in x- and y-direction.
   int l_nX, l_nY;
 
-  //wheather simulation is swe-of (0) or of-swe(1)
+  //whether simulation is swe-of of-swe swe-swe sub or supercritical
   size_t simType;
 
   //! l_baseName of the plots.

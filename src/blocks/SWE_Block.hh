@@ -250,8 +250,8 @@ class SWE_Block {
 
 public:
     float* hGrad = new float[ny+2];
-    float* huGrad_SWE = new float[ny+2];
-    float* hvGrad_SWE = new float[ny+2];
+    float* huGrad = new float[ny+2];
+    float* hvGrad = new float[ny+2];
 
 protected:
 
