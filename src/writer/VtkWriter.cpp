@@ -47,9 +47,11 @@ io::VtkWriter::VtkWriter( const std::string &i_baseName,
 		const BoundarySize &i_boundarySize,
 		int i_nX, int i_nY,
 		float i_dX, float i_dY,
+		size_t i_simType,
 		int i_offsetX, int i_offsetY) :
   io::Writer(i_baseName, i_b, i_boundarySize, i_nX, i_nY),
   dX(i_dX), dY(i_dY),
+  simType(i_simType),
   offsetX(i_offsetX), offsetY(i_offsetY)
 {
 }
@@ -75,7 +77,13 @@ void io::VtkWriter::writeTimeStep(
 			<< "<DataArray NumberOfComponents=\"3\" type=\"Float32\" format=\"ascii\">" << std::endl;
 
 	//Grid points
-	float zCoord = 5.0;
+	float zCoord;
+	if (simType != 5) {
+		zCoord = 5.0;
+	}else{
+		zCoord = 2.0;
+	}
+
 	for (int j=0; j < nY+1; j++)
 	      for (int i=0; i < nX+1; i++)
 	    	  vtkFile << offsetX + i * dX << " " << zCoord << " " << offsetY + j * dY << std::endl;

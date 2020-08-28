@@ -179,7 +179,9 @@ int main( int argc, char** argv ) {
 		  l_boundarySize,
 		  l_nX, l_nY,
 		  l_dX, l_dY,
-          l_originX, l_originY);
+          simType,
+          l_originX, l_originY
+      );
 
 
   // Write zero time step

@@ -38,7 +38,7 @@ class io::VtkWriter : public io::Writer
 private:
 	//! cell size
 	float dX, dY;
-
+	size_t simType;
 	float offsetX, offsetY;
 
 public:
@@ -47,7 +47,9 @@ public:
 			   const BoundarySize &i_boundarySize,
 			   int i_nX, int i_nY,
 			   float i_dX, float i_dY,
-			   int i_offsetX = 0, int i_offsetY = 0);
+			   size_t simType,
+			   int i_offsetX = 0, int i_offsetY = 0
+		   );
 
     // writes the unknowns at a given time step to a vtk file
     void writeTimeStep( const Float2D &i_h,
