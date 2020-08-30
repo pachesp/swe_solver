@@ -80,11 +80,17 @@ void io::VtkWriter::writeTimeStep(
 
 	//Grid points
 	float zCoord;
-	if (simType != threeDtwoDdsub) { // different from OF_SWE_Subcritical_Scenario
-		zCoord = 5.0;
-	}else{
+	if (simType == threeDtwoDdsub) { // for orientation purposes
 		zCoord = 2.0;
 	}
+	else if (simType == twoDtwoDsup) {
+		zCoord = 0.0;
+	}
+	else{
+		zCoord = 5.0;
+	}
+
+
 
 	for (int j=0; j < nY+1; j++)
 	      for (int i=0; i < nX+1; i++)

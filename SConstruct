@@ -114,7 +114,9 @@ vars.AddVariables(
 
   BoolVariable( 'copyenv', 'copy the whole environment', False ),
 
-  BoolVariable( 'countflops', 'enable flop counting; defines the macro COUNTFLOPS', False )
+  BoolVariable( 'countflops', 'enable flop counting; defines the macro COUNTFLOPS', False ),
+
+  BoolVariable( 'secondSWE', 'activate SWE SWE solver', False)
 )
 
 # external variables
@@ -386,6 +388,8 @@ build_dir = env['buildDir']+'/build_'+program_name
 
 # get the src-code files
 env.src_files_1 = []
+if env['secondSWE'] == True:
+    env.src_files_2 = []
 
 Export('env')
 SConscript('src/SConscript', variant_dir=build_dir, duplicate=0)
@@ -394,3 +398,7 @@ Import('env')
 # build the program
 env.Program('build/'+program_name+'_1', env.src_files_1, LIBS = 'precice',
  LIBPATH = ['/usr/lib'])
+
+if env['secondSWE'] == True:
+    env.Program('build/'+program_name+'_2', env.src_files_2, LIBS = 'precice',
+    LIBPATH = ['/usr/lib'])

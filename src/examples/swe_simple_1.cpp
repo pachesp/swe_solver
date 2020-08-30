@@ -211,7 +211,7 @@ int main( int argc, char** argv ) {
 
   //set coordinates on face centres of the interfoam left boundary
   int vertexIDs[l_nY * l_nY]{};
-  double grid3D[dimensions * l_nY * l_nY]{};
+  double grid[dimensions * l_nY * l_nY]{};
   int count=0;
   double xBoundary;
   if (simType == twoDthreeDdsup || simType == twoDthreeDdsub) { //if 2d to 3d
@@ -224,16 +224,16 @@ int main( int argc, char** argv ) {
 
   for (int i = 1; i <= l_nY; i++){
     for (int j = 1; j <= l_nY; j++){
-      grid3D[count++] = xBoundary;                  // x
-      grid3D[count++] = 0 + (i - 0.5) * l_dY;       // y
-      grid3D[count++] = 0 + (j - 0.5) * l_dY;       // z
+      grid[count++] = xBoundary;                  // x
+      grid[count++] = 0 + (i - 0.5) * l_dY;       // y
+      grid[count++] = 0 + (j - 0.5) * l_dY;       // z
     }
   }
-  interface.setMeshVertices(meshID, l_nY * l_nY , grid3D, vertexIDs);
+  interface.setMeshVertices(meshID, l_nY * l_nY , grid, vertexIDs);
 
   //initilize preCICE
   float precice_dt = interface.initialize();
-  PreciceData preciceData{alphaId, ghId, velocityId, velocityGradientId, grid3D, l_nY, (double)l_dY, vertexIDs, simType};
+  PreciceData preciceData{alphaId, ghId, velocityId, velocityGradientId, grid, l_nY, (double)l_dY, vertexIDs, simType};
  // +++++++++++++++++ preCICE config - END +++++++++++++++++
 
 
@@ -373,17 +373,3 @@ int main( int argc, char** argv ) {
 
   return 0;
 }
-
-// // Debbugging
-//  std::cout << "output1" << '\n';
-//  for(int j = 0; j < l_nX +2 ; j++){
-//     for(int i = 0; i < l_nY + 2; i++){
-//       std::cout << l_wavePropgationBlock.getWaterHeight().float2D2doublePointer()[i*(l_nX+2)+(j)] << "\t";
-//   }
-//   std::cout <<"\n";
-// }
-//
-//  std::cout << "output 2" << '\n';
-//  for(int i = 0; i < l_nY +2; i++){
-//    std::cout << height_SWE_db[i] << '\n';
-//  }

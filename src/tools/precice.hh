@@ -9,10 +9,14 @@ using namespace precice::constants;
 #include "tools/help.hh"
 
 enum type{
-    twoDthreeDdsup=2,
+    twoDtwoDsup,
+    twoDtwoDsub,
+    twoDthreeDdsup,
     twoDthreeDdsub,
     threeDtwoDdsup,
-    threeDtwoDdsub
+    threeDtwoDdsub,
+    threeDthreeDsup,
+    threeDthreeDsub
 };
 
 struct PreciceData{
@@ -20,7 +24,7 @@ struct PreciceData{
   int  ghId;
   int  velocityId;
   int  velocityGradientId;
-  double* grid3D;
+  double* grid;
   int l_nY;
   double l_dY;
   int* vertexIDs;

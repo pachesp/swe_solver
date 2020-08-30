@@ -571,6 +571,9 @@ void SWE_Block::setBoundaryConditions() {
 	}
     case PASSIVE:
       break;
+    case INFLOW_COUPLE:
+		std::cout << "INFLOW COUPLEE YIHAAA" << '\n';
+      break;
     default:
       assert(false);
       break;
