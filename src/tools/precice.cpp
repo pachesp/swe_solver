@@ -1,8 +1,115 @@
 #include "tools/precice.hh"
 #include <iomanip>      // std::setprecision
 
-void writeCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float time, float &time_CP, int size, int columNr){}
-void restoreCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float &time, float time_CP, int size, int columNr){}
+void writeCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float time, float &time_CP, int size, int columNr)
+{
+    if(data->CP_height_f2d) delete data->CP_height_f2d;
+   if(data->CP_hu_f2d) delete data->CP_hu_f2d;
+   if(data->CP_hv_f2d) delete data->CP_hv_f2d;
+
+
+   time_CP = time;
+
+   data->CP_height_f2d = new Float2D(wavePropagationBlock.getWaterHeight(), false);
+   data->CP_hu_f2d = new Float2D(wavePropagationBlock.getDischarge_hu(), false);
+   data->CP_hv_f2d = new Float2D(wavePropagationBlock.getDischarge_hv(), false);
+}
+
+void restoreCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float &time, float time_CP, int size, int columNr)
+{
+    time = time_CP;
+
+    for(int j = 0; j < size ; j++){
+        for(int i = 0; i < size ; i++){
+
+            wavePropagationBlock.getWaterHeight()[i][j]  =  (*(data->CP_height_f2d))[i][j];
+            wavePropagationBlock.getDischarge_hu()[i][j] =  (*(data->CP_hu_f2d))[i][j];
+            wavePropagationBlock.getDischarge_hv()[i][j] =  (*(data->CP_hv_f2d))[i][j];
+        }
+    }
+}
+
+void write2SWE_SWE_Right_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data, int size, int columNr){
+
+    int nY = data->l_nY;
+    double h[nY + 2]{};
+    double hu[nY + 2]{};
+    double hv[nY + 2]{};
+
+    for(int i = 0; i < nY + 2 ; i++){ //Data stored column-wise
+      h[i] = (double)wavePropagationBlock.getWaterHeight()[columNr][i];
+      hu[i] = (double)wavePropagationBlock.getDischarge_hu()[columNr][i];
+      hv[i] = (double)wavePropagationBlock.getDischarge_hv()[columNr][i];
+    }
+
+    interface.writeBlockScalarData(data->heightId, nY + 2, data->vertexIDs, h);
+    interface.writeBlockScalarData(data->huId, nY + 2, data->vertexIDs, hu);
+    interface.writeBlockScalarData(data->hvId, nY + 2, data->vertexIDs, hv);
+}
+
+void write2SWE_SWE_Left_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data, int size, int columNr){
+
+    int nY = data->l_nY;
+    double hGrad[nY + 2]{};
+    double huGrad[nY + 2]{};
+    double hvGrad[nY + 2]{};
+
+    for(int i = 0; i < nY + 2; i++){ //Data stored column-wise
+      hGrad[i] = (double)wavePropagationBlock.hGrad[i];
+      huGrad[i] = (double)wavePropagationBlock.huGrad[i];
+      hvGrad[i] = (double)wavePropagationBlock.hvGrad[i];
+    }
+
+    interface.writeBlockScalarData(data->heightGradId, nY + 2, data->vertexIDs, hGrad);
+    interface.writeBlockScalarData(data->huGradId, nY + 2, data->vertexIDs, huGrad);
+    interface.writeBlockScalarData(data->hvGradId, nY + 2, data->vertexIDs, hvGrad);
+}
+
+void readFromSWE_SWE_Left_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock,
+                  SWE_Block1D* ghoshtBlock, PreciceData *data, int size, int columNr){
+
+    int nY = data->l_nY;
+    double h[nY + 2]{};
+    double hu[nY + 2]{};
+    double hv[nY + 2]{};
+
+    float h_f[nY + 2]{};
+    float hu_f[nY + 2]{};
+    float hv_f[nY + 2]{};
+
+    interface.readBlockScalarData(data->heightId, nY + 2, data->vertexIDs, h);
+    interface.readBlockScalarData(data->huId, nY + 2, data->vertexIDs, hu);
+    interface.readBlockScalarData(data->hvId, nY + 2, data->vertexIDs, hv);
+
+    for(int i = 0; i< nY + 2; i++){
+      h_f[i] = (float)h[i];
+      hu_f[i] = (float)hu[i];
+      hv_f[i] = (float)hv[i];
+    }
+
+    // Data sent by left neighbour from precice
+    SWE_Block1D newBlock{h_f, hu_f, hv_f, 1};
+    ghoshtBlock->copyFrom(&newBlock, nY + 2);
+}
+
+void readFromSWE_SWE_Right_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock,
+                   PreciceData *data, int size, int columNr){
+
+     int nY = data->l_nY;
+     double hGrad[nY + 2]{};
+     double huGrad[nY + 2]{};
+     double hvGrad[nY + 2]{};
+
+    interface.readBlockScalarData(data->heightGradId, nY + 2, data->vertexIDs, hGrad);
+    interface.readBlockScalarData(data->huGradId, nY + 2, data->vertexIDs, huGrad);
+    interface.readBlockScalarData(data->hvGradId, nY + 2, data->vertexIDs, hvGrad);
+
+    for (int i = 0; i < nY + 2; i++) {
+        wavePropagationBlock.hGrad[i] = (float)hGrad[i];
+        wavePropagationBlock.huGrad[i] = (float)huGrad[i];
+        wavePropagationBlock.hvGrad[i] = (float)hvGrad[i];
+    }
+}
 
 //(2)
 void write2Interfoam_2D3DSupercritical_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,

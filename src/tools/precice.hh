@@ -20,6 +20,27 @@ enum type{
 };
 
 struct PreciceData{
+    int  snd_heightId;
+    int  snd_huId;
+    int  snd_hvId;
+
+    double* snd_height_db;
+    double* snd_hu_db;
+    double* snd_hv_db;
+
+    int recv_heightId;
+    int recv_huId;
+    int recv_hvId;
+
+    double* recv_height_db;
+    double* recv_hu_db;
+    double* recv_hv_db;
+
+    int* vertexIDs;
+
+
+
+
   int  alphaId;
   int  ghId;
   int  velocityId;
@@ -27,24 +48,38 @@ struct PreciceData{
   double* grid;
   int l_nY;
   double l_dY;
-  int* vertexIDs;
   size_t simType;
+
+  int heightGradId;
+  int huGradId;
+  int hvGradId;
+  double* heightGrad_db;
+  double* huGrad_db;
+  double* hvGrad_db;
+
+  int heightId;
+  int huId;
+  int hvId;
+  double* heightS1_db;
+  double* huS1_db;
+  double* hvS1_db;
+
 
   Float2D* CP_height_f2d;
   Float2D* CP_hu_f2d;
   Float2D* CP_hv_f2d;
 };
 
-void write_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+void write2SWE_SWE_Right_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
                   int size, int columNr);
 
-void writeGradient_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
+void write2SWE_SWE_Left_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, PreciceData *data,
                 int size, int columNr);
 
-void read_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, SWE_Block1D* ghoshtBlock,
+void readFromSWE_SWE_Left_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock, SWE_Block1D* ghoshtBlock,
                   PreciceData *data, int size, int columNr = 0);
 
-void readGradient_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock,
+void readFromSWE_SWE_Right_preCICE(SolverInterface &interface, SWE_Block &wavePropagationBlock,
                   PreciceData *data, int size, int columNr = 0);
 
 void writeCheckpoint(PreciceData *data, SWE_Block &wavePropagationBlock, float time, float &time_CP, int size, int columNr);

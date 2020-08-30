@@ -105,7 +105,10 @@ int main( int argc, char** argv ) {
   // create a simple artificial scenario
   SWE_Scenario* l_scenario = nullptr;
 
-    if(simType == twoDthreeDdsup){ // if 2d to 3d supercritical (2)
+    if (simType == twoDtwoDsup) { // if 2d to 2d supercritical (0)
+        l_scenario = new SWE_SWE_Supercritical_Left_Scenario();
+    }
+    else if(simType == twoDthreeDdsup){ // if 2d to 3d supercritical (2)
         l_scenario = new SWE_OF_Supercritical_Scenario();
     }
     else if(simType == twoDthreeDdsub){ // if 2d to 3d subcritical (3)
@@ -204,15 +207,42 @@ int main( int argc, char** argv ) {
   SolverInterface interface(solverName, configFileName, 0, 1);
   int dimensions = interface.getDimensions();
   int meshID = interface.getMeshID("SWE_solver-Mesh");
+  int count=0;
+  int meshSize;
+  int* vertexIDs = nullptr;
+  double* grid = nullptr;
+  PreciceData* preciceData = new PreciceData{};
+
+if(simType == twoDtwoDsup)
+{
+      vertexIDs = new int[l_nY +2];
+      grid = new double[dimensions * (l_nY+2)];
+      for (int j=0; j <= l_nY + 1 ; j++){
+        grid[count++] = 0;
+        grid[count++] = j;
+      }
+
+      meshSize = l_nY+2;
+
+      preciceData->heightId = interface.getDataID("heightS1", meshID);
+      preciceData->huId = interface.getDataID("huS1", meshID);
+      preciceData->hvId = interface.getDataID("hvS1", meshID);
+      preciceData->heightGradId = interface.getDataID("heightGrad", meshID);
+      preciceData->huGradId = interface.getDataID("huGrad", meshID);
+      preciceData->hvGradId = interface.getDataID("hvGrad", meshID);
+
+}
+else{
+
   int alphaId = interface.getDataID("Alpha", meshID);
   int ghId = interface.getDataID("Gh", meshID);
   int velocityId = interface.getDataID("Velocity", meshID);
   int velocityGradientId = interface.getDataID("VelocityGradient", meshID);
 
   //set coordinates on face centres of the interfoam left boundary
-  int vertexIDs[l_nY * l_nY]{};
-  double grid[dimensions * l_nY * l_nY]{};
-  int count=0;
+  vertexIDs = new int[l_nY * l_nY];
+  grid = new double[dimensions * l_nY * l_nY];
+
   double xBoundary;
   if (simType == twoDthreeDdsup || simType == twoDthreeDdsub) { //if 2d to 3d
       xBoundary = 10 + l_dX;
@@ -223,34 +253,51 @@ int main( int argc, char** argv ) {
   }
 
   for (int i = 1; i <= l_nY; i++){
-    for (int j = 1; j <= l_nY; j++){
-      grid[count++] = xBoundary;                  // x
-      grid[count++] = 0 + (i - 0.5) * l_dY;       // y
-      grid[count++] = 0 + (j - 0.5) * l_dY;       // z
-    }
+      for (int j = 1; j <= l_nY; j++){
+        grid[count++] = xBoundary;                  // x
+        grid[count++] = 0 + (i - 0.5) * l_dY;       // y
+        grid[count++] = 0 + (j - 0.5) * l_dY;       // z
+      }
   }
-  interface.setMeshVertices(meshID, l_nY * l_nY , grid, vertexIDs);
 
-  //initilize preCICE
-  float precice_dt = interface.initialize();
-  PreciceData preciceData{alphaId, ghId, velocityId, velocityGradientId, grid, l_nY, (double)l_dY, vertexIDs, simType};
+  meshSize = l_nY * l_nY;
+  preciceData->alphaId = alphaId;
+  preciceData->ghId = ghId;
+  preciceData->velocityId = velocityId;
+  preciceData->velocityGradientId = velocityGradientId;
+  
+}
+
+preciceData->l_nY = l_nY;
+preciceData->l_dY = (double)l_dY;
+preciceData->simType = simType;
+preciceData->grid = grid;
+preciceData->vertexIDs = vertexIDs;
+
+interface.setMeshVertices(meshID, meshSize , grid, vertexIDs);
+
+float precice_dt = interface.initialize();
+
  // +++++++++++++++++ preCICE config - END +++++++++++++++++
 
-
-
-
-    // if (interface.isActionRequired(actionWriteInitialData())) {
-    //   std::cout << "SWE_solver action write initial data" << '\n';
-    //   write_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nX+2, l_nY);
-    //   interface.markActionFulfilled(actionWriteInitialData());
-    // }
+ if(simType == twoDtwoDsup){
+     //this apparently comes from the config file
+       if (interface.isActionRequired(actionWriteInitialData())) {
+         std::cout << "solver1 action write initial data" << '\n';
+         write2SWE_SWE_Right_preCICE(interface, l_wavePropgationBlock, preciceData, l_nX+2, l_nY);
+         interface.markActionFulfilled(actionWriteInitialData());
+       }
+  }
 
   interface.initializeData();
 
-  // if (interface.isReadDataAvailable()) {
-  //     interface.readBlockVectorData(velocityGradientId, l_nY * l_nY, vertexIDs);
-  //     std::cout << "read before loop" << '\n';
-  // }
+ if(simType == twoDtwoDsup){
+     if (interface.isReadDataAvailable()) {
+     std::cout << "Solver1 Read Data Available" << '\n';
+     readFromSWE_SWE_Right_preCICE(interface, l_wavePropgationBlock,
+         preciceData,  l_nX +2);
+   }
+}
 
   //! simulation time.
   float l_t = 0.0;
@@ -268,21 +315,21 @@ int main( int argc, char** argv ) {
      }
 
       if(interface.isActionRequired(actionWriteIterationCheckpoint())) {
-        writeCheckpoint(&preciceData, l_wavePropgationBlock, l_t, time_CP, l_nX+2, l_nY);
+        writeCheckpoint(preciceData, l_wavePropgationBlock, l_t, time_CP, l_nX+2, l_nY);
         interface.markActionFulfilled(actionWriteIterationCheckpoint());
       }
 
       if(simType == twoDthreeDdsub){ //execute if 2d to 3d subcritical (3)
           std::cout << "executing 2d to 3d subcritical" << '\n';
-          alphav = readFromInterfoam_2D3DSubcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_rightGhostCells, l_nY);
+          alphav = readFromInterfoam_2D3DSubcritical_preCICE(interface, l_wavePropgationBlock, preciceData, l_rightGhostCells, l_nY);
       }
       else if(simType == threeDtwoDdsup){ //execute if 3d to 2d supercritical (4)
           std::cout << "executing 3d to 2d supercritical" << '\n';
-          readFromInterfoam_3D2DSupercritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_leftGhostCells);
+          readFromInterfoam_3D2DSupercritical_preCICE(interface, l_wavePropgationBlock, preciceData, l_leftGhostCells);
       }
       else if (simType == threeDtwoDdsub) { // execute if 3d to 2d subcritical (5)
           std::cout << "executing 3d to 2d subcritical" << '\n';
-          readFromInterfoam_3D2DSubcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_leftGhostCells, 1);
+          readFromInterfoam_3D2DSubcritical_preCICE(interface, l_wavePropgationBlock, preciceData, l_leftGhostCells, 1);
       }
 
       // set values in ghost cells:
@@ -300,29 +347,41 @@ int main( int argc, char** argv ) {
       l_wavePropgationBlock.computeNumericalFluxes();
 
       //! maximum allowed time step width.
-      // float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
-      float l_maxTimeStepWidth = 0.0009765625;
-      // float l_maxTimeStepWidth = 0.125;
+      float l_maxTimeStepWidth;
+
+      if(simType == twoDtwoDsup){
+          l_maxTimeStepWidth = 0.125;
+      }else{
+          l_maxTimeStepWidth = 0.0009765625;
+      }
 
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
 
-      if(simType == twoDthreeDdsup){ //execute if 2d to 3d supercritical (2)
+      if (simType == twoDtwoDsup) {
+          write2SWE_SWE_Right_preCICE(interface, l_wavePropgationBlock, preciceData, l_nX+2, l_nY);
+      }
+      else if(simType == twoDthreeDdsup){ //execute if 2d to 3d supercritical (2)
           std::cout << "executing 2d to 3d supercritical" << '\n';
-          write2Interfoam_2D3DSupercritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY);
+          write2Interfoam_2D3DSupercritical_preCICE(interface, l_wavePropgationBlock, preciceData, l_nY);
       }
       else if (simType == twoDthreeDdsub) { //execute if 2d to 3d subcritical (3)
           std::cout << "executing 2d to 3d subcritical" << '\n';
-          write2Interfoam_2D3DSubcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, l_nY, alphav);
+          write2Interfoam_2D3DSubcritical_preCICE(interface, l_wavePropgationBlock, preciceData, l_nY, alphav);
       }
       else if (simType == threeDtwoDdsub) { //execute if 3d to 2d subcritical (5)
           std::cout << "executing 3d to 2d subcritical" << '\n';
-          write2Interfoam_3D2DSubcritical_preCICE(interface, l_wavePropgationBlock, &preciceData, 1);
+          write2Interfoam_3D2DSubcritical_preCICE(interface, l_wavePropgationBlock, preciceData, 1);
       }
 
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt);
 
       precice_dt = interface.advance(l_maxTimeStepWidth);
+
+      if (simType == twoDtwoDsup) {
+          readFromSWE_SWE_Right_preCICE(interface, l_wavePropgationBlock,
+          preciceData, l_nX+2);
+      }
 
       // update the cpu time in the logger
       tools::Logger::logger.updateTime("Cpu");
@@ -337,7 +396,7 @@ int main( int argc, char** argv ) {
       progressBar.update(l_t);
 
       if (interface.isActionRequired(actionReadIterationCheckpoint())) {
-        restoreCheckpoint(&preciceData, l_wavePropgationBlock, l_t, time_CP, l_nX+2, l_nY);
+        restoreCheckpoint(preciceData, l_wavePropgationBlock, l_t, time_CP, l_nX+2, l_nY);
         interface.markActionFulfilled(actionReadIterationCheckpoint());
       }else{
         if(l_t >= l_checkPoints[chkpt] - l_maxTimeStepWidth && l_t < l_checkPoints[chkpt] + l_maxTimeStepWidth){

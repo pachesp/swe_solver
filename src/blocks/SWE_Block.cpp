@@ -572,7 +572,6 @@ void SWE_Block::setBoundaryConditions() {
     case PASSIVE:
       break;
     case INFLOW_COUPLE:
-		std::cout << "INFLOW COUPLEE YIHAAA" << '\n';
       break;
     default:
       assert(false);
@@ -726,8 +725,8 @@ void SWE_Block::calculateGradient(SWE_Block1D* ghostlayer){
 		hvGrad[i] = hv[1][i] - ghostlayer->hv[i];
 
 		// hGrad[i] = 0.f;
-		// huGrad_SWE[i] = 0.f;
-		// hvGrad_SWE[i] = 0.f;
+		// huGrad[i] = 0.f;
+		// hvGrad[i] = 0.f;
 	}
 }
 
