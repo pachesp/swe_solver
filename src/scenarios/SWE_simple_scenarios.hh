@@ -57,14 +57,15 @@ class SWE_RadialDamBreakScenario : public SWE_Scenario {
            return side;
      };
 };
-
+// 0 and 1
 class SWE_SWE_Supercritical_Left_Scenario : public SWE_RadialDamBreakScenario{
-public:
+  public:
     float side = 1000.f;
 
     virtual int numberOfCheckpoints(){return 50; }; // to see double splash
 
-    virtual float endSimulation() { return 20.f; }
+    virtual float endSimulation() { return 60.f; }
+
     virtual BoundaryType getBoundaryType(BoundaryEdge edge) {
         if (edge == BND_RIGHT) {
             return OUTFLOW_COUPLE;
@@ -72,6 +73,7 @@ public:
             return OUTFLOW;
         }
     };
+
     virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
         float b = (y-((side * 0.5)+offsetY));
         bool circ_1  = false;
@@ -88,26 +90,21 @@ public:
      };
 };
 
-//Francisco_Scenario2
-class SWE_SWE_Supercritical_Right_Scenario : public SWE_RadialDamBreakScenario{
-    public:
-        float side = 1000.f;
+// 0
+class SWE_SWE_Supercritical_Right_Scenario : public SWE_SWE_Supercritical_Left_Scenario{
+  public:
+    float side = 1000.f;
 
-        virtual int numberOfCheckpoints(){return 50; }; // to see double splash
+    virtual BoundaryType getBoundaryType(BoundaryEdge edge) {
+        if (edge == BND_LEFT) {
+            return INFLOW_COUPLE;
+        }else{
+            return OUTFLOW;
+        }
+      };
 
-        virtual float endSimulation() { return 20.f; };
-        virtual BoundaryType getBoundaryType(BoundaryEdge edge) {
-            if (edge == BND_LEFT) {
-                return INFLOW_COUPLE;
-            }else{
-                return OUTFLOW;
-            }
-        };
-
-    virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
-      bool circ_1  = false;
-      bool circ_2  = false;
-     return ( circ_1 || circ_2 ) ? 15.f: 10.0f;
+    virtual float getWaterHeight(float x, float y, float offsetX, float offsetY) {
+      return 10.0f;
     };
 
     virtual float getBoundaryPos(BoundaryEdge edge) {
@@ -120,6 +117,19 @@ class SWE_SWE_Supercritical_Right_Scenario : public SWE_RadialDamBreakScenario{
     };
 };
 
+// 1
+class SWE_SWE_Subcritical_Right_Scenario : public SWE_SWE_Supercritical_Right_Scenario{
+    public:
+      virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
+        float b = (y-((side * 0.5)+offsetY));
+        bool circ_1  = false;
+        float a_0 = (x-((side * 0.375) +offsetX));
+        bool circ_2 = sqrt(a_0*a_0 + b*b) < (side * 0.1);
+        return ( circ_1 || circ_2 ) ? 20.f: 10.0f;
+      }
+};
+
+//2
 class SWE_OF_Supercritical_Scenario : public SWE_RadialDamBreakScenario{//(2)
   public:
     virtual float getWaterHeight(float x, float y, float offsetX, float offsetY) {
@@ -137,6 +147,7 @@ class SWE_OF_Supercritical_Scenario : public SWE_RadialDamBreakScenario{//(2)
 
 };
 
+//3
 class SWE_OF_Subcritical_Scenario : public SWE_RadialDamBreakScenario {//(3)
   public: //TODO
 
@@ -182,6 +193,7 @@ class SWE_OF_Subcritical_Scenario : public SWE_RadialDamBreakScenario {//(3)
     // };
 };
 
+//4
 class OF_SWE_Supercritical_Scenario : public SWE_RadialDamBreakScenario { //(4)
   public:
     virtual float getWaterHeight(float x, float y, float offsetX, float offsetY) {
@@ -212,6 +224,7 @@ class OF_SWE_Supercritical_Scenario : public SWE_RadialDamBreakScenario { //(4)
 
 };
 
+//5
 class OF_SWE_Subcritical_Scenario : public SWE_RadialDamBreakScenario { //(5)
   public:
     float sideX = 7.f;

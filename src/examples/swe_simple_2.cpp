@@ -91,10 +91,16 @@ int main( int argc, char** argv ) {
   l_baseName = args.getArgument<std::string>("output-basepath");
 
   // create a simple artificial scenario
-  SWE_SWE_Supercritical_Right_Scenario* l_scenario = new SWE_SWE_Supercritical_Right_Scenario();
+  SWE_Scenario* l_scenario = nullptr;
 
-  if(simType != twoDtwoDsup){
-      assert(false && "wrong type in SWE_SWE_Supercritical_Right_Scenario");
+  if(simType == twoDtwoDsup){
+    l_scenario = new SWE_SWE_Supercritical_Right_Scenario();
+  }
+  else if (simType == twoDtwoDsub) {
+    l_scenario = new SWE_SWE_Subcritical_Right_Scenario();
+  }
+  else{
+    assert(false && "wrong type in SWE_SWE_Supercritical_Right_Scenario");
   }
 
   //! number of checkpoints for visualization (at each checkpoint in time, an output file is written).
@@ -168,7 +174,6 @@ int main( int argc, char** argv ) {
   }
 
   SWE_Block1D* l_leftGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_LEFT);
-  // SWE_Block1D* l_leftGhostCells  = l_wavePropgationBlock.grabEdge(BND_LEFT);
 
   // Init fancy progressbar
   tools::ProgressBar progressBar(l_endSimulation);
@@ -204,8 +209,9 @@ int main( int argc, char** argv ) {
   tools::Logger::logger.printStartMessage();
   tools::Logger::logger.initWallClockTime(time(NULL));
 
-  l_wavePropgationBlock.setBoundaryType(BND_LEFT, INFLOW_COUPLE);
+  // l_wavePropgationBlock.setBoundaryType(BND_LEFT, INFLOW_COUPLE);
 
+  //This configuration works for both 2d-2d subcritical or supercritical
   PreciceExchange* preciceExchange = new SWE_SWE_SuperCritical_Right_Exchange{interface, l_wavePropgationBlock,
      preciceData, 1, l_leftGhostCells};
 

@@ -105,20 +105,24 @@ int main( int argc, char** argv ) {
   // create a simple artificial scenario
   SWE_Scenario* l_scenario = nullptr;
 
-    if (simType == twoDtwoDsup) { // if 2d to 2d supercritical (0)
+    if (simType == twoDtwoDsup || simType == twoDtwoDsub) { // if 2d to 2d supercritical (0 and 1)
+      std::cout << "Executing scenario 2d-2d supercritical or subcritical" << '\n';
         l_scenario = new SWE_SWE_Supercritical_Left_Scenario();
     }
     else if(simType == twoDthreeDdsup){ // if 2d to 3d supercritical (2)
+      std::cout << "Executing scenario 2d-3d supercritical" << '\n';
         l_scenario = new SWE_OF_Supercritical_Scenario();
     }
     else if(simType == twoDthreeDdsub){ // if 2d to 3d subcritical (3)
-        std::cout << "Executing scenario 2d 3d subcritical" << '\n';
+        std::cout << "Executing scenario 2d-3d subcritical" << '\n';
         l_scenario = new SWE_OF_Subcritical_Scenario();
     }
     else if(simType == threeDtwoDdsup){ // if 3d to 2d supercritical (4)
+      std::cout << "Executing scenario 3d-2d supercritical" << '\n';
         l_scenario = new OF_SWE_Supercritical_Scenario();
     }
     else if(simType == threeDtwoDdsub){ // if 3d to 2d subcritical (5)
+      std::cout << "Executing scenario 3d-2d subcritical" << '\n';
         l_scenario = new OF_SWE_Subcritical_Scenario();
     }
      else{
@@ -213,7 +217,7 @@ int main( int argc, char** argv ) {
   double* grid = nullptr;
   PreciceData* preciceData = new PreciceData{};
 
-if(simType == twoDtwoDsup)
+if(simType == twoDtwoDsup || simType == twoDtwoDsub)
 {
       vertexIDs = new int[l_nY +2];
       grid = new double[dimensions * (l_nY+2)];
@@ -282,12 +286,13 @@ float precice_dt = interface.initialize();
 
 //overload write and read functions according to the flow regime
 PreciceExchange* preciceExchange = nullptr;
-if (simType == twoDtwoDsup) {
+if (simType == twoDtwoDsup || simType == twoDtwoDsub){
+  std::cout << "Data exchange 2d to 2d supercritical or subcritical" << '\n';
   preciceExchange = new SWE_SWE_SuperCritical_Left_Exchange{interface, l_wavePropgationBlock,
      preciceData, l_nY, l_leftGhostCells};
 }
 else if (simType == twoDthreeDdsup) {
-  std::cout << "executing 2d to 3d supercritical" << '\n';
+  std::cout << "Data exchange 2d to 3d supercritical" << '\n';
   preciceExchange = new SWE_OF_SuperCritical_Exchange{interface, l_wavePropgationBlock,
      preciceData, l_nY};
 }
@@ -310,7 +315,7 @@ else{
   assert(false && "wrong simulation type in preciceExchange");
 }
 
- if(simType == twoDtwoDsup){
+ if(simType == twoDtwoDsup || simType == twoDtwoDsub){
        if (interface.isActionRequired(actionWriteInitialData())) {
          std::cout << "solver1 action write initial data" << '\n';
          preciceExchange->write();
@@ -359,7 +364,7 @@ else{
 
       //! maximum allowed time step width. These deliver good results.
       float l_maxTimeStepWidth;
-      if(simType == twoDtwoDsup){
+      if(simType == twoDtwoDsup || simType == twoDtwoDsub){
           // float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
           l_maxTimeStepWidth = 0.125;
       }else{
