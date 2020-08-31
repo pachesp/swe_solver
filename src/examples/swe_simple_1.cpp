@@ -334,7 +334,7 @@ else{
   std::vector<double> alphav;
   while(interface.isCouplingOngoing()){
 
-      // add second droplet after 2 seconds. Only for 2D-3D supercritical
+      //add second droplet after 2 seconds. Only for 2D-3D supercritical
       if (l_t > 2.0 && setSecondDrop && simType == twoDthreeDdsup) {
           l_wavePropgationBlock.setWaterHeight(secondDrop);
           setSecondDrop = false;

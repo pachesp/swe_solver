@@ -57,6 +57,7 @@ class SWE_RadialDamBreakScenario : public SWE_Scenario {
            return side;
      };
 };
+
 // 0 and 1
 class SWE_SWE_Supercritical_Left_Scenario : public SWE_RadialDamBreakScenario{
   public:
@@ -93,7 +94,6 @@ class SWE_SWE_Supercritical_Left_Scenario : public SWE_RadialDamBreakScenario{
 // 0
 class SWE_SWE_Supercritical_Right_Scenario : public SWE_SWE_Supercritical_Left_Scenario{
   public:
-    float side = 1000.f;
 
     virtual BoundaryType getBoundaryType(BoundaryEdge edge) {
         if (edge == BND_LEFT) {

@@ -209,7 +209,6 @@ int main( int argc, char** argv ) {
   tools::Logger::logger.printStartMessage();
   tools::Logger::logger.initWallClockTime(time(NULL));
 
-  // l_wavePropgationBlock.setBoundaryType(BND_LEFT, INFLOW_COUPLE);
 
   //This configuration works for both 2d-2d subcritical or supercritical
   PreciceExchange* preciceExchange = new SWE_SWE_SuperCritical_Right_Exchange{interface, l_wavePropgationBlock,
