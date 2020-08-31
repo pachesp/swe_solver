@@ -48,7 +48,7 @@ using namespace precice::constants;
 
 #include "tools/precice.hh"
 
-//Add second drop fall. only for 2d 3d supercritical
+//Add second drop fall. only for 2d 3d supercritical case
 float secondDrop(float x, float y){
     //TODO avoid parameters hardcoding
     float side = 10.f;
@@ -265,7 +265,7 @@ else{
   preciceData->ghId = ghId;
   preciceData->velocityId = velocityId;
   preciceData->velocityGradientId = velocityGradientId;
-  
+
 }
 
 preciceData->l_nY = l_nY;
@@ -280,24 +280,45 @@ float precice_dt = interface.initialize();
 
  // +++++++++++++++++ preCICE config - END +++++++++++++++++
 
+//overload write and read functions according to the flow regime
+PreciceExchange* preciceExchange = nullptr;
+if (simType == twoDtwoDsup) {
+  preciceExchange = new SWE_SWE_SuperCritical_Left_Exchange{interface, l_wavePropgationBlock,
+     preciceData, l_nY, l_leftGhostCells};
+}
+else if (simType == twoDthreeDdsup) {
+  std::cout << "executing 2d to 3d supercritical" << '\n';
+  preciceExchange = new SWE_OF_SuperCritical_Exchange{interface, l_wavePropgationBlock,
+     preciceData, l_nY};
+}
+else if (simType == twoDthreeDdsub) {
+  std::cout << "executing 2d to 3d subcritical" << '\n';
+  preciceExchange = new SWE_OF_SubCritical_Exchange{interface, l_wavePropgationBlock,
+     preciceData, l_nY, l_rightGhostCells};
+}
+else if (simType == threeDtwoDdsup) {
+  std::cout << "executing 3d to 2d supercritical" << '\n';
+  preciceExchange = new OF_SWE_SuperCritical_Exchange{interface, l_wavePropgationBlock,
+     preciceData, 0, l_leftGhostCells};
+}
+else if (simType == threeDtwoDdsub) {
+  std::cout << "executing 3d to 2d subcritical" << '\n';
+  preciceExchange = new OF_SWE_SubCritical_Exchange{interface, l_wavePropgationBlock,
+     preciceData, 1, l_leftGhostCells};
+}
+else{
+  assert(false && "wrong simulation type in preciceExchange");
+}
+
  if(simType == twoDtwoDsup){
-     //this apparently comes from the config file
        if (interface.isActionRequired(actionWriteInitialData())) {
          std::cout << "solver1 action write initial data" << '\n';
-         write2SWE_SWE_Right_preCICE(interface, l_wavePropgationBlock, preciceData, l_nX+2, l_nY);
+         preciceExchange->write();
          interface.markActionFulfilled(actionWriteInitialData());
        }
   }
 
   interface.initializeData();
-
- if(simType == twoDtwoDsup){
-     if (interface.isReadDataAvailable()) {
-     std::cout << "Solver1 Read Data Available" << '\n';
-     readFromSWE_SWE_Right_preCICE(interface, l_wavePropgationBlock,
-         preciceData,  l_nX +2);
-   }
-}
 
   //! simulation time.
   float l_t = 0.0;
@@ -319,18 +340,8 @@ float precice_dt = interface.initialize();
         interface.markActionFulfilled(actionWriteIterationCheckpoint());
       }
 
-      if(simType == twoDthreeDdsub){ //execute if 2d to 3d subcritical (3)
-          std::cout << "executing 2d to 3d subcritical" << '\n';
-          alphav = readFromInterfoam_2D3DSubcritical_preCICE(interface, l_wavePropgationBlock, preciceData, l_rightGhostCells, l_nY);
-      }
-      else if(simType == threeDtwoDdsup){ //execute if 3d to 2d supercritical (4)
-          std::cout << "executing 3d to 2d supercritical" << '\n';
-          readFromInterfoam_3D2DSupercritical_preCICE(interface, l_wavePropgationBlock, preciceData, l_leftGhostCells);
-      }
-      else if (simType == threeDtwoDdsub) { // execute if 3d to 2d subcritical (5)
-          std::cout << "executing 3d to 2d subcritical" << '\n';
-          readFromInterfoam_3D2DSubcritical_preCICE(interface, l_wavePropgationBlock, preciceData, l_leftGhostCells, 1);
-      }
+      // read precice values
+      preciceExchange->read();
 
       // set values in ghost cells:
       l_wavePropgationBlock.setGhostLayer();
@@ -346,10 +357,10 @@ float precice_dt = interface.initialize();
       // compute numerical flux on each edge
       l_wavePropgationBlock.computeNumericalFluxes();
 
-      //! maximum allowed time step width.
+      //! maximum allowed time step width. These deliver good results.
       float l_maxTimeStepWidth;
-
       if(simType == twoDtwoDsup){
+          // float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
           l_maxTimeStepWidth = 0.125;
       }else{
           l_maxTimeStepWidth = 0.0009765625;
@@ -358,30 +369,12 @@ float precice_dt = interface.initialize();
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
 
-      if (simType == twoDtwoDsup) {
-          write2SWE_SWE_Right_preCICE(interface, l_wavePropgationBlock, preciceData, l_nX+2, l_nY);
-      }
-      else if(simType == twoDthreeDdsup){ //execute if 2d to 3d supercritical (2)
-          std::cout << "executing 2d to 3d supercritical" << '\n';
-          write2Interfoam_2D3DSupercritical_preCICE(interface, l_wavePropgationBlock, preciceData, l_nY);
-      }
-      else if (simType == twoDthreeDdsub) { //execute if 2d to 3d subcritical (3)
-          std::cout << "executing 2d to 3d subcritical" << '\n';
-          write2Interfoam_2D3DSubcritical_preCICE(interface, l_wavePropgationBlock, preciceData, l_nY, alphav);
-      }
-      else if (simType == threeDtwoDdsub) { //execute if 3d to 2d subcritical (5)
-          std::cout << "executing 3d to 2d subcritical" << '\n';
-          write2Interfoam_3D2DSubcritical_preCICE(interface, l_wavePropgationBlock, preciceData, 1);
-      }
+      // write precice values
+      preciceExchange->write();
 
       l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt);
 
       precice_dt = interface.advance(l_maxTimeStepWidth);
-
-      if (simType == twoDtwoDsup) {
-          readFromSWE_SWE_Right_preCICE(interface, l_wavePropgationBlock,
-          preciceData, l_nX+2);
-      }
 
       // update the cpu time in the logger
       tools::Logger::logger.updateTime("Cpu");

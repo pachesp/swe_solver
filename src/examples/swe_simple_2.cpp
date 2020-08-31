@@ -159,7 +159,6 @@ int main( int argc, char** argv ) {
   // initialize the wave propagation block
   l_wavePropgationBlock.initScenario(l_originX, l_originY, l_scenario);
 
-
   //! checkpoints when output files are written.
   float* l_checkPoints = new float[l_numberOfCheckPoints+1];
 
@@ -207,21 +206,15 @@ int main( int argc, char** argv ) {
 
   l_wavePropgationBlock.setBoundaryType(BND_LEFT, INFLOW_COUPLE);
 
-//
-// // //this apparently comes from the config file
-// //   if (interface.isActionRequired(actionWriteInitialData())) {
-// //     std::cout << "SWE_solver_right action write initial data" << '\n';
-// //     write2SWE_SWE_Left_preCICE(interface, l_wavePropgationBlock, preciceData, l_nX+2, 1);
-// //     interface.markActionFulfilled(actionWriteInitialData());
-// //   }
-//
-  interface.initializeData();
+  PreciceExchange* preciceExchange = new SWE_SWE_SuperCritical_Right_Exchange{interface, l_wavePropgationBlock,
+     preciceData, 1, l_leftGhostCells};
 
+  interface.initializeData();
 
   if (interface.isReadDataAvailable()) {
     std::cout << "precicedt = " << precice_dt <<'\n';
     std::cout << " SWE_solver_right Read data Available outside loop" << '\n';
-    readFromSWE_SWE_Left_preCICE(interface, l_wavePropgationBlock, l_leftGhostCells, preciceData, l_nX +2);
+    preciceExchange->read();
   }
 
   //! simulation time.
@@ -239,9 +232,11 @@ int main( int argc, char** argv ) {
         // set values in ghost cells:
         l_wavePropgationBlock.setGhostLayer();
 
+        //Calculation of gradient to send to left domain
         l_wavePropgationBlock.calculateGradient(l_leftGhostCells);
 
-        write2SWE_SWE_Left_preCICE(interface, l_wavePropgationBlock, preciceData, l_nX+2, 1);
+        // write data
+        preciceExchange->write();
 
         // reset the cpu clock
         tools::Logger::logger.resetClockToCurrentTime("Cpu");
@@ -254,19 +249,19 @@ int main( int argc, char** argv ) {
         // compute numerical flux on each edge
         l_wavePropgationBlock.computeNumericalFluxes();
 
-        //! maximum allowed time step width.
+        //! maximum allowed time step width. This gives good results
         // float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
         float l_maxTimeStepWidth = 0.125;
 
         // update the cell values
         l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
 
-
         l_maxTimeStepWidth = std::min(l_maxTimeStepWidth, precice_dt );
 
         precice_dt = interface.advance(l_maxTimeStepWidth);
 
-        readFromSWE_SWE_Left_preCICE(interface, l_wavePropgationBlock, l_leftGhostCells,  preciceData,  l_nX +2);
+        // read data
+        preciceExchange->read();
 
         // update the cpu time in the logger
         tools::Logger::logger.updateTime("Cpu");
