@@ -121,6 +121,12 @@ void io::VtkWriter::writeTimeStep(
 			vtkFile << i_hv[i][j] << std::endl;
 	vtkFile << "</DataArray>" << std::endl;
 
+	vtkFile << "<DataArray Name=\"h_vector\" type=\"Float32\" NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;
+for (int j=1; j < nY+1; j++)
+	for (int i=1; i<nX+1; i++)
+		vtkFile << 0 << " " << i_h[i][j] << " " << 0 << std::endl;
+vtkFile << "</DataArray>" << std::endl;
+
 	// Bathymetry
 	vtkFile << "<DataArray Name=\"b\" type=\"Float32\" format=\"ascii\">" << std::endl;
 	for (int j=1; j<nY+1; j++)
