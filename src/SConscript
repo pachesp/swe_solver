@@ -107,9 +107,9 @@ if env['xmlRuntime'] == True:
 #   Exit(1)
 
 # CPU compilation for sure
-env.src_files_1.append(env.Object(['examples/swe_simple_1.cpp']))
+env.src_files_1.append(env.Object(['examples/swe_domain_1.cpp']))
 if env['secondSWE'] == True:
-    env.src_files_2.append(env.Object(['examples/swe_simple_2.cpp']))
+    env.src_files_2.append(env.Object(['examples/swe_domain_2.cpp']))
 
 for i in sourceFiles:
   env.src_files_1.append(env.Object(i))
