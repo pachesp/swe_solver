@@ -105,7 +105,7 @@ int main( int argc, char** argv ) {
   // create a simple artificial scenario
   SWE_Scenario* l_scenario = nullptr;
 
-    if (simType == twoDtwoDsup || simType == twoDtwoDsub) { // if 2d to 2d supercritical (0 and 1)
+    if (simType == twoDtwoDsup || simType == twoDtwoDsub) { // if 2d to 2d supercritical or supercritical (0 and 1)
       std::cout << "Executing scenario 2d-2d supercritical or subcritical" << '\n';
         l_scenario = new SWE_SWE_Supercritical_Left_Scenario();
     }
@@ -151,6 +151,9 @@ int main( int argc, char** argv ) {
   // get the origin from the scenario
   l_originX = l_scenario->getBoundaryPos(BND_LEFT);
   l_originY = l_scenario->getBoundaryPos(BND_BOTTOM);
+
+  //! maximum allowed time step width.
+  float l_maxTimeStepWidth  = l_scenario->maxTimeStepWidth();
 
   // holds time at checkpoints
   float time_CP;
@@ -362,14 +365,7 @@ else{
       // compute numerical flux on each edge
       l_wavePropgationBlock.computeNumericalFluxes();
 
-      //! maximum allowed time step width. These deliver good results.
-      float l_maxTimeStepWidth;
-      if(simType == twoDtwoDsup || simType == twoDtwoDsub){
-          // float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
-          l_maxTimeStepWidth = 0.125;
-      }else{
-          l_maxTimeStepWidth = 0.0009765625;
-      }
+       // l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
 
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);

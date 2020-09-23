@@ -58,12 +58,14 @@ class SWE_RadialDamBreakScenario : public SWE_Scenario {
      };
 };
 
-// 0 and 1
+// 0 and 1 (supercritial and subcritical)
 class SWE_SWE_Supercritical_Left_Scenario : public SWE_RadialDamBreakScenario{
   public:
     float side = 1000.f;
 
-    virtual int numberOfCheckpoints(){return 50; }; // to see double splash
+    virtual int numberOfCheckpoints(){return 50; };
+
+    virtual float maxTimeStepWidth() {return 0.125;};
 
     virtual float endSimulation() { return 60.f; }
 
@@ -103,6 +105,8 @@ class SWE_SWE_Supercritical_Right_Scenario : public SWE_SWE_Supercritical_Left_S
         }
       };
 
+    virtual float maxTimeStepWidth() {return 0.125;};
+
     virtual float getWaterHeight(float x, float y, float offsetX, float offsetY) {
       return 10.0f;
     };
@@ -127,6 +131,9 @@ class SWE_SWE_Subcritical_Right_Scenario : public SWE_SWE_Supercritical_Right_Sc
         bool circ_2 = sqrt(a_0*a_0 + b*b) < (side * 0.1);
         return ( circ_1 || circ_2 ) ? 20.f: 10.0f;
       }
+
+      virtual float maxTimeStepWidth() {return 0.125;};
+
 };
 
 //2
@@ -138,6 +145,8 @@ class SWE_OF_Supercritical_Scenario : public SWE_RadialDamBreakScenario{//(2)
         bool circ = sqrt(a * a + b * b) < (side * 0.1);
        return circ ? 20.f: 5.0f;
     };
+
+    virtual float maxTimeStepWidth() {return 0.001;}; //TODO
 
     virtual float endSimulation() { return 5.f; };
 
@@ -182,15 +191,6 @@ class SWE_OF_Subcritical_Scenario : public SWE_RadialDamBreakScenario {//(3)
         }
         assert(false && "wrong boundary type in SWE_OF_Subcritical_Scenario");
     };
-
-
-    // virtual float getWaterHeight(float x, float y, float offsetX = 0, float offsetY = 0) {
-    //     float a = x - (side * 0.5) + offsetX;
-    //     float b = y - (side * 0.5) + offsetY;
-    //     bool circ = sqrt(a * a + b * b) < (side * 0.1);
-    //     return (circ ? 17.5f: 5.0f);
-    //     // return 5.0f;
-    // };
 };
 
 //4
@@ -210,6 +210,8 @@ class OF_SWE_Supercritical_Scenario : public SWE_RadialDamBreakScenario { //(4)
     };
 
     virtual float endSimulation() { return 8.f; };
+
+    virtual float maxTimeStepWidth() {return 0.001;};
 
     virtual int numberOfCheckpoints(){return 80; };
 

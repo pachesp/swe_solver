@@ -127,6 +127,9 @@ int main( int argc, char** argv ) {
   l_originX = l_scenario->getBoundaryPos(BND_LEFT);
   l_originY = l_scenario->getBoundaryPos(BND_BOTTOM);
 
+  //! maximum allowed time step width. This gives good results
+  float l_maxTimeStepWidth = l_scenario->maxTimeStepWidth();
+
   //***************preCICE**************************
   std::string configFileName("precice-config.xml");
   std::string solverName = "SWE_solver_right";
@@ -254,9 +257,7 @@ int main( int argc, char** argv ) {
         // compute numerical flux on each edge
         l_wavePropgationBlock.computeNumericalFluxes();
 
-        //! maximum allowed time step width. This gives good results
         // float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
-        float l_maxTimeStepWidth = 0.125;
 
         // update the cell values
         l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
