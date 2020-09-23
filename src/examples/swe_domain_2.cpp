@@ -104,7 +104,6 @@ int main( int argc, char** argv ) {
   }
 
   //! number of checkpoints for visualization (at each checkpoint in time, an output file is written).
-  // int l_numberOfCheckPoints = 50;
   int l_numberOfCheckPoints = l_scenario->numberOfCheckpoints();
 
   //! time when the simulation ends.
@@ -126,6 +125,9 @@ int main( int argc, char** argv ) {
   // get the origin from the scenario
   l_originX = l_scenario->getBoundaryPos(BND_LEFT);
   l_originY = l_scenario->getBoundaryPos(BND_BOTTOM);
+
+  //! maximum allowed time step width. This gives good results
+  float l_maxTimeStepWidth = l_scenario->maxTimeStepWidth();
 
   //***************preCICE**************************
   std::string configFileName("precice-config.xml");
@@ -158,7 +160,7 @@ int main( int argc, char** argv ) {
   preciceData->simType = simType;
   preciceData->vertexIDs = vertexIDs;
 
-  float time_CP;  //TODO
+  float time_CP;  //TODO for implicit
 
   //***************preCICE**************************
 
@@ -173,6 +175,7 @@ int main( int argc, char** argv ) {
      l_checkPoints[cp] = cp*(l_endSimulation/l_numberOfCheckPoints);
   }
 
+  //Layer where the data exchange will be executed
   SWE_Block1D* l_leftGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_LEFT);
 
   // Init fancy progressbar
@@ -183,6 +186,7 @@ int main( int argc, char** argv ) {
   progressBar.update(0.);
 
   std::string l_fileName = generateBaseFileName(l_baseName,0,0);
+
   //boundary size of the ghost layers
   io::BoundarySize l_boundarySize = {{1, 1, 1, 1}};
 
@@ -218,7 +222,7 @@ int main( int argc, char** argv ) {
 
   if (interface.isReadDataAvailable()) {
     std::cout << "precicedt = " << precice_dt <<'\n';
-    std::cout << " SWE_solver_right Read data Available outside loop" << '\n';
+    std::cout << " SWE_solver_right ReadInitialData" << '\n';
     preciceExchange->read();
   }
 
@@ -254,9 +258,7 @@ int main( int argc, char** argv ) {
         // compute numerical flux on each edge
         l_wavePropgationBlock.computeNumericalFluxes();
 
-        //! maximum allowed time step width. This gives good results
         // float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
-        float l_maxTimeStepWidth = 0.125;
 
         // update the cell values
         l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);

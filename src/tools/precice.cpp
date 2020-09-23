@@ -162,7 +162,7 @@ void SWE_OF_SuperCritical_Exchange::write(){
           }
       }
 
-  //     // Mintgens algorithm
+  //     // Mintgens algorithm for treating velocity with shear stress
   //     int dim2 = 2;
   //     double rho_water = 1000.0; // water density
   //     double tau[dim2 * nY * nY]{0.0}; // wall shear stress
@@ -370,13 +370,13 @@ void OF_SWE_SuperCritical_Exchange::read(){
     std::cout << "executing 3d to 2d supercritical read" << '\n';
 
     int nY = data->l_nY; //resolution
-    double dY = data->l_dY; //cell size in y-direction
+    float dY = (float)data->l_dY; //cell size in y-direction
     int dim = 3; //3-dimension
 
     // read alpha
     double alpha[nY * nY]{};
     interface.readBlockScalarData(data->alphaId, nY * nY, data->vertexIDs, alpha);
-    float h[nY+2] {};
+    float h[nY+2] {0.0f};
     for (int i = 0; i < nY; i++) {
         for (int j = 1; j <= nY; j++) {
             h[j] += (float)alpha[i*nY + (j-1)] * dY;
@@ -390,10 +390,8 @@ void OF_SWE_SuperCritical_Exchange::read(){
     float hv[nY+2] {};
     for (int i = 0; i < nY; i++) {
         for (int j = 1; j <= nY; j++) {
-            if (alpha[i*nY + (j-1)] > 0.01) {
                 hu[j] += (float)U[(i*nY + (j-1)) * dim + 0] * (float)alpha[i*nY + (j-1)] * dY;
                 hv[j] += (float)U[(i*nY + (j-1)) * dim + 1] * (float)alpha[i*nY + (j-1)] * dY;
-            }
         }
     }
 

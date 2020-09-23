@@ -105,7 +105,7 @@ int main( int argc, char** argv ) {
   // create a simple artificial scenario
   SWE_Scenario* l_scenario = nullptr;
 
-    if (simType == twoDtwoDsup || simType == twoDtwoDsub) { // if 2d to 2d supercritical (0 and 1)
+    if (simType == twoDtwoDsup || simType == twoDtwoDsub) { // if 2d to 2d supercritical or supercritical (0 and 1)
       std::cout << "Executing scenario 2d-2d supercritical or subcritical" << '\n';
         l_scenario = new SWE_SWE_Supercritical_Left_Scenario();
     }
@@ -152,6 +152,9 @@ int main( int argc, char** argv ) {
   l_originX = l_scenario->getBoundaryPos(BND_LEFT);
   l_originY = l_scenario->getBoundaryPos(BND_BOTTOM);
 
+  //! maximum allowed time step width.
+  float l_maxTimeStepWidth  = l_scenario->maxTimeStepWidth();
+
   // holds time at checkpoints
   float time_CP;
 
@@ -166,6 +169,7 @@ int main( int argc, char** argv ) {
      l_checkPoints[cp] = cp*(l_endSimulation/l_numberOfCheckPoints);
   }
 
+  //Layers where data will be exchanges depending on the case
   SWE_Block1D* l_leftGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_LEFT);
   SWE_Block1D* l_rightGhostCells  = l_wavePropgationBlock.grabGhostLayer(BND_RIGHT);
 
@@ -217,7 +221,7 @@ int main( int argc, char** argv ) {
   double* grid = nullptr;
   PreciceData* preciceData = new PreciceData{};
 
-if(simType == twoDtwoDsup || simType == twoDtwoDsub)
+if(simType == twoDtwoDsup || simType == twoDtwoDsub) //SWE-SWE cases
 {
       vertexIDs = new int[l_nY +2];
       grid = new double[dimensions * (l_nY+2)];
@@ -236,7 +240,7 @@ if(simType == twoDtwoDsup || simType == twoDtwoDsub)
       preciceData->hvGradId = interface.getDataID("hvGrad", meshID);
 
 }
-else{
+else{ //SWE-OF cases
 
   int alphaId = interface.getDataID("Alpha", meshID);
   int ghId = interface.getDataID("Gh", meshID);
@@ -317,7 +321,7 @@ else{
 
  if(simType == twoDtwoDsup || simType == twoDtwoDsub){
        if (interface.isActionRequired(actionWriteInitialData())) {
-         std::cout << "solver1 action write initial data" << '\n';
+         std::cout << "SWE solver action writeInitialData" << '\n';
          preciceExchange->write();
          interface.markActionFulfilled(actionWriteInitialData());
        }
@@ -362,14 +366,7 @@ else{
       // compute numerical flux on each edge
       l_wavePropgationBlock.computeNumericalFluxes();
 
-      //! maximum allowed time step width. These deliver good results.
-      float l_maxTimeStepWidth;
-      if(simType == twoDtwoDsup || simType == twoDtwoDsub){
-          // float l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
-          l_maxTimeStepWidth = 0.125;
-      }else{
-          l_maxTimeStepWidth = 0.0009765625;
-      }
+       // l_maxTimeStepWidth = l_wavePropgationBlock.getMaxTimestep();
 
       // update the cell values
       l_wavePropgationBlock.updateUnknowns(l_maxTimeStepWidth);
