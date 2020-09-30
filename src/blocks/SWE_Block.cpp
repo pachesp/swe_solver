@@ -598,7 +598,7 @@ void SWE_Block::setBoundaryConditions() {
       };
       break;
     }
-	case OUTFLOW_COUPLE:
+	case OUT-INFLOW_COUPLE:
     {
       for(int j=1; j<=ny; j++) {
         h[nx+1][j] = h[nx][j] + hGrad[j];
