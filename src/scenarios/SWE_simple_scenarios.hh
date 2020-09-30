@@ -71,7 +71,7 @@ class SWE_SWE_Supercritical_Left_Scenario : public SWE_RadialDamBreakScenario{
 
     virtual BoundaryType getBoundaryType(BoundaryEdge edge) {
         if (edge == BND_RIGHT) {
-            return OUT-INFLOW_COUPLE;
+            return OUT_INFLOW_COUPLE;
         }else{
             return OUTFLOW;
         }
