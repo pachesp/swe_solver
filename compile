@@ -1,4 +1,4 @@
 #!/bin/bash
-#TODO add option to build from this folder 2d2d or 3d2d
-# file sourced from run.sh or from the SWEOF/swe-of or SWEOF/of-swe subdirectories
+# script sourced from either ./run.sh or from ./../swe-swe_<case>/compile
+
 scons  buildVariablesFile=$build
