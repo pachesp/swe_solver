@@ -22,7 +22,7 @@ SWE_SWE_SuperCritical_Left_Exchange::SWE_SWE_SuperCritical_Left_Exchange(
   {};
 
 void SWE_SWE_SuperCritical_Left_Exchange::write(){
-  std::cout << "executing 2d to 2d supercritical Left write" << '\n';
+  std::cout << "executing 2d to 2d supercritical or subcritical Left write" << '\n';
 
   int nY = data->l_nY;
   double h[nY + 2]{};
@@ -41,7 +41,7 @@ void SWE_SWE_SuperCritical_Left_Exchange::write(){
 }
 
 void SWE_SWE_SuperCritical_Left_Exchange::read(){
-  std::cout << "executing 2d to 2d supercritical Left read" << '\n';
+  std::cout << "executing 2d to 2d supercritical or subcritical Left read" << '\n';
 
      int nY = data->l_nY;
      double hGrad[nY + 2]{};

@@ -290,7 +290,7 @@ float precice_dt = interface.initialize();
 
 //overload write and read functions according to the flow regime
 PreciceExchange* preciceExchange = nullptr;
-if (simType == twoDtwoDsup || simType == twoDtwoDsub){
+if (simType == twoDtwoDsup || simType == twoDtwoDsub){ //this implementation works for both supercritical and subcritical
   std::cout << "Data exchange 2d to 2d supercritical or subcritical" << '\n';
   preciceExchange = new SWE_SWE_SuperCritical_Left_Exchange{interface, l_wavePropgationBlock,
      preciceData, l_nY, l_leftGhostCells};
